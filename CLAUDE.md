@@ -149,7 +149,7 @@ Task tool with:
 - Prompt: "Create documentation for **[your feature/module]**"
 
 **What it does:**
-- Creates comprehensive documentation
+- Creates concise, actionable documentation
 - Follows documentation standards
 - References: guidelines/documentation-standards.md
 - Maintains consistent structure

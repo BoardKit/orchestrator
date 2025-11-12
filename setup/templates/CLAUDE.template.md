@@ -132,7 +132,7 @@ Task tool with:
 - Prompt: "Create documentation for the authentication system"
 
 **What it does:**
-- Creates comprehensive documentation
+- Creates concise, actionable documentation
 - Follows documentation standards
 - References: guidelines/documentation-standards.md
 - Maintains consistent structure
