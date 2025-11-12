@@ -286,7 +286,6 @@ cat orchestrator/shared/skills/skill-rules.json | jq .
 - **[QUICKSTART.md](./QUICKSTART.md)** - Detailed setup guide (start here!)
 - **[CLAUDE.md](./CLAUDE.md)** - Complete resource discovery for AI agents
 - **[shared/agents/README.md](./shared/agents/README.md)** - Agent capabilities guide
-- **[shared/guidelines/README.md](./shared/guidelines/README.md)** - Guidelines index
 - **[dev/README.md](./dev/README.md)** - Dev docs pattern explanation
 
 ---
