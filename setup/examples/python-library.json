@@ -1,0 +1,65 @@
+{
+  "version": "1.0",
+  "generatedAt": "2025-11-10 15:35:00",
+
+  "organization": {
+    "name": "ExampleOrg"
+  },
+
+  "repositories": [
+    {
+      "name": "core",
+      "path": "../example-core",
+      "type": "library",
+      "description": "Python library/package",
+      "techStack": {
+        "backend": [
+          "Python 3.11",
+          "Pydantic",
+          "asyncio"
+        ],
+        "other": [
+          "pytest",
+          "mypy",
+          "black",
+          "ruff"
+        ]
+      },
+      "filePatterns": [
+        "**/example-core/**/*.py"
+      ],
+      "keywords": [
+        "Python",
+        "Pydantic",
+        "asyncio",
+        "library",
+        "package"
+      ]
+    }
+  ],
+
+  "features": {
+    "crossRepoDocSync": false,
+    "databaseDocs": false,
+    "chatModes": false,
+    "skillEnforcement": "suggest"
+  },
+
+  "customization": {
+    "includeExamples": true,
+    "detailedGuidelines": false,
+    "generateTests": true
+  },
+
+  "paths": {
+    "shared": "shared",
+    "devDocs": "dev",
+    "docSyncLogs": "doc-sync-logs"
+  },
+
+  "_metadata": {
+    "schemaVersion": "1.0",
+    "generatedBy": "manual",
+    "description": "Single Python library or package repository"
+  }
+}

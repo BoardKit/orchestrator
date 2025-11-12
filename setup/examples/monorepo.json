@@ -1,0 +1,143 @@
+{
+  "version": "1.0",
+  "generatedAt": "2025-11-10 15:35:00",
+
+  "organization": {
+    "name": "ExampleOrg"
+  },
+
+  "repositories": [
+    {
+      "name": "frontend-web",
+      "path": "../example-monorepo/apps/web",
+      "type": "frontend",
+      "description": "Web application frontend",
+      "techStack": {
+        "frontend": [
+          "React 19",
+          "Next.js 15",
+          "TypeScript",
+          "Tailwind CSS"
+        ],
+        "other": [
+          "Turborepo",
+          "pnpm"
+        ]
+      },
+      "filePatterns": [
+        "**/apps/web/**/*.tsx",
+        "**/apps/web/**/*.ts"
+      ],
+      "keywords": [
+        "web app",
+        "Next.js",
+        "React",
+        "Tailwind"
+      ]
+    },
+    {
+      "name": "frontend-mobile",
+      "path": "../example-monorepo/apps/mobile",
+      "type": "frontend",
+      "description": "Mobile application",
+      "techStack": {
+        "frontend": [
+          "React Native",
+          "TypeScript",
+          "Expo"
+        ],
+        "other": [
+          "Turborepo"
+        ]
+      },
+      "filePatterns": [
+        "**/apps/mobile/**/*.tsx",
+        "**/apps/mobile/**/*.ts"
+      ],
+      "keywords": [
+        "mobile app",
+        "React Native",
+        "Expo"
+      ]
+    },
+    {
+      "name": "backend-api",
+      "path": "../example-monorepo/apps/api",
+      "type": "backend",
+      "description": "REST API service",
+      "techStack": {
+        "backend": [
+          "Express",
+          "Node.js",
+          "TypeScript"
+        ],
+        "database": [
+          "PostgreSQL",
+          "Prisma"
+        ],
+        "other": [
+          "Turborepo"
+        ]
+      },
+      "filePatterns": [
+        "**/apps/api/**/*.ts"
+      ],
+      "keywords": [
+        "API",
+        "Express",
+        "Prisma",
+        "REST"
+      ]
+    },
+    {
+      "name": "shared-ui",
+      "path": "../example-monorepo/packages/ui",
+      "type": "library",
+      "description": "Shared UI component library",
+      "techStack": {
+        "frontend": [
+          "React",
+          "TypeScript",
+          "Storybook"
+        ],
+        "other": [
+          "Turborepo"
+        ]
+      },
+      "filePatterns": [
+        "**/packages/ui/**/*.tsx",
+        "**/packages/ui/**/*.ts"
+      ],
+      "keywords": [
+        "shared components",
+        "UI library",
+        "Storybook"
+      ]
+    }
+  ],
+
+  "features": {
+    "crossRepoDocSync": true,
+    "databaseDocs": true,
+    "chatModes": false,
+    "skillEnforcement": "suggest"
+  },
+
+  "customization": {
+    "includeExamples": true,
+    "detailedGuidelines": true,
+    "generateTests": true
+  },
+
+  "paths": {
+    "shared": "shared",
+    "devDocs": "dev",
+    "docSyncLogs": "doc-sync-logs"
+  },
+
+  "_metadata": {
+    "schemaVersion": "1.0",
+    "generatedBy": "manual",
+    "description": "Monorepo with multiple apps (web, mobile, API) and shared packages"
+  }
+}

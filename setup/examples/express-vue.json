@@ -1,0 +1,76 @@
+{
+  "version": "1.0",
+  "generatedAt": "2025-11-10 15:35:00",
+
+  "organization": {
+    "name": "ExampleOrg"
+  },
+
+  "repositories": [
+    {
+      "name": "app",
+      "path": "../example-app",
+      "type": "fullstack",
+      "description": "Vue.js frontend with Express backend",
+      "techStack": {
+        "frontend": [
+          "Vue 3",
+          "TypeScript",
+          "Vite",
+          "Pinia",
+          "Vue Router"
+        ],
+        "backend": [
+          "Express",
+          "Node.js",
+          "TypeScript"
+        ],
+        "database": [
+          "MongoDB",
+          "Mongoose"
+        ],
+        "other": [
+          "Socket.io",
+          "Docker"
+        ]
+      },
+      "filePatterns": [
+        "**/example-app/**/*.vue",
+        "**/example-app/**/*.ts"
+      ],
+      "keywords": [
+        "Vue",
+        "Express",
+        "MongoDB",
+        "Pinia",
+        "Vue Router",
+        "Socket.io"
+      ]
+    }
+  ],
+
+  "features": {
+    "crossRepoDocSync": false,
+    "databaseDocs": true,
+    "chatModes": false,
+    "skillEnforcement": "suggest"
+  },
+
+  "customization": {
+    "includeExamples": true,
+    "detailedGuidelines": true,
+    "generateTests": true
+  },
+
+  "paths": {
+    "shared": "shared",
+    "devDocs": "dev",
+    "docSyncLogs": "doc-sync-logs"
+  },
+
+  "_metadata": {
+    "schemaVersion": "1.0",
+    "generatedBy": "manual",
+    "description": "Full-stack application with Vue.js frontend and Express backend"
+  }
+}

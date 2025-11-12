@@ -1,0 +1,98 @@
+{
+  "version": "1.0",
+  "generatedAt": "2025-11-10 15:35:00",
+
+  "organization": {
+    "name": "ExampleOrg"
+  },
+
+  "repositories": [
+    {
+      "name": "backend",
+      "path": "../example-backend",
+      "type": "backend",
+      "description": "Django REST API backend",
+      "techStack": {
+        "backend": [
+          "Django",
+          "Django REST Framework",
+          "Python 3.11"
+        ],
+        "database": [
+          "PostgreSQL",
+          "Redis"
+        ],
+        "other": [
+          "Celery",
+          "Docker"
+        ]
+      },
+      "filePatterns": [
+        "**/example-backend/**/*.py"
+      ],
+      "keywords": [
+        "Django",
+        "DRF",
+        "REST Framework",
+        "serializers",
+        "viewsets",
+        "models"
+      ]
+    },
+    {
+      "name": "frontend",
+      "path": "../example-frontend",
+      "type": "frontend",
+      "description": "React SPA frontend",
+      "techStack": {
+        "frontend": [
+          "React 18",
+          "TypeScript",
+          "Vite",
+          "React Router",
+          "Material-UI"
+        ],
+        "other": [
+          "Axios",
+          "React Query"
+        ]
+      },
+      "filePatterns": [
+        "**/example-frontend/**/*.tsx",
+        "**/example-frontend/**/*.ts"
+      ],
+      "keywords": [
+        "React",
+        "Material-UI",
+        "React Router",
+        "React Query",
+        "Vite"
+      ]
+    }
+  ],
+
+  "features": {
+    "crossRepoDocSync": true,
+    "databaseDocs": true,
+    "chatModes": false,
+    "skillEnforcement": "suggest"
+  },
+
+  "customization": {
+    "includeExamples": true,
+    "detailedGuidelines": true,
+    "generateTests": true
+  },
+
+  "paths": {
+    "shared": "shared",
+    "devDocs": "dev",
+    "docSyncLogs": "doc-sync-logs"
+  },
+
+  "_metadata": {
+    "schemaVersion": "1.0",
+    "generatedBy": "manual",
+    "description": "Traditional full-stack with separate Django backend and React frontend repos"
+  }
+}

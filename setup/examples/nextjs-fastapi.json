@@ -1,0 +1,80 @@
+{
+  "version": "1.0",
+  "generatedAt": "2025-11-10 15:35:00",
+
+  "organization": {
+    "name": "ExampleOrg"
+  },
+
+  "repositories": [
+    {
+      "name": "app",
+      "path": "../example-app",
+      "type": "fullstack",
+      "description": "Next.js frontend with FastAPI backend",
+      "techStack": {
+        "frontend": [
+          "React 19",
+          "Next.js 15",
+          "TypeScript",
+          "Tailwind CSS",
+          "Radix UI"
+        ],
+        "backend": [
+          "FastAPI",
+          "Python 3.11",
+          "Pydantic"
+        ],
+        "database": [
+          "PostgreSQL",
+          "Supabase"
+        ],
+        "other": [
+          "Docker",
+          "Redis"
+        ]
+      },
+      "filePatterns": [
+        "**/example-app/**/*.tsx",
+        "**/example-app/**/*.ts",
+        "**/example-app/**/*.py"
+      ],
+      "keywords": [
+        "Next.js",
+        "FastAPI",
+        "Supabase",
+        "React",
+        "Tailwind",
+        "Radix UI",
+        "App Router",
+        "apiClient",
+        "apiFetch"
+      ]
+    }
+  ],
+
+  "features": {
+    "crossRepoDocSync": false,
+    "databaseDocs": true,
+    "chatModes": false,
+    "skillEnforcement": "suggest"
+  },
+
+  "customization": {
+    "includeExamples": true,
+    "detailedGuidelines": true,
+    "generateTests": true
+  },
+
+  "paths": {
+    "shared": "shared",
+    "devDocs": "dev",
+    "docSyncLogs": "doc-sync-logs"
+  },
+
+  "_metadata": {
+    "schemaVersion": "1.0",
+    "generatedBy": "manual",
+    "description": "Full-stack web application with Next.js frontend and FastAPI backend"
+  }
+}

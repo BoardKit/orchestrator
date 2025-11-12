@@ -1,0 +1,150 @@
+{
+  "_comment": "Orchestrator Setup Configuration Template",
+  "_instructions": "Copy this file to SETUP_CONFIG.json and customize for your organization, or run /setup-orchestrator to generate automatically",
+
+  "version": "1.0",
+  "generatedAt": "YYYY-MM-DD HH:MM:SS",
+
+  "organization": {
+    "name": "YourOrganization",
+    "_comment_name": "Your organization or project name (e.g., 'Acme Corp', 'MyProject')"
+  },
+
+  "repositories": [
+    {
+      "name": "app",
+      "_comment_name": "Short name for this repository (used in skill names, file references)",
+
+      "path": "../your-app",
+      "_comment_path": "Relative path from orchestrator to this repository",
+
+      "type": "fullstack",
+      "_comment_type": "Repository type: 'fullstack', 'frontend', 'backend', 'library', 'service', 'monorepo'",
+
+      "description": "Main application with frontend and backend",
+      "_comment_description": "Brief description of what this repository contains",
+
+      "techStack": {
+        "frontend": [
+          "React",
+          "Next.js",
+          "TypeScript",
+          "Tailwind CSS"
+        ],
+        "_comment_frontend": "Frontend frameworks and libraries",
+
+        "backend": [
+          "FastAPI",
+          "Python"
+        ],
+        "_comment_backend": "Backend frameworks and languages",
+
+        "database": [
+          "PostgreSQL",
+          "Supabase"
+        ],
+        "_comment_database": "Database systems and ORMs",
+
+        "other": [
+          "Docker",
+          "Redis"
+        ],
+        "_comment_other": "Other important tools, libraries, or technologies"
+      },
+
+      "filePatterns": [
+        "*.tsx",
+        "*.ts",
+        "*.py"
+      ],
+      "_comment_filePatterns": "File patterns that should trigger this repo's skill (auto-detected by wizard)",
+
+      "keywords": [
+        "Next.js",
+        "FastAPI",
+        "Supabase",
+        "React",
+        "Tailwind"
+      ],
+      "_comment_keywords": "Keywords in user prompts that should trigger this repo's skill (auto-detected)"
+    },
+    {
+      "name": "core",
+      "path": "../your-core-package",
+      "type": "library",
+      "description": "Core business logic library",
+      "techStack": {
+        "backend": [
+          "Python",
+          "Pydantic"
+        ],
+        "other": [
+          "pytest"
+        ]
+      },
+      "filePatterns": [
+        "*.py"
+      ],
+      "keywords": [
+        "core",
+        "business logic",
+        "Pydantic"
+      ]
+    }
+  ],
+
+  "_comment_repositories": "Add as many repositories as you need. Each will get its own skill and guidelines.",
+
+  "features": {
+    "crossRepoDocSync": true,
+    "_comment_crossRepoDocSync": "Enable cross-repo documentation synchronization (requires cross-repo-doc-sync agent)",
+
+    "databaseDocs": true,
+    "_comment_databaseDocs": "Generate database documentation guidelines (DATABASE_SCHEMA, DATABASE_OPERATIONS, DATABASE_SECURITY)",
+
+    "chatModes": false,
+    "_comment_chatModes": "Generate chat mode files for each agent (optional, for Cursor/other IDEs)",
+
+    "skillEnforcement": "suggest",
+    "_comment_skillEnforcement": "Default skill enforcement: 'suggest' (show suggestion), 'warn' (show warning), 'block' (require usage)"
+  },
+
+  "customization": {
+    "includeExamples": true,
+    "_comment_includeExamples": "Include code examples in generated guidelines",
+
+    "detailedGuidelines": true,
+    "_comment_detailedGuidelines": "Generate detailed guidelines vs minimal versions",
+
+    "generateTests": true,
+    "_comment_generateTests": "Include testing guidelines and patterns"
+  },
+
+  "paths": {
+    "shared": "shared",
+    "_comment_shared": "Path to shared resources directory (usually 'shared')",
+
+    "devDocs": "dev",
+    "_comment_devDocs": "Path to dev docs directory (usually 'dev')",
+
+    "docSyncLogs": "doc-sync-logs",
+    "_comment_docSyncLogs": "Path to doc sync logs (if crossRepoDocSync enabled)"
+  },
+
+  "_examples": {
+    "_comment": "See setup/examples/ for complete example configurations for common tech stacks:",
+    "examples": [
+      "setup/examples/nextjs-fastapi.json - Full-stack web app",
+      "setup/examples/django-react.json - Traditional full-stack",
+      "setup/examples/express-vue.json - Node.js + Vue",
+      "setup/examples/python-library.json - Single Python package",
+      "setup/examples/monorepo.json - Multiple services in one repo"
+    ]
+  },
+
+  "_metadata": {
+    "schemaVersion": "1.0",
+    "generatedBy": "setup-wizard",
+    "lastModified": "YYYY-MM-DD HH:MM:SS"
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "skills": [
+    {
+      "name": "skill-developer",
+      "filePatterns": [
+        "**/.claude/skills/**"
+      ],
+      "keywords": [
+        "skill",
+        "skill-rules.json"
+      ]
+    },
+    {
+      "name": "orchestrator-guidelines",
+      "filePatterns": [
+        "**/shared/agents/**/*.md",
+        "**/shared/skills/**/*.md",
+        "**/shared/guidelines/**/*.md",
+        "**/shared/hooks/**/*.sh",
+        "**/shared/commands/**/*.md",
+        "**/setup/**/*.md",
+        "CLAUDE.md",
+        "SETUP_CONFIG.json",
+        "README.md"
+      ],
+      "keywords": [
+        "agent",
+        "skill",
+        "guideline",
+        "orchestrator",
+        "setup",
+        "cross-repo",
+        "template"
+      ]
+    }
+  ]
+}

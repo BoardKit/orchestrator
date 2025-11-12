@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "user_prompt_submit": [
+      {
+        "command": ".claude/hooks/skill-activation-prompt.sh",
+        "timeout": 5000
+      }
+    ],
+    "post_tool_use": [
+      {
+        "command": ".claude/hooks/post-tool-use-tracker.sh",
+        "timeout": 2000
+      }
+    ]
+  }
+}
