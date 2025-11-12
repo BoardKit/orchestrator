@@ -543,13 +543,18 @@ Generated Files:
 Next Steps:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-1. Create Symlinks in Your Repositories
+1. Create Symlinks and Settings in Your Repositories
 
-   Run this script to create symlinks:
+   Run this script to create symlinks and settings.json:
 
    ```bash
    ./setup/scripts/create-symlinks.sh
    ```
+
+   This script will:
+   - Create symlinks for skills, hooks, and commands
+   - Generate settings.json with proper permissions and hook configuration
+   - Verify all symlinks work correctly
 
    Or manually for each repo:
 
@@ -558,6 +563,7 @@ Next Steps:
    ln -sf ../../orchestrator/shared/skills skills
    ln -sf ../../orchestrator/shared/hooks hooks
    ln -sf ../../orchestrator/shared/commands commands
+   # Copy settings.json from orchestrator/.claude/settings.json
    ```
 
 2. Review Generated Files

@@ -64,6 +64,7 @@ git commit -m "Remove setup wizard after configuration"
 ### Templates
 - `templates/CLAUDE.template.md` - Template for main context file
 - `templates/README.template.md` - Template for README
+- `templates/settings.json` - Standard settings.json for repositories
 - `templates/skill-rules.template.json` - Template for skill triggers
 - `templates/repo-skill-template/` - Template for generating repo skills
 - `templates/guidelines/` - Templates for guidelines

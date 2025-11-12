@@ -32,7 +32,8 @@ Settings > Update & Security > For Developers > Developer Mode
 
 ### 2. Required Tools
 
-- **Claude Code** - Download from [claude.com](https://claude.com/claude-code)
+- **Claude Code** - Download from [claude.com](https://claude.com/claude-code) or install via terminal. Check installation [here](https://code.claude.com/docs/en/setup).
+
 - **jq** - JSON processor for validation scripts
   ```bash
   # macOS
@@ -44,6 +45,7 @@ Settings > Update & Security > For Developers > Developer Mode
   # Check if installed
   jq --version
   ```
+
 
 ### 3. Your Repositories
 

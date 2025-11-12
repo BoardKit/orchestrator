@@ -172,6 +172,22 @@ for i in $(seq 0 $((REPO_COUNT - 1))); do
         echo -e "  ${GREEN}✓${NC} Created commands symlink"
     fi
 
+    # Create settings.json if it doesn't exist
+    SETTINGS_FILE="$CLAUDE_DIR/settings.json"
+    SETTINGS_TEMPLATE="$ORCHESTRATOR_ROOT/setup/templates/settings.json"
+
+    if [ -f "$SETTINGS_FILE" ]; then
+        echo -e "  ${GREEN}✓${NC} settings.json already exists (skipping)"
+    else
+        if [ -f "$SETTINGS_TEMPLATE" ]; then
+            cp "$SETTINGS_TEMPLATE" "$SETTINGS_FILE"
+            echo -e "  ${GREEN}✓${NC} Created settings.json"
+        else
+            echo -e "  ${YELLOW}⚠${NC} settings.json template not found, skipping"
+            SYMLINK_ERRORS=$((SYMLINK_ERRORS + 1))
+        fi
+    fi
+
     # Verify symlinks work
     VERIFY_ERRORS=0
 
@@ -218,6 +234,12 @@ echo ""
 
 if [ $SUCCESS_COUNT -eq $REPO_COUNT ]; then
     echo -e "${GREEN}✓ All repositories configured successfully!${NC}"
+    echo ""
+    echo "What was created in each repository:"
+    echo "  ✓ .claude/skills → symlink to orchestrator/shared/skills"
+    echo "  ✓ .claude/hooks → symlink to orchestrator/shared/hooks"
+    echo "  ✓ .claude/commands → symlink to orchestrator/shared/commands"
+    echo "  ✓ .claude/settings.json → hooks and permissions configuration"
     echo ""
     echo "Next steps:"
     echo "  1. Test skills by editing files in your repositories"

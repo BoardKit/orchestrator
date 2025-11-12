@@ -1,0 +1,1 @@
+../../setup/doc-generator.md
