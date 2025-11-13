@@ -202,6 +202,49 @@ for i in $(seq 0 $((REPO_COUNT - 1))); do
         fi
     fi
 
+    # Create CLAUDE.md if it doesn't exist
+    CLAUDE_MD_FILE="$REPO_ABS_PATH/CLAUDE.md"
+    CLAUDE_TEMPLATE="$ORCHESTRATOR_ROOT/setup/templates/repo-CLAUDE.template.md"
+
+    if [ -f "$CLAUDE_MD_FILE" ]; then
+        echo -e "  ${GREEN}✓${NC} CLAUDE.md already exists (skipping)"
+    else
+        if [ -f "$CLAUDE_TEMPLATE" ]; then
+            # Get repo details from config
+            REPO_TYPE=$(jq -r ".repositories[$i].type" "$CONFIG_FILE")
+            REPO_DESC=$(jq -r ".repositories[$i].description" "$CONFIG_FILE")
+            FRONTEND=$(jq -r ".repositories[$i].techStack.frontend // [] | join(\", \")" "$CONFIG_FILE")
+            BACKEND=$(jq -r ".repositories[$i].techStack.backend // [] | join(\", \")" "$CONFIG_FILE")
+            DATABASE=$(jq -r ".repositories[$i].techStack.database // [] | join(\", \")" "$CONFIG_FILE")
+            OTHER=$(jq -r ".repositories[$i].techStack.other // [] | join(\", \")" "$CONFIG_FILE")
+            TIMESTAMP=$(date "+%Y-%m-%d")
+
+            # Set defaults for empty values
+            [ -z "$FRONTEND" ] && FRONTEND="None"
+            [ -z "$BACKEND" ] && BACKEND="None"
+            [ -z "$DATABASE" ] && DATABASE="None"
+            [ -z "$OTHER" ] && OTHER="None"
+
+            # Generate CLAUDE.md from template
+            sed -e "s/{{REPO_NAME}}/$REPO_NAME/g" \
+                -e "s/{{REPO_TYPE}}/$REPO_TYPE/g" \
+                -e "s/{{REPO_DESCRIPTION}}/$REPO_DESC/g" \
+                -e "s/{{FRONTEND_STACK}}/$FRONTEND/g" \
+                -e "s/{{BACKEND_STACK}}/$BACKEND/g" \
+                -e "s/{{DATABASE_STACK}}/$DATABASE/g" \
+                -e "s/{{OTHER_STACK}}/$OTHER/g" \
+                -e "s/{{TIMESTAMP}}/$TIMESTAMP/g" \
+                -e "s/{{TECH_NAME}}/$REPO_NAME/g" \
+                -e "s/{{REPO_SPECIFIC_STRUCTURE}}//g" \
+                "$CLAUDE_TEMPLATE" > "$CLAUDE_MD_FILE"
+
+            echo -e "  ${GREEN}✓${NC} Created CLAUDE.md"
+        else
+            echo -e "  ${YELLOW}⚠${NC} CLAUDE.md template not found, skipping"
+            SYMLINK_ERRORS=$((SYMLINK_ERRORS + 1))
+        fi
+    fi
+
     # Verify symlinks work
     VERIFY_ERRORS=0
 
@@ -260,6 +303,7 @@ if [ $SUCCESS_COUNT -eq $REPO_COUNT ]; then
     echo "  ✓ .claude/hooks → symlink to orchestrator/shared/hooks"
     echo "  ✓ .claude/commands → symlink to orchestrator/shared/commands"
     echo "  ✓ .claude/settings.json → hooks and permissions configuration"
+    echo "  ✓ CLAUDE.md → repository-specific context file"
     echo ""
     echo "Next steps:"
     echo "  1. Test skills by editing files in your repositories"

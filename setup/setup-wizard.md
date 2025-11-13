@@ -512,9 +512,34 @@ If any fail:
 
 ---
 
-### Step 8: Show Summary & Next Steps
+### Step 8: Verify Generated Files & Show Summary
 
-Display comprehensive summary:
+Before showing the final summary, **verify all expected files were created**:
+
+```bash
+# Check orchestrator files
+test -f SETUP_CONFIG.json && echo "✅ SETUP_CONFIG.json" || echo "❌ SETUP_CONFIG.json MISSING"
+test -f CLAUDE.md && echo "✅ CLAUDE.md" || echo "❌ CLAUDE.md MISSING"
+test -f README.md && echo "✅ README.md" || echo "❌ README.md MISSING"
+test -f shared/skills/skill-rules.json && echo "✅ shared/skills/skill-rules.json" || echo "❌ skill-rules.json MISSING"
+test -f shared/guidelines/architectural-principles.md && echo "✅ architectural-principles.md" || echo "❌ architectural-principles.md MISSING"
+test -f shared/guidelines/error-handling.md && echo "✅ error-handling.md" || echo "❌ error-handling.md MISSING"
+test -f shared/guidelines/testing-standards.md && echo "✅ testing-standards.md" || echo "❌ testing-standards.md MISSING"
+
+# Check each repo skill
+for repo in {{repo_names}}; do
+  test -d shared/skills/${repo}-guidelines && echo "✅ shared/skills/${repo}-guidelines/" || echo "❌ ${repo}-guidelines/ MISSING"
+done
+
+# Check database docs if enabled
+{{#if databaseDocs}}
+test -f shared/guidelines/DATABASE_SCHEMA.md && echo "✅ DATABASE_SCHEMA.md" || echo "❌ DATABASE_SCHEMA.md MISSING"
+test -f shared/guidelines/DATABASE_OPERATIONS.md && echo "✅ DATABASE_OPERATIONS.md" || echo "❌ DATABASE_OPERATIONS.md MISSING"
+test -f shared/guidelines/DATABASE_SECURITY.md && echo "✅ DATABASE_SECURITY.md" || echo "❌ DATABASE_SECURITY.md MISSING"
+{{/if}}
+```
+
+Store the verification results, then display comprehensive summary:
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -524,46 +549,76 @@ Display comprehensive summary:
 Organization: {{ORG_NAME}}
 Repositories: {{REPO_COUNT}}
 
-Generated Files:
+What Was Generated:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-✅ SETUP_CONFIG.json - Your configuration
-✅ CLAUDE.md - Main context file
-✅ README.md - Organization README
-✅ shared/skills/skill-rules.json - Skill triggers
+
+Core Configuration:
+✅ SETUP_CONFIG.json - Your organization configuration
+✅ CLAUDE.md - Main orchestrator context file
+✅ README.md - Orchestrator architecture documentation
+
+Skills (Auto-Triggering):
+✅ shared/skills/skill-rules.json - Skill activation rules
 {{#each repositories}}
-✅ shared/skills/{{name}}-guidelines/ - {{name}} skill
+✅ shared/skills/{{name}}-guidelines/ - {{name}} repository skill
+   ├── skill.md - Skill prompt
+   └── README.md - Skill documentation
 {{/each}}
+
+Guidelines (Referenced Documentation):
 ✅ shared/guidelines/architectural-principles.md
 ✅ shared/guidelines/error-handling.md
 ✅ shared/guidelines/testing-standards.md
 {{#if databaseDocs}}
-✅ shared/guidelines/DATABASE_*.md
+✅ shared/guidelines/DATABASE_SCHEMA.md
+✅ shared/guidelines/DATABASE_OPERATIONS.md
+✅ shared/guidelines/DATABASE_SECURITY.md
+{{/if}}
+
+Shared Resources (Already Present):
+✅ shared/agents/ - 13 shared agents
+✅ shared/hooks/ - Hook scripts
+✅ shared/commands/ - Slash commands
+✅ .claude/settings.json - Orchestrator settings template
+
+{{#if missingFiles}}
+⚠️  WARNING: Some Expected Files Are Missing:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+{{#each missingFiles}}
+❌ {{this}}
+{{/each}}
+
+Please review the errors above and re-run the setup wizard if needed.
 {{/if}}
 
 Next Steps:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-1. Create Symlinks and Settings in Your Repositories
+1. Create Symlinks and Files in Your Repositories
 
-   Run this script to create symlinks and settings.json:
+   Run this script to set up all repositories:
 
    ```bash
    ./setup/scripts/create-symlinks.sh
    ```
 
-   This script will:
-   - Create symlinks for skills, hooks, and commands
-   - Generate settings.json with proper permissions and hook configuration
-   - Verify all symlinks work correctly
+   This script will create in EACH repository:
+   ✅ .claude/agents → symlink to orchestrator/shared/agents
+   ✅ .claude/skills → symlink to orchestrator/shared/skills
+   ✅ .claude/hooks → symlink to orchestrator/shared/hooks
+   ✅ .claude/commands → symlink to orchestrator/shared/commands
+   ✅ .claude/settings.json → copied from template
+   ✅ CLAUDE.md → repository-specific context file
 
    Or manually for each repo:
 
    ```bash
    cd {{repo_path}}/.claude
+   ln -sf ../../orchestrator/shared/agents agents
    ln -sf ../../orchestrator/shared/skills skills
    ln -sf ../../orchestrator/shared/hooks hooks
    ln -sf ../../orchestrator/shared/commands commands
-   # Copy settings.json from orchestrator/.claude/settings.json
+   ln -sf ../../orchestrator/.claude/settings.json settings.json
    ```
 
 2. Review Generated Files
