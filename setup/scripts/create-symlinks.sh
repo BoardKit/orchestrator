@@ -172,6 +172,20 @@ for i in $(seq 0 $((REPO_COUNT - 1))); do
         echo -e "  ${GREEN}✓${NC} Created commands symlink"
     fi
 
+    # Agents symlink
+    AGENTS_LINK="$CLAUDE_DIR/agents"
+    AGENTS_TARGET="$RELATIVE_PATH/agents"
+
+    if [ -L "$AGENTS_LINK" ]; then
+        echo -e "  ${GREEN}✓${NC} agents symlink already exists"
+    elif [ -e "$AGENTS_LINK" ]; then
+        echo -e "  ${YELLOW}⚠${NC} agents exists but is not a symlink (skipping)"
+        SYMLINK_ERRORS=$((SYMLINK_ERRORS + 1))
+    else
+        ln -s "$AGENTS_TARGET" "$AGENTS_LINK"
+        echo -e "  ${GREEN}✓${NC} Created agents symlink"
+    fi
+
     # Create settings.json if it doesn't exist
     SETTINGS_FILE="$CLAUDE_DIR/settings.json"
     SETTINGS_TEMPLATE="$ORCHESTRATOR_ROOT/setup/templates/settings.json"
@@ -206,6 +220,11 @@ for i in $(seq 0 $((REPO_COUNT - 1))); do
         VERIFY_ERRORS=$((VERIFY_ERRORS + 1))
     fi
 
+    if [ ! -d "$AGENTS_LINK" ]; then
+        echo -e "  ${RED}✗${NC} agents symlink broken (directory not accessible)"
+        VERIFY_ERRORS=$((VERIFY_ERRORS + 1))
+    fi
+
     if [ $SYMLINK_ERRORS -eq 0 ] && [ $VERIFY_ERRORS -eq 0 ]; then
         SUCCESS_COUNT=$((SUCCESS_COUNT + 1))
         echo -e "  ${GREEN}✓ Repository configured successfully${NC}"
@@ -236,6 +255,7 @@ if [ $SUCCESS_COUNT -eq $REPO_COUNT ]; then
     echo -e "${GREEN}✓ All repositories configured successfully!${NC}"
     echo ""
     echo "What was created in each repository:"
+    echo "  ✓ .claude/agents → symlink to orchestrator/shared/agents"
     echo "  ✓ .claude/skills → symlink to orchestrator/shared/skills"
     echo "  ✓ .claude/hooks → symlink to orchestrator/shared/hooks"
     echo "  ✓ .claude/commands → symlink to orchestrator/shared/commands"

@@ -13,4 +13,4 @@ Task tool with:
 - prompt: "Run the orchestrator setup wizard to configure this orchestrator instance for the user's organization. Guide them through the complete setup process including collecting organization info, analyzing repositories, generating skills, creating guidelines, and producing all necessary documentation."
 ```
 
-The setup-wizard agent is located at `setup/setup-wizard.md` and will handle the entire configuration process interactively.
+The setup-wizard agent is located at `shared/agents/setup-wizard.md` and will handle the entire configuration process interactively.
