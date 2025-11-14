@@ -2,20 +2,34 @@
 
 **A self-configuring infrastructure for shared Claude Code resources across all projects in your organization.**
 
----
-
 ## What Is This?
 
-The Orchestrator provides **shared AI infrastructure** (agents, skills, hooks, commands, guidelines) used by other projects in your organization via symlinks.
+The Orchestrator is a **shared AI infrastructure** for organizations using Claude Code tools (and eventually expand for other AI tools) across multiple repositories.
+Instead of duplicating agents, skills, prompts, and guidelines in every repo, you maintain them in **one place**, and each project auto-propagates them via symlinks.
 
 **Key Features:**
 - 🤖 **Self-configuring** - Setup wizard auto-detects your tech stacks
-- 🔄 **Update once, all repos benefit** - Changes propagate automatically
+- 🔄 **Documentation Synchronization** - Changes propagate automatically
 - 📋 **Consistent patterns** across all your projects
 - 🎯 **Single source of truth** for shared resources
 - 🛠️ **Customizable** - Each repo keeps its own context and repo-specific agents
 
----
+## Why This Exists 
+
+Any organization (including us!) using AI coding assistants faces challenges like:
+- duplicated agents (if you even use any) across the board
+- inconsistent/outdated documentation
+- large multi-repo codebases with no shared context
+
+This creates **hallucinations, unpredictable responses, and agents that get lost in long and complex tasks**.
+
+The Orchestrator solves all these problems by:
+
+- keeping up-to-date documentation
+- centralizing best practices and patterns for your codebase
+- reducing duplicated efforts across multiple repositories
+
+This makes AI assistance context-aware, more predictable and accurate, and consistent across your entire engineering organization.
 
 ## Quick Start
 
@@ -40,7 +54,7 @@ The wizard will:
 - Generate customized configuration files
 - Create repository-specific skills and guidelines
 
-**Time:** 5-10 minutes
+**Time:** Depends on complexity of your repos. 
 
 ### 3. Create Symlinks
 
@@ -58,39 +72,38 @@ rm -rf setup/
 
 **Done!** Your orchestrator is ready to use.
 
----
 
 ## Architecture
 
 ```
 YourOrganization/
-├── orchestrator/          # Shared infrastructure (this repo)
+├── orchestrator/                  # Central shared AI infrastructure
 │   └── shared/
-│       ├── agents/                 # Intelligent agents
-│       ├── skills/                 # Auto-trigger patterns
-│       ├── hooks/                  # Auto-run scripts
-│       ├── commands/               # Slash commands
-│       └── guidelines/             # Reference documentation
+│       ├── agents/                # Global agents
+│       ├── skills/                # Auto-trigger skills
+│       ├── hooks/                 # Repo event hooks
+│       ├── commands/              # Slash commands
+│       └── guidelines/            # Reference documentation
 │
-├── your-repo-1/              # Your first project
+├── repo-a/
 │   └── .claude/
-│       ├── agents/                 # Repo-specific agents
-│       ├── skills/    -> ../../orchestrator/shared/skills     # SYMLINK
-│       ├── hooks/     -> ../../orchestrator/shared/hooks      # SYMLINK
-│       └── commands/  -> ../../orchestrator/shared/commands   # SYMLINK
+│       ├── agents/                # Repo-specific agents
+│       ├── skills  -> symlink to orchestrator/shared/skills
+│       ├── hooks   -> symlink to orchestrator/shared/hooks
+│       ├── commands -> symlink to orchestrator/shared/commands
+│       └── CLAUDE.md
 │
-├── your-repo-2/              # Your second project
-│   └── .claude/
-│       └── ...  (same structure)
+├── repo-b/
+│   └── .claude/                   # Same structure
+
 ```
 
 **How it works:**
-1. Shared resources live in `orchestrator/shared/`
-2. Your repositories symlink to these shared resources
-3. Updates in orchestrator propagate automatically to all repos
-4. Each repo maintains its own repo-specific agents and CLAUDE.md
+1. All shared resources live in orchestrator/shared/.
+Repositories use symlinks to reference these shared resources.
+Updating the orchestrator updates all repositories instantly.
+Each repo still keeps its own agents and CLAUDE.md for local context.
 
----
 
 ## What Gets Generated
 
@@ -149,7 +162,6 @@ Tech stack-specific reference documentation:
 4. Reference guidelines for detailed patterns
 5. Use dev docs for long-running tasks
 
----
 
 ## Setup Process Details
 
@@ -185,59 +197,6 @@ Tech stack-specific reference documentation:
    - Verifies no placeholders remain
    - Validates JSON files
 
-### Supported Tech Stacks
-
-The orchestrator auto-detects:
-
-**Frontend:**
-- React, Next.js, Vue, Nuxt, Angular, Svelte
-- Tailwind CSS, Radix UI, Material-UI, Bootstrap
-- Vite, Webpack
-
-**Backend:**
-- FastAPI, Django, Flask (Python)
-- Express, NestJS, Fastify (Node.js)
-- Ruby on Rails, Sinatra (Ruby)
-
-**Database:**
-- PostgreSQL, MySQL, MongoDB
-- Supabase, Prisma, SQLAlchemy, Mongoose
-
-**Other:**
-- TypeScript, Docker, GraphQL
-- Jest, Vitest, pytest
-- And many more...
-
-Can't find your stack? The wizard allows manual specification!
-
----
-
-## Adding New Shared Resources
-
-### Adding an Agent
-```bash
-1. Create shared/agents/new-agent.md
-2. Update shared/agents/README.md
-3. Update CLAUDE.md discovery map
-```
-
-### Adding a Skill
-```bash
-1. Create shared/skills/new-skill/ directory
-2. Update shared/skills/skill-rules.json with triggers
-3. Update CLAUDE.md discovery map
-```
-
-### Adding a Guideline
-```bash
-1. Create shared/guidelines/new-guideline.md
-2. Update shared/guidelines/README.md
-3. Update CLAUDE.md discovery map
-4. Reference from relevant agents/skills
-```
-
----
-
 ## Compatibility
 
 ### Operating Systems
@@ -250,82 +209,21 @@ Can't find your stack? The wizard allows manual specification!
 - ✅ **GitHub Copilot** (agents work as chatmodes)
 - ✅ **Any tool** respecting `.claude/` directory structure
 
----
-
-## Troubleshooting
-
-### Symlinks Not Working
-```bash
-cd your-repo/.claude
-ln -sf ../../orchestrator/shared/skills skills
-ln -sf ../../orchestrator/shared/hooks hooks
-ln -sf ../../orchestrator/shared/commands commands
-```
-
-### Hooks Not Executable
-```bash
-chmod +x orchestrator/shared/hooks/*.sh
-```
-
-### Skills Not Triggering
-```bash
-# Validate skill-rules.json
-cat orchestrator/shared/skills/skill-rules.json | jq .
-```
-
-### Setup Validation
-```bash
-# Run comprehensive validation
-./setup/scripts/validate-setup.sh
-```
-
----
 
 ## Documentation
 
-- **[QUICKSTART.md](./QUICKSTART.md)** - Detailed setup guide (start here!)
+- **[QUICKSTART.md](./QUICKSTART.md)** - Detailed setup guide **(start here!)**
 - **[CLAUDE.md](./CLAUDE.md)** - Complete resource discovery for AI agents
 - **[shared/agents/README.md](./shared/agents/README.md)** - Agent capabilities guide
 - **[dev/README.md](./dev/README.md)** - Dev docs pattern explanation
 
----
+Additional reference docs:
+- **[docs/reconfiguration.md](./docs/reconfiguration.md)** - Reconfiguration
+- **[docs/troubleshooting.md](./docs/troubleshooting.md)** - Troubleshooting
+- **[docs/supported-tech-stacks.md](./docs/supported-tech-stacks.md)** - Supported tech stacks
+- **[docs/new-shared-resources.md](./docs/new-shared-resources.md)** - Adding new shared resources
 
-## Advanced Features
 
-### Cross-Repo Documentation Sync
-If enabled, the `cross-repo-doc-sync` agent keeps your orchestrator documentation synchronized with changes in your repositories.
-
-### Dev Docs Pattern
-For complex tasks spanning multiple sessions, use the `/dev-docs` command to create persistent documentation that survives context resets.
-
-### Custom Tech Stack Support
-Can't find your framework? The setup wizard allows manual tech stack specification, and you can customize generated skills afterward.
-
----
-
-## Reconfiguration
-
-Need to add a new repository or change tech stacks?
-
-**Option 1: Re-run Setup (Recommended)**
-```bash
-# Backup current config if needed
-cp SETUP_CONFIG.json SETUP_CONFIG.backup.json
-
-# Re-clone orchestrator or restore setup/ directory
-# Then run wizard again
-/setup-orchestrator
-```
-
-**Option 2: Manual Edit**
-1. Edit `SETUP_CONFIG.json`
-2. Re-run skill generator or doc generator agents
-3. Run validation: `./setup/scripts/validate-setup.sh`
-
-**Option 3: Partial Re-setup**
-1. Talk to Claude Code to update specific parts
-2. Use `/dev-docs` to create a task for updating configuration
----
 
 ## Contributing
 
@@ -340,11 +238,11 @@ This orchestrator is designed to be customized for your organization. Feel free 
 ## 🧠 Credits & Inspiration
 
 **Created by:** [mvoutov](https://github.com/mvoutov)  
-**Built while working on [BoardKit](https://github.com/mvoutov/boardkit)** — an AI-powered whiteboard.
+**Built while working on [BoardKit](https://github.com/boardkit)** — an AI-powered whiteboard.
 
 This project grew out of the need to manage shared AI resources across BoardKit’s multi-repo architecture.
 
-Inspired by the Reddit post [**“Building a Cross-Repo Documentation Sync Agent with Claude Code”**](https://www.reddit.com/r/ClaudeAI/comments/1n8z1y3/building_a_crossrepo_documentation_sync_agent/),  
+Inspired by the Reddit post [**“Claude Code is a Beast – Tips from 6 Months of Hardcore Use”**](https://www.reddit.com/r/ClaudeAI/comments/1oivjvm/claude_code_is_a_beast_tips_from_6_months_of/),  
 I expanded the idea into a full **orchestrator system** for syncing documentation and AI resources across repositories.  
 
 Its key feature — a **cross-repo documentation synchronization agent** — keeps docs aligned with your evolving codebase, ensuring AI agents always have up-to-date context.
