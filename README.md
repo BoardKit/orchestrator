@@ -1,5 +1,12 @@
 # Orchestrator
 
+
+
+![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)
+![Claude Code](https://img.shields.io/badge/Claude%20Code-Supported-7F4DFF)
+![GitHub Copilot](https://img.shields.io/badge/GitHub%20Copilot-Compatible-blue?logo=githubcopilot)
+
+
 **A self-configuring infrastructure for shared Claude Code resources across all projects in your organization.**
 
 ## What Is This?
