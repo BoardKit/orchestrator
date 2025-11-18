@@ -11,15 +11,16 @@
 
 ## What Is This?
 
-The Orchestrator is a **shared AI infrastructure** for organizations using Claude Code tools (and eventually expand for other AI tools) across multiple repositories.
+The Orchestrator is a **shared AI infrastructure** for organizations using Claude Code (and eventually expand for other AI tools) across multiple repositories.
 Instead of duplicating agents, skills, prompts, and guidelines in every repo, you maintain them in **one place**, and each project auto-propagates them via symlinks.
 
+
 **Key Features:**
-- 🤖 **Self-configuring** - Setup wizard auto-detects your tech stacks
-- 🔄 **Documentation Synchronization** - Changes propagate automatically
-- 📋 **Consistent patterns** across all your projects
-- 🎯 **Single source of truth** for shared resources
-- 🛠️ **Customizable** - Each repo keeps its own context and repo-specific agents
+- 📚 **Centralized Shared Resources** - One source of truth for agents, skills, hooks, commands, and guidelines (documentation) - they all live in *Orchestrator*. All repos can have access to all resources or just a subset depending on your use case and needs
+- 🤖 **Specialized Agents** - preconfigured several specialized agents for wide-range of tasks. You can edit them as needed or add any number of agents
+- 🤖 **Self-configuring** - Setup wizard that walks you through your entire configuration. You do not have to do it all by yourself
+- 🔄 **Cross Repo Documentation Synchronization Agent** - Other than your other specialized agents, you have an agent inside the *orchestrator* keeping documentation in sync across all repos. You must invoke it once in a while and let it do its job
+- 🛠️ **Customizable** - Each repo can have its own agents, guidelines or skills. There is not one right way to use this orchestrator
 
 ## Why This Exists 
 
@@ -40,14 +41,19 @@ This makes AI assistance context-aware, more predictable and accurate, and consi
 
 ## Quick Start
 
+**Go to [QUICKSTART.md](./QUICKSTART.md) for the complete  setup guide.**
+
+Below is a brief overview:
+
 ### 1. Clone This Repository
 
 ```bash
 git clone <this-repo-url> orchestrator
 cd orchestrator
-```
+````
 
 ### 2. Run Setup Wizard
+‼️**IMPORTANT** ‼️ **This assumes you have Claude Code installed and running in terminal.**  Check installation [here](https://code.claude.com/docs/en/setup). 
 
 Open in Claude Code and run:
 
@@ -65,13 +71,15 @@ The wizard will:
 
 ### 3. Create Symlinks
 
+Symlinks connect each repository to the shared resources in the orchestrator.
+
 ```bash
 ./setup/scripts/create-symlinks.sh
 ```
 
-This creates symlinks in all your repositories to use the shared resources.
 
 ### 4. Delete Setup Directory
+Delete the setup directory to keep your orchestrator clean.
 
 ```bash
 rm -rf setup/
@@ -82,6 +90,16 @@ rm -rf setup/
 
 ## Architecture
 
+**How it works:**
+1. All shared resources live in orchestrator/shared/
+
+2. Repositories use symlinks to connect the shared resources from `orchestrator/shared/` to their own `.claude/` directory.
+
+3. You ONLY need to update the orchestrator to update all repositories instantly.
+
+4. Each repo can have its own agents and **MUST HAVE CLAUDE.md.**
+
+**IMPORTANT! Below is how the orchestrator and each repo are structured:** If after setup your structure looks different(i.e. missing files), then it is not setup properly. You can ask Claude Code to help you fix it.
 ```
 YourOrganization/
 ├── orchestrator/                  # Central shared AI infrastructure
@@ -94,27 +112,23 @@ YourOrganization/
 │
 ├── repo-a/
 │   └── .claude/
-│       ├── agents/                # Repo-specific agents
-│       ├── skills  -> symlink to orchestrator/shared/skills
-│       ├── hooks   -> symlink to orchestrator/shared/hooks
-│       ├── commands -> symlink to orchestrator/shared/commands
-│       └── CLAUDE.md
-│
-├── repo-b/
-│   └── .claude/                   # Same structure
+│       ├── agents/   -> symlink to orchestrator/shared/agents
+│       ├── skills    -> symlink to orchestrator/shared/skills
+│       ├── hooks     -> symlink to orchestrator/shared/hooks
+│       ├── commands  -> symlink to orchestrator/shared/commands
+│       └── CLAUDE.md -> MUST HAVE IN EACH REPO!!
+│...
+
+(you can have any number of repositories)
 
 ```
 
-**How it works:**
-1. All shared resources live in orchestrator/shared/.
-Repositories use symlinks to reference these shared resources.
-Updating the orchestrator updates all repositories instantly.
-Each repo still keeps its own agents and CLAUDE.md for local context.
+
 
 
 ## What Gets Generated
 
-When you run the setup wizard, the orchestrator generates:
+After you run the setup wizard, the orchestrator generates:
 
 ### Shared Agents
 Intelligent agents you can invoke in any repository:
@@ -125,7 +139,7 @@ Intelligent agents you can invoke in any repository:
 - `documentation-architect` - Create/update documentation
 - `auto-error-resolver` - Fix errors automatically
 - `web-research-specialist` - Research technologies and patterns
-- `cross-repo-doc-sync` - Synchronize documentation across repos (optional)
+- `cross-repo-doc-sync` - Synchronize documentation across repos
 
 ### Repository-Specific Skills
 Auto-trigger based on the files you edit:
@@ -231,16 +245,13 @@ Additional reference docs:
 - **[docs/new-shared-resources.md](./docs/new-shared-resources.md)** - Adding new shared resources
 
 
+## Extensions
 
-## Contributing
-
-This orchestrator is designed to be customized for your organization. Feel free to:
-- Add organization-specific agents
+This orchestrator is designed to be customized and extended for your organization's needs. Feel free to:
+- Add any useful organization-specific agents
 - Create custom skills
 - Extend guidelines with your patterns
-- Improve the setup wizard
 
----
 
 ## 🧠 Credits & Inspiration
 
