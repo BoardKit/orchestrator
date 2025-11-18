@@ -1,15 +1,24 @@
 # Troubleshooting - Skill Activation Issues
 
+**⚠️ CURRENT IMPLEMENTATION NOTE:**
+This orchestrator currently implements:
+- ✅ **UserPromptSubmit** hook - Debuggable (see sections below)
+- ✅ **PostToolUse** hook - Debuggable (file tracking)
+- ❌ **PreToolUse** hook - Not implemented (PreToolUse sections below are for reference only)
+
+---
+
 Complete debugging guide for skill activation problems.
 
 ## Table of Contents
 
 - [Skill Not Triggering](#skill-not-triggering)
-  - [UserPromptSubmit Not Suggesting](#userpromptsubmit-not-suggesting)
-  - [PreToolUse Not Blocking](#pretooluse-not-blocking)
-- [False Positives](#false-positives)
-- [Hook Not Executing](#hook-not-executing)
-- [Performance Issues](#performance-issues)
+  - [UserPromptSubmit Not Suggesting](#userpromptsubmit-not-suggesting) ✅ Applicable
+  - [PreToolUse Not Blocking](#pretooluse-not-blocking) ❌ Not applicable (not implemented)
+  - [PostToolUse Not Tracking](#posttooluse-not-tracking) ✅ Applicable
+- [False Positives](#false-positives) ✅ Applicable
+- [Hook Not Executing](#hook-not-executing) ✅ Applicable
+- [Performance Issues](#performance-issues) ✅ Applicable
 
 ---
 
@@ -113,7 +122,98 @@ Expected: Your skill should appear in the output.
 
 ---
 
+### PostToolUse Not Tracking
+
+**Symptoms:** Files are edited but tsc-cache is not being populated.
+
+**Common Causes:**
+
+#### 1. Hook Not Registered in settings.json
+
+**Check:**
+```bash
+cat .claude/settings.json | jq '.hooks.PostToolUse'
+```
+
+**Expected:**
+```json
+[
+  {
+    "matcher": "Edit|MultiEdit|Write",
+    "hooks": [
+      {
+        "type": "command",
+        "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/post-tool-use-tracker.sh"
+      }
+    ]
+  }
+]
+```
+
+**Fix:** Add PostToolUse hook registration to settings.json
+
+#### 2. Hook Script Not Executable
+
+**Check:**
+```bash
+ls -la .claude/hooks/post-tool-use-tracker.sh
+```
+
+**Expected:** `-rwxr-xr-x` (executable permissions)
+
+**Fix:**
+```bash
+chmod +x .claude/hooks/post-tool-use-tracker.sh
+```
+
+#### 3. Markdown Files Being Tracked
+
+**Expected Behavior:** The hook skips `.md` and `.markdown` files by design.
+
+**Check the skip logic:**
+```bash
+grep "\.md\|\.markdown" .claude/hooks/post-tool-use-tracker.sh
+```
+
+#### 4. Session Cache Not Created
+
+**Check:**
+```bash
+ls -la .claude/tsc-cache/
+```
+
+**Expected:** Directory for current session ID exists
+
+**Debug:**
+```bash
+# Test hook manually
+echo '{"session_id":"test","tool_name":"Edit","tool_input":{"file_path":"test.ts"}}' | \
+  .claude/hooks/post-tool-use-tracker.sh
+
+# Check if files were created
+ls -la .claude/tsc-cache/test/
+cat .claude/tsc-cache/test/edited-files.log
+```
+
+#### 5. Check Hook Output
+
+**Test the hook:**
+```bash
+echo '{"session_id":"debug","tool_name":"Edit","tool_input":{"file_path":"src/test.ts"}}' | \
+  .claude/hooks/post-tool-use-tracker.sh
+```
+
+**Expected:** Exit code 0, cache files created in `.claude/tsc-cache/debug/`
+
+---
+
 ### PreToolUse Not Blocking
+
+**⚠️ NOT APPLICABLE - PreToolUse hooks are not implemented in this orchestrator.**
+
+This section is kept for reference in case PreToolUse hooks are added in the future.
+
+---
 
 **Symptoms:** Edit a file that should trigger a guardrail, but no block occurs.
 

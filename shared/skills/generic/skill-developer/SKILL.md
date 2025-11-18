@@ -1,6 +1,6 @@
 ---
 name: skill-developer
-description: Create and manage Claude Code skills following Anthropic best practices. Use when creating new skills, modifying skill-rules.json, understanding trigger patterns, working with hooks, debugging skill activation, or implementing progressive disclosure. Covers skill structure, YAML frontmatter, trigger types (keywords, intent patterns, file paths, content patterns), enforcement levels (block, suggest, warn), hook mechanisms (UserPromptSubmit, PreToolUse), session tracking, and the 500-line rule.
+description: Create and manage Claude Code skills following Anthropic best practices. Use when creating new skills, modifying skill-rules.json, understanding trigger patterns, working with hooks, debugging skill activation, or implementing progressive disclosure. Covers skill structure, YAML frontmatter, trigger types (keywords, intent patterns, file paths), enforcement levels (suggest, warn), hook mechanisms (UserPromptSubmit, PostToolUse), and the 500-line rule.
 ---
 
 # Skill Developer Guide
@@ -29,21 +29,23 @@ Automatically activates when you mention:
 
 ### Two-Hook Architecture
 
-**1. UserPromptSubmit Hook** (Proactive Suggestions)
+**1. UserPromptSubmit Hook** (Proactive Skill Suggestions)
 - **File**: `.claude/hooks/skill-activation-prompt.ts`
 - **Trigger**: BEFORE Claude sees user's prompt
 - **Purpose**: Suggest relevant skills based on keywords + intent patterns
 - **Method**: Injects formatted reminder as context (stdout → Claude's input)
 - **Use Cases**: Topic-based skills, implicit work detection
 
-**2. Stop Hook - Error Handling Reminder** (Gentle Reminders)
-- **File**: `.claude/hooks/error-handling-reminder.ts`
-- **Trigger**: AFTER Claude finishes responding
-- **Purpose**: Gentle reminder to self-assess error handling in code written
-- **Method**: Analyzes edited files for risky patterns, displays reminder if needed
-- **Use Cases**: Error handling awareness without blocking friction
+**2. PostToolUse Hook** (File Change Tracking)
+- **File**: `.claude/hooks/post-tool-use-tracker.sh`
+- **Trigger**: AFTER Edit/Write/MultiEdit tools complete successfully
+- **Purpose**: Track which files and repos were modified during the session
+- **Method**: Logs to tsc-cache, stores build/tsc commands for affected repos
+- **Use Cases**: Session-scoped change tracking, build command automation
 
-**Philosophy Change (2025-10-27):** We moved away from blocking PreToolUse for Sentry/error handling. Instead, use gentle post-response reminders that don't block workflow but maintain code quality awareness.
+**Current Implementation:** This orchestrator uses suggestion-based skills (via UserPromptSubmit) and post-edit tracking (via PostToolUse). There is no PreToolUse blocking mechanism currently implemented.
+
+
 
 ### Configuration File
 
@@ -60,26 +62,28 @@ Defines:
 
 ## Skill Types
 
-### 1. Guardrail Skills
+### 1. Critical Skills
 
-**Purpose:** Enforce critical best practices that prevent errors
+**Purpose:** Strongly suggest critical best practices
 
 **Characteristics:**
-- Type: `"guardrail"`
-- Enforcement: `"block"`
+- Type: `"guardrail"` (naming convention, not enforced)
+- Enforcement: `"suggest"` (no blocking in current implementation)
 - Priority: `"critical"` or `"high"`
-- Block file edits until skill used
-- Prevent common mistakes (column names, critical errors)
-- Session-aware (don't repeat nag in same session)
+- Strongly suggested via UserPromptSubmit hook
+- Prevent common mistakes through awareness
+- Important patterns that should always be considered
 
 **Examples:**
-- `database-verification` - Verify table/column names before Prisma queries
-- `frontend-dev-guidelines` - Enforce React/TypeScript patterns
+- `database-verification` - Suggest verification of table/column names
+- `frontend-dev-guidelines` - Suggest React/TypeScript patterns
 
 **When to Use:**
-- Mistakes that cause runtime errors
+- Mistakes that could cause runtime errors
 - Data integrity concerns
 - Critical compatibility issues
+
+**Note:** True blocking enforcement requires PreToolUse hooks, which are not currently implemented in this orchestrator.
 
 ### 2. Domain Skills
 
@@ -159,15 +163,15 @@ See [SKILL_RULES_REFERENCE.md](SKILL_RULES_REFERENCE.md) for complete schema.
 
 ### Step 3: Test Triggers
 
-**Test UserPromptSubmit:**
+**Test UserPromptSubmit (Skill Activation):**
 ```bash
 echo '{"session_id":"test","prompt":"your test prompt"}' | \
   npx tsx .claude/hooks/skill-activation-prompt.ts
 ```
 
-**Test PreToolUse:**
+**Test PostToolUse (File Tracking):**
 ```bash
-cat <<'EOF' | npx tsx .claude/hooks/skill-verification-guard.ts
+cat <<'EOF' | .claude/hooks/post-tool-use-tracker.sh
 {"session_id":"test","tool_name":"Edit","tool_input":{"file_path":"test.ts"}}
 EOF
 ```
@@ -182,34 +186,31 @@ Based on testing:
 
 ### Step 5: Follow Anthropic Best Practices
 
-✅ Keep SKILL.md under 500 lines
-✅ Use progressive disclosure with reference files
-✅ Add table of contents to reference files > 100 lines
-✅ Write detailed description with trigger keywords
-✅ Test with 3+ real scenarios before documenting
-✅ Iterate based on actual usage
+- ✅ Keep SKILL.md under 500 lines
+- ✅ Use progressive disclosure with reference files
+- ✅ Add table of contents to reference files > 100 lines
+- ✅ Write detailed description with trigger keywords
+- ✅ Test with 3+ real scenarios before documenting
+- ✅ Iterate based on actual usage
 
 ---
 
 ## Enforcement Levels
 
-### BLOCK (Critical Guardrails)
-
-- Physically prevents Edit/Write tool execution
-- Exit code 2 from hook, stderr → Claude
-- Claude sees message and must use skill to proceed
-- **Use For**: Critical mistakes, data integrity, security issues
-
-**Example:** Database column name verification
+**Current Implementation Note:** This orchestrator only implements suggestion-based enforcement via UserPromptSubmit. Blocking enforcement would require PreToolUse hooks.
 
 ### SUGGEST (Recommended)
 
 - Reminder injected before Claude sees prompt
 - Claude is aware of relevant skills
 - Not enforced, just advisory
-- **Use For**: Domain guidance, best practices, how-to guides
+- **Use For**: All skills - domain guidance, best practices, critical patterns
 
-**Example:** Frontend development guidelines
+**Priority Levels Within SUGGEST:**
+- **critical**: "⚠️ CRITICAL SKILLS (REQUIRED)" - top of suggestion list
+- **high**: "📚 RECOMMENDED SKILLS" - strongly suggested
+- **medium**: "💡 SUGGESTED SKILLS" - helpful guidance
+- **low**: "📌 OPTIONAL SKILLS" - nice to have
 
 ### WARN (Optional)
 
@@ -217,52 +218,40 @@ Based on testing:
 - Advisory only, minimal enforcement
 - **Use For**: Nice-to-have suggestions, informational reminders
 
-**Rarely used** - most skills are either BLOCK or SUGGEST.
+**Rarely used** - most skills use "suggest" with appropriate priority levels.
+
+### BLOCK (Not Currently Implemented)
+
+- Would require PreToolUse hooks
+- Not available in this orchestrator's current implementation
+- For future enhancement if blocking enforcement is needed
 
 ---
 
-## Skip Conditions & User Control
+## Skill Priority System
 
-### 1. Session Tracking
+**How Skills Are Surfaced:**
 
-**Purpose:** Don't nag repeatedly in same session
+Skills are suggested via UserPromptSubmit hook based on:
+1. **Keyword matches** in user prompt
+2. **Intent pattern matches** using regex
+3. **File patterns** from recent edits (tracked by PostToolUse)
 
-**How it works:**
-- First edit → Hook blocks, updates session state
-- Second edit (same session) → Hook allows
-- Different session → Blocks again
+**Priority Display:**
 
-**State File:** `.claude/hooks/state/skills-used-{session_id}.json`
-
-### 2. File Markers
-
-**Purpose:** Permanent skip for verified files
-
-**Marker:** `// @skip-validation`
-
-**Usage:**
-```typescript
-// @skip-validation
-import { PrismaService } from './prisma';
-// This file has been manually verified
+```
+⚠️ CRITICAL SKILLS (REQUIRED):     priority: "critical"
+📚 RECOMMENDED SKILLS:              priority: "high"
+💡 SUGGESTED SKILLS:                priority: "medium"
+📌 OPTIONAL SKILLS:                 priority: "low"
 ```
 
-**NOTE:** Use sparingly - defeats the purpose if overused
+**User Control:**
 
-### 3. Environment Variables
-
-**Purpose:** Emergency disable, temporary override
-
-**Global disable:**
-```bash
-export SKIP_SKILL_GUARDRAILS=true  # Disables ALL PreToolUse blocks
-```
-
-**Skill-specific:**
-```bash
-export SKIP_DB_VERIFICATION=true
-export SKIP_ERROR_REMINDER=true
-```
+Since skills are suggestions (not enforced), users can:
+- Choose to invoke suggested skills or not
+- Rely on Claude's judgment about which skills to use
+- Request specific skills manually via Skill tool
 
 ---
 
@@ -314,18 +303,22 @@ Complete skill-rules.json schema:
 ### [HOOK_MECHANISMS.md](HOOK_MECHANISMS.md)
 Deep dive into hook internals:
 - UserPromptSubmit flow (detailed)
-- PreToolUse flow (detailed)
-- Exit code behavior table (CRITICAL)
-- Session state management
+- PostToolUse flow (detailed)
+- Hook input/output contracts
+- TSC-cache session tracking
 - Performance considerations
+
+**Note:** This file may reference PreToolUse hooks which are not currently implemented.
 
 ### [TROUBLESHOOTING.md](TROUBLESHOOTING.md)
 Comprehensive debugging guide:
 - Skill not triggering (UserPromptSubmit)
-- PreToolUse not blocking
+- PostToolUse not tracking files
 - False positives (too many triggers)
 - Hook not executing at all
 - Performance issues
+
+**Note:** This file may reference PreToolUse debugging which is not applicable to current implementation.
 
 ### [PATTERNS_LIBRARY.md](PATTERNS_LIBRARY.md)
 Ready-to-use pattern collection:
@@ -366,15 +359,15 @@ See [TRIGGER_TYPES.md](TRIGGER_TYPES.md) for complete details.
 
 ### Enforcement
 
-- **BLOCK**: Exit code 2, critical only
-- **SUGGEST**: Inject context, most common
+- **SUGGEST**: Inject context before prompt, most common
+- **Priority levels**: critical > high > medium > low
 - **WARN**: Advisory, rarely used
+- **BLOCK**: Not currently implemented (would require PreToolUse hooks)
 
-### Skip Conditions
+### Actual Hooks
 
-- **Session tracking**: Automatic (prevents repeated nags)
-- **File markers**: `// @skip-validation` (permanent skip)
-- **Env vars**: `SKIP_SKILL_GUARDRAILS` (emergency disable)
+- **UserPromptSubmit**: skill-activation-prompt.ts (suggest skills)
+- **PostToolUse**: post-tool-use-tracker.sh (track file changes)
 
 ### Anthropic Best Practices
 
@@ -390,13 +383,12 @@ See [TRIGGER_TYPES.md](TRIGGER_TYPES.md) for complete details.
 
 Test hooks manually:
 ```bash
-# UserPromptSubmit
+# UserPromptSubmit (skill suggestions)
 echo '{"prompt":"test"}' | npx tsx .claude/hooks/skill-activation-prompt.ts
 
-# PreToolUse
-cat <<'EOF' | npx tsx .claude/hooks/skill-verification-guard.ts
-{"tool_name":"Edit","tool_input":{"file_path":"test.ts"}}
-EOF
+# PostToolUse (file tracking)
+echo '{"tool_name":"Edit","tool_input":{"file_path":"test.ts"}}' | \
+  .claude/hooks/post-tool-use-tracker.sh
 ```
 
 See [TROUBLESHOOTING.md](TROUBLESHOOTING.md) for complete debugging guide.
@@ -411,8 +403,8 @@ See [TROUBLESHOOTING.md](TROUBLESHOOTING.md) for complete debugging guide.
 - `.claude/settings.json` - Hook registration
 
 **Hooks:**
-- `.claude/hooks/skill-activation-prompt.ts` - UserPromptSubmit
-- `.claude/hooks/error-handling-reminder.ts` - Stop event (gentle reminders)
+- `.claude/hooks/skill-activation-prompt.ts` - UserPromptSubmit (skill suggestions)
+- `.claude/hooks/post-tool-use-tracker.sh` - PostToolUse (file change tracking)
 
 **All Skills:**
 - `.claude/skills/*/SKILL.md` - Skill content files

@@ -1,6 +1,17 @@
 # Hook Mechanisms - Deep Dive
 
-Technical deep dive into how the UserPromptSubmit and PreToolUse hooks work.
+**⚠️ CURRENT IMPLEMENTATION NOTE:**
+This orchestrator currently implements:
+- ✅ **UserPromptSubmit** hook (skill-activation-prompt.ts) - Implemented and active
+- ✅ **PostToolUse** hook (post-tool-use-tracker.sh) - Implemented and active
+- ❌ **PreToolUse** hook - Not implemented (documentation below is for reference/future use)
+- ❌ **Stop** hook - Not implemented
+
+The PreToolUse section below documents how blocking enforcement *would* work if implemented.
+
+---
+
+Technical deep dive into how the UserPromptSubmit, PostToolUse, and (potential) PreToolUse hooks work.
 
 ## Table of Contents
 

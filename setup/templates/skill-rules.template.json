@@ -28,9 +28,8 @@
                     "skill.*?(work|trigger|activate|system)"
                 ]
             }
-        }{{GENERATED_SKILLS_JSON}}
+        }
     },
-
     "notes": {
         "enforcement_types": {
             "suggest": "Skill suggestion appears but doesn't block execution",

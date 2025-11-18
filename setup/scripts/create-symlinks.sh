@@ -1,19 +1,16 @@
 #!/bin/bash
+# create-symlinks.sh - SMART SYMLINKING (v2.0)
+# Only links relevant resources to each repository (generic + repo-specific)
 
-# Create Symlinks Script
-# Automatically creates symlinks in all repositories defined in SETUP_CONFIG.json
-#
-# Usage: ./setup/scripts/create-symlinks.sh
-# Run from orchestrator root directory
+set -euo pipefail
 
-set -e  # Exit on error
-
-# Color output
+# Colors
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
+CYAN='\033[0;36m'
 BLUE='\033[0;34m'
-NC='\033[0m' # No Color
+NC='\033[0m'
 
 # Get script directory and orchestrator root
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -21,40 +18,27 @@ ORCHESTRATOR_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 CONFIG_FILE="$ORCHESTRATOR_ROOT/SETUP_CONFIG.json"
 
 echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-echo -e "${BLUE}  Orchestrator Symlink Creator${NC}"
+echo -e "${BLUE}🔗 Smart Symlinking (v2.0)${NC}"
 echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo ""
 
-# Check if jq is installed
+# Check for jq
 if ! command -v jq &> /dev/null; then
     echo -e "${RED}✗ Error: jq is not installed${NC}"
-    echo ""
-    echo "jq is required to parse SETUP_CONFIG.json"
-    echo ""
-    echo "Install jq:"
-    echo "  macOS:   brew install jq"
-    echo "  Ubuntu:  sudo apt-get install jq"
-    echo "  Other:   https://stedolan.github.io/jq/download/"
-    echo ""
+    echo "Install jq: brew install jq (macOS) or apt-get install jq (Linux)"
     exit 1
 fi
 
-# Check if SETUP_CONFIG.json exists
+# Check for config file
 if [ ! -f "$CONFIG_FILE" ]; then
     echo -e "${RED}✗ Error: SETUP_CONFIG.json not found${NC}"
-    echo ""
-    echo "Expected location: $CONFIG_FILE"
-    echo ""
-    echo "Run the setup wizard first:"
-    echo "  /setup-orchestrator"
-    echo ""
+    echo "Run the setup wizard first: /setup-orchestrator"
     exit 1
 fi
 
 # Validate JSON
 if ! jq empty "$CONFIG_FILE" 2>/dev/null; then
     echo -e "${RED}✗ Error: SETUP_CONFIG.json is not valid JSON${NC}"
-    echo ""
     exit 1
 fi
 
@@ -62,7 +46,7 @@ echo -e "Configuration: ${GREEN}$CONFIG_FILE${NC}"
 echo ""
 
 # Get organization name
-ORG_NAME=$(jq -r '.organization.name' "$CONFIG_FILE")
+ORG_NAME=$(jq -r '.organization.name // .organization // "Unknown"' "$CONFIG_FILE")
 echo "Organization: $ORG_NAME"
 echo ""
 
@@ -90,8 +74,47 @@ SUCCESS_COUNT=0
 FAILURE_COUNT=0
 SKIP_COUNT=0
 
+# Function to create symlink safely
+create_symlink() {
+    local target="$1"
+    local link_name="$2"
+    local description="$3"
+
+    # Check if target exists
+    if [ ! -e "$target" ] && [ ! -L "$target" ]; then
+        echo -e "  ${YELLOW}⚠${NC} Target does not exist (optional): $target"
+        return 1
+    fi
+
+    # Remove existing symlink if it exists
+    if [ -L "$link_name" ]; then
+        rm "$link_name"
+    elif [ -e "$link_name" ]; then
+        echo -e "  ${YELLOW}⚠${NC} Backing up existing: $link_name"
+        mv "$link_name" "${link_name}.backup"
+    fi
+
+    # Create parent directory
+    mkdir -p "$(dirname "$link_name")"
+
+    # Calculate relative path
+    local link_dir="$(dirname "$link_name")"
+    local rel_target="$(python3 -c "import os.path; print(os.path.relpath('$target', '$link_dir'))")"
+
+    # Create symlink
+    ln -s "$rel_target" "$link_name"
+
+    if [ -L "$link_name" ] && [ -e "$link_name" ]; then
+        echo -e "  ${GREEN}✓${NC} $description"
+        return 0
+    else
+        echo -e "  ${RED}✗${NC} Failed to create symlink: $link_name"
+        return 1
+    fi
+}
+
 echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-echo -e "${BLUE}  Creating Symlinks${NC}"
+echo -e "${BLUE}Creating Symlinks${NC}"
 echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo ""
 
@@ -100,188 +123,126 @@ for i in $(seq 0 $((REPO_COUNT - 1))); do
     # Get repository info
     REPO_NAME=$(jq -r ".repositories[$i].name" "$CONFIG_FILE")
     REPO_PATH=$(jq -r ".repositories[$i].path" "$CONFIG_FILE")
+    CLAUDE_PATH=$(jq -r ".repositories[$i].claudePath // \".claude\"" "$CONFIG_FILE")
 
-    # Convert relative path to absolute
-    REPO_ABS_PATH="$ORCHESTRATOR_ROOT/$REPO_PATH"
-
-    echo -e "${BLUE}[$((i + 1))/$REPO_COUNT]${NC} Repository: ${GREEN}$REPO_NAME${NC}"
+    echo -e "${CYAN}[$((i + 1))/$REPO_COUNT] $REPO_NAME${NC}"
     echo "  Path: $REPO_PATH"
+    echo "  Claude: $CLAUDE_PATH"
 
     # Check if repository exists
-    if [ ! -d "$REPO_ABS_PATH" ]; then
-        echo -e "  ${YELLOW}⚠ Warning: Repository not found at $REPO_ABS_PATH${NC}"
-        echo "  Skipping..."
+    if [ ! -d "$REPO_PATH" ]; then
+        echo -e "  ${YELLOW}⚠ Repository not found${NC}"
         SKIP_COUNT=$((SKIP_COUNT + 1))
         echo ""
         continue
     fi
 
-    # Create .claude directory if it doesn't exist
-    CLAUDE_DIR="$REPO_ABS_PATH/.claude"
-    if [ ! -d "$CLAUDE_DIR" ]; then
-        echo "  Creating .claude directory..."
-        mkdir -p "$CLAUDE_DIR"
+    # Create .claude directory structure
+    CLAUDE_DIR="$REPO_PATH/$CLAUDE_PATH"
+    mkdir -p "$CLAUDE_DIR/"{agents,skills,tsc-cache}
+
+    ERRORS=0
+
+    # 1. AGENTS: Generic (all repos) + Repo-specific (only this repo)
+    echo -e "${YELLOW}  Agents:${NC}"
+
+    # Generic agents
+    create_symlink \
+        "$ORCHESTRATOR_ROOT/shared/agents/generic" \
+        "$CLAUDE_DIR/agents/generic" \
+        "Generic agents" || ((ERRORS++))
+
+    # Repo-specific agents (if exist)
+    if [ -d "$ORCHESTRATOR_ROOT/shared/agents/repo-specific/$REPO_NAME" ]; then
+        create_symlink \
+            "$ORCHESTRATOR_ROOT/shared/agents/repo-specific/$REPO_NAME" \
+            "$CLAUDE_DIR/agents/$REPO_NAME" \
+            "Repo-specific agents" || ((ERRORS++))
     fi
 
-    # Calculate relative path from repo .claude to orchestrator shared
-    # This ensures symlinks work regardless of where repos are cloned
-    RELATIVE_PATH=$(python3 -c "import os.path; print(os.path.relpath('$ORCHESTRATOR_ROOT/shared', '$CLAUDE_DIR'))")
+    # 2. SKILLS: Generic (all repos) + Repo-specific skill (only this repo)
+    echo -e "${YELLOW}  Skills:${NC}"
 
-    # Create symlinks
-    SYMLINK_ERRORS=0
+    # Generic skills
+    create_symlink \
+        "$ORCHESTRATOR_ROOT/shared/skills/generic" \
+        "$CLAUDE_DIR/skills/generic" \
+        "Generic skills" || ((ERRORS++))
 
-    # Skills symlink
-    SKILLS_LINK="$CLAUDE_DIR/skills"
-    SKILLS_TARGET="$RELATIVE_PATH/skills"
-
-    if [ -L "$SKILLS_LINK" ]; then
-        echo -e "  ${GREEN}✓${NC} skills symlink already exists"
-    elif [ -e "$SKILLS_LINK" ]; then
-        echo -e "  ${YELLOW}⚠${NC} skills exists but is not a symlink (skipping)"
-        SYMLINK_ERRORS=$((SYMLINK_ERRORS + 1))
-    else
-        ln -s "$SKILLS_TARGET" "$SKILLS_LINK"
-        echo -e "  ${GREEN}✓${NC} Created skills symlink"
+    # Repo-specific skill
+    if [ -d "$ORCHESTRATOR_ROOT/shared/skills/repo-specific/${REPO_NAME}-guidelines" ]; then
+        create_symlink \
+            "$ORCHESTRATOR_ROOT/shared/skills/repo-specific/${REPO_NAME}-guidelines" \
+            "$CLAUDE_DIR/skills/${REPO_NAME}-guidelines" \
+            "Repo-specific skill" || ((ERRORS++))
     fi
 
-    # Hooks symlink
-    HOOKS_LINK="$CLAUDE_DIR/hooks"
-    HOOKS_TARGET="$RELATIVE_PATH/hooks"
+    # skill-rules.json (shared by all)
+    create_symlink \
+        "$ORCHESTRATOR_ROOT/shared/skills/skill-rules.json" \
+        "$CLAUDE_DIR/skills/skill-rules.json" \
+        "Skill rules" || ((ERRORS++))
 
-    if [ -L "$HOOKS_LINK" ]; then
-        echo -e "  ${GREEN}✓${NC} hooks symlink already exists"
-    elif [ -e "$HOOKS_LINK" ]; then
-        echo -e "  ${YELLOW}⚠${NC} hooks exists but is not a symlink (skipping)"
-        SYMLINK_ERRORS=$((SYMLINK_ERRORS + 1))
-    else
-        ln -s "$HOOKS_TARGET" "$HOOKS_LINK"
-        echo -e "  ${GREEN}✓${NC} Created hooks symlink"
+    # 3. COMMANDS: All repos get same commands
+    echo -e "${YELLOW}  Commands:${NC}"
+    create_symlink \
+        "$ORCHESTRATOR_ROOT/shared/commands" \
+        "$CLAUDE_DIR/commands" \
+        "Commands" || ((ERRORS++))
+
+    # 4. HOOKS: All repos get same hooks
+    echo -e "${YELLOW}  Hooks:${NC}"
+    create_symlink \
+        "$ORCHESTRATOR_ROOT/shared/hooks" \
+        "$CLAUDE_DIR/hooks" \
+        "Hooks" || ((ERRORS++))
+
+    # Make hooks executable
+    chmod +x "$ORCHESTRATOR_ROOT/shared/hooks/"*.sh 2>/dev/null || true
+
+    # 5. GUIDELINES: All repos get same guidelines
+    echo -e "${YELLOW}  Guidelines:${NC}"
+    create_symlink \
+        "$ORCHESTRATOR_ROOT/shared/guidelines" \
+        "$CLAUDE_DIR/guidelines" \
+        "Guidelines" || ((ERRORS++))
+
+    # 6. SETTINGS: Symlink to repo-specific settings file
+    echo -e "${YELLOW}  Settings:${NC}"
+    SETTINGS_FILE="$ORCHESTRATOR_ROOT/shared/settings/${REPO_NAME}-settings.json"
+
+    # Create settings from template if doesn't exist
+    if [ ! -f "$SETTINGS_FILE" ]; then
+        cp "$ORCHESTRATOR_ROOT/shared/settings/template-settings.json" "$SETTINGS_FILE"
+        echo -e "  ${GREEN}✓${NC} Generated $REPO_NAME-settings.json"
     fi
 
-    # Commands symlink
-    COMMANDS_LINK="$CLAUDE_DIR/commands"
-    COMMANDS_TARGET="$RELATIVE_PATH/commands"
+    create_symlink \
+        "$SETTINGS_FILE" \
+        "$CLAUDE_DIR/settings.json" \
+        "Settings file" || ((ERRORS++))
 
-    if [ -L "$COMMANDS_LINK" ]; then
-        echo -e "  ${GREEN}✓${NC} commands symlink already exists"
-    elif [ -e "$COMMANDS_LINK" ]; then
-        echo -e "  ${YELLOW}⚠${NC} commands exists but is not a symlink (skipping)"
-        SYMLINK_ERRORS=$((SYMLINK_ERRORS + 1))
-    else
-        ln -s "$COMMANDS_TARGET" "$COMMANDS_LINK"
-        echo -e "  ${GREEN}✓${NC} Created commands symlink"
+    # 7. GITIGNORE: Add .claude/tsc-cache
+    echo -e "${YELLOW}  Gitignore:${NC}"
+    if [ -f "$SCRIPT_DIR/manage-gitignore.sh" ]; then
+        bash "$SCRIPT_DIR/manage-gitignore.sh" "$REPO_PATH" 2>&1 | sed 's/^/  /'
     fi
 
-    # Agents symlink
-    AGENTS_LINK="$CLAUDE_DIR/agents"
-    AGENTS_TARGET="$RELATIVE_PATH/agents"
-
-    if [ -L "$AGENTS_LINK" ]; then
-        echo -e "  ${GREEN}✓${NC} agents symlink already exists"
-    elif [ -e "$AGENTS_LINK" ]; then
-        echo -e "  ${YELLOW}⚠${NC} agents exists but is not a symlink (skipping)"
-        SYMLINK_ERRORS=$((SYMLINK_ERRORS + 1))
-    else
-        ln -s "$AGENTS_TARGET" "$AGENTS_LINK"
-        echo -e "  ${GREEN}✓${NC} Created agents symlink"
-    fi
-
-    # Create settings.json if it doesn't exist
-    SETTINGS_FILE="$CLAUDE_DIR/settings.json"
-    SETTINGS_TEMPLATE="$ORCHESTRATOR_ROOT/setup/templates/settings.json"
-
-    if [ -f "$SETTINGS_FILE" ]; then
-        echo -e "  ${GREEN}✓${NC} settings.json already exists (skipping)"
-    else
-        if [ -f "$SETTINGS_TEMPLATE" ]; then
-            cp "$SETTINGS_TEMPLATE" "$SETTINGS_FILE"
-            echo -e "  ${GREEN}✓${NC} Created settings.json"
-        else
-            echo -e "  ${YELLOW}⚠${NC} settings.json template not found, skipping"
-            SYMLINK_ERRORS=$((SYMLINK_ERRORS + 1))
-        fi
-    fi
-
-    # Create CLAUDE.md if it doesn't exist
-    CLAUDE_MD_FILE="$REPO_ABS_PATH/CLAUDE.md"
-    CLAUDE_TEMPLATE="$ORCHESTRATOR_ROOT/setup/templates/repo-CLAUDE.template.md"
-
-    if [ -f "$CLAUDE_MD_FILE" ]; then
-        echo -e "  ${GREEN}✓${NC} CLAUDE.md already exists (skipping)"
-    else
-        if [ -f "$CLAUDE_TEMPLATE" ]; then
-            # Get repo details from config
-            REPO_TYPE=$(jq -r ".repositories[$i].type" "$CONFIG_FILE")
-            REPO_DESC=$(jq -r ".repositories[$i].description" "$CONFIG_FILE")
-            FRONTEND=$(jq -r ".repositories[$i].techStack.frontend // [] | join(\", \")" "$CONFIG_FILE")
-            BACKEND=$(jq -r ".repositories[$i].techStack.backend // [] | join(\", \")" "$CONFIG_FILE")
-            DATABASE=$(jq -r ".repositories[$i].techStack.database // [] | join(\", \")" "$CONFIG_FILE")
-            OTHER=$(jq -r ".repositories[$i].techStack.other // [] | join(\", \")" "$CONFIG_FILE")
-            TIMESTAMP=$(date "+%Y-%m-%d")
-
-            # Set defaults for empty values
-            [ -z "$FRONTEND" ] && FRONTEND="None"
-            [ -z "$BACKEND" ] && BACKEND="None"
-            [ -z "$DATABASE" ] && DATABASE="None"
-            [ -z "$OTHER" ] && OTHER="None"
-
-            # Generate CLAUDE.md from template
-            sed -e "s/{{REPO_NAME}}/$REPO_NAME/g" \
-                -e "s/{{REPO_TYPE}}/$REPO_TYPE/g" \
-                -e "s/{{REPO_DESCRIPTION}}/$REPO_DESC/g" \
-                -e "s/{{FRONTEND_STACK}}/$FRONTEND/g" \
-                -e "s/{{BACKEND_STACK}}/$BACKEND/g" \
-                -e "s/{{DATABASE_STACK}}/$DATABASE/g" \
-                -e "s/{{OTHER_STACK}}/$OTHER/g" \
-                -e "s/{{TIMESTAMP}}/$TIMESTAMP/g" \
-                -e "s/{{TECH_NAME}}/$REPO_NAME/g" \
-                -e "s/{{REPO_SPECIFIC_STRUCTURE}}//g" \
-                "$CLAUDE_TEMPLATE" > "$CLAUDE_MD_FILE"
-
-            echo -e "  ${GREEN}✓${NC} Created CLAUDE.md"
-        else
-            echo -e "  ${YELLOW}⚠${NC} CLAUDE.md template not found, skipping"
-            SYMLINK_ERRORS=$((SYMLINK_ERRORS + 1))
-        fi
-    fi
-
-    # Verify symlinks work
-    VERIFY_ERRORS=0
-
-    if [ ! -e "$SKILLS_LINK/skill-rules.json" ]; then
-        echo -e "  ${RED}✗${NC} skills symlink broken (skill-rules.json not accessible)"
-        VERIFY_ERRORS=$((VERIFY_ERRORS + 1))
-    fi
-
-    if [ ! -d "$HOOKS_LINK" ]; then
-        echo -e "  ${RED}✗${NC} hooks symlink broken (directory not accessible)"
-        VERIFY_ERRORS=$((VERIFY_ERRORS + 1))
-    fi
-
-    if [ ! -d "$COMMANDS_LINK" ]; then
-        echo -e "  ${RED}✗${NC} commands symlink broken (directory not accessible)"
-        VERIFY_ERRORS=$((VERIFY_ERRORS + 1))
-    fi
-
-    if [ ! -d "$AGENTS_LINK" ]; then
-        echo -e "  ${RED}✗${NC} agents symlink broken (directory not accessible)"
-        VERIFY_ERRORS=$((VERIFY_ERRORS + 1))
-    fi
-
-    if [ $SYMLINK_ERRORS -eq 0 ] && [ $VERIFY_ERRORS -eq 0 ]; then
+    # Summary for this repo
+    if [ $ERRORS -eq 0 ]; then
         SUCCESS_COUNT=$((SUCCESS_COUNT + 1))
         echo -e "  ${GREEN}✓ Repository configured successfully${NC}"
     else
         FAILURE_COUNT=$((FAILURE_COUNT + 1))
-        echo -e "  ${RED}✗ Repository configuration incomplete${NC}"
+        echo -e "  ${RED}✗ Repository configuration incomplete ($ERRORS errors)${NC}"
     fi
 
     echo ""
 done
 
-# Summary
+# Final summary
 echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-echo -e "${BLUE}  Summary${NC}"
+echo -e "${BLUE}Summary${NC}"
 echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo ""
 echo "Processed: $REPO_COUNT repositories"
@@ -290,40 +251,34 @@ if [ $FAILURE_COUNT -gt 0 ]; then
     echo -e "${RED}Failed:${NC}    $FAILURE_COUNT"
 fi
 if [ $SKIP_COUNT -gt 0 ]; then
-    echo -e "${YELLOW}Skipped:${NC}   $SKIP_COUNT (repository not found)"
+    echo -e "${YELLOW}Skipped:${NC}   $SKIP_COUNT"
 fi
 echo ""
 
 if [ $SUCCESS_COUNT -eq $REPO_COUNT ]; then
-    echo -e "${GREEN}✓ All repositories configured successfully!${NC}"
+    echo -e "${GREEN}✅ All repositories configured!${NC}"
     echo ""
-    echo "What was created in each repository:"
-    echo "  ✓ .claude/agents → symlink to orchestrator/shared/agents"
-    echo "  ✓ .claude/skills → symlink to orchestrator/shared/skills"
-    echo "  ✓ .claude/hooks → symlink to orchestrator/shared/hooks"
-    echo "  ✓ .claude/commands → symlink to orchestrator/shared/commands"
-    echo "  ✓ .claude/settings.json → hooks and permissions configuration"
-    echo "  ✓ CLAUDE.md → repository-specific context file"
+    echo "What was created (per repository):"
+    echo "  ✓ .claude/agents/generic/ → orchestrator/shared/agents/generic/"
+    echo "  ✓ .claude/agents/{repo}/ → orchestrator/shared/agents/repo-specific/{repo}/ (if exists)"
+    echo "  ✓ .claude/skills/generic/ → orchestrator/shared/skills/generic/"
+    echo "  ✓ .claude/skills/{repo}-guidelines/ → orchestrator/shared/skills/repo-specific/{repo}-guidelines/"
+    echo "  ✓ .claude/skills/skill-rules.json → orchestrator/shared/skills/skill-rules.json"
+    echo "  ✓ .claude/commands/ → orchestrator/shared/commands/"
+    echo "  ✓ .claude/hooks/ → orchestrator/shared/hooks/"
+    echo "  ✓ .claude/guidelines/ → orchestrator/shared/guidelines/"
+    echo "  ✓ .claude/settings.json → orchestrator/shared/settings/{repo}-settings.json"
+    echo "  ✓ .gitignore updated with .claude/tsc-cache"
     echo ""
     echo "Next steps:"
-    echo "  1. Test skills by editing files in your repositories"
-    echo "  2. Verify skill activation works"
-    echo "  3. Delete the setup/ directory: rm -rf setup/"
+    echo "  1. Run health check: ./setup/scripts/health-check.sh"
+    echo "  2. Test in Claude Code"
+    echo "  3. Delete setup/ directory after validation"
     echo ""
     exit 0
-elif [ $FAILURE_COUNT -gt 0 ]; then
-    echo -e "${YELLOW}⚠ Some repositories had issues${NC}"
-    echo ""
-    echo "Check the errors above and:"
-    echo "  1. Verify repository paths are correct"
-    echo "  2. Ensure shared/skills, shared/hooks, shared/commands exist"
-    echo "  3. Re-run this script after fixing issues"
-    echo ""
-    exit 1
 else
-    echo -e "${YELLOW}⚠ All repositories were skipped${NC}"
-    echo ""
-    echo "Verify repository paths in SETUP_CONFIG.json"
+    echo -e "${YELLOW}⚠ Some issues occurred${NC}"
+    echo "Review errors above and re-run after fixing"
     echo ""
     exit 1
 fi

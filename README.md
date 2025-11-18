@@ -116,7 +116,8 @@ YourOrganization/
 │       ├── skills    -> symlink to orchestrator/shared/skills
 │       ├── hooks     -> symlink to orchestrator/shared/hooks
 │       ├── commands  -> symlink to orchestrator/shared/commands
-│       └── CLAUDE.md -> MUST HAVE IN EACH REPO!!
+│       └── settings.json 
+│    └── CLAUDE.md -> MUST HAVE IN EACH REPO!!
 │...
 
 (you can have any number of repositories)

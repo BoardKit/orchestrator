@@ -53,8 +53,21 @@ prisma/.env
 # Claude
 .claude/tsc-cache/*
 
-# Setup Configuration (generated during setup - keep template)
+# Setup artifacts (generated during setup)
 SETUP_CONFIG.json
+SETUP_REPORT.md
+*.backup
+
+# Cross-repo-doc-sync artifacts (runtime metrics and reports)
+doc-sync-logs/sync-reports/*.md
+doc-sync-logs/metrics/*.jsonl
+!doc-sync-logs/sync-reports/.gitkeep
+!doc-sync-logs/metrics/.gitkeep
+
+# Generated per-repo settings (keep template)
+shared/settings/*.json
+!shared/settings/template-settings.json
+!shared/settings/README.md
 
 # Setup directory (optional - can be removed after setup)
 # Uncomment the line below after completing setup if you want git to ignore it:

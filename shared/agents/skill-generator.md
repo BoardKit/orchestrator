@@ -1,1 +1,0 @@
-../../setup/skill-generator.md
