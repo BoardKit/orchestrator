@@ -1,0 +1,1 @@
+../../shared/agents/documentation-architect.md

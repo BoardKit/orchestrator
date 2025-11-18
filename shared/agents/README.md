@@ -12,6 +12,39 @@ This directory contains AI agents that can be invoked to perform specific tasks 
 - **Skills** auto-trigger when you edit files (proactive guidance)
 - **Agents** must be explicitly invoked via Task tool (on-demand execution)
 
+## Agent Storage and Distribution
+
+**Central Management:**
+- All agents (generic and repo-specific) are stored in `orchestrator/shared/agents/`
+- Flat directory structure (no subdirectories)
+- Single source of truth for all agent definitions
+
+**Selective Distribution:**
+- Each repository gets **individual symlinks** for only the agents it needs
+- Example: Frontend repo symlinks to `frontend-typescript-specialist.md` but NOT `backend-python-developer.md`
+- NOT directory symlinks - each agent file is symlinked separately
+
+**Structure:**
+```
+orchestrator/shared/agents/
+├── code-architecture-reviewer.md       (generic - useful for all repos)
+├── refactor-planner.md                 (generic - useful for all repos)
+├── frontend-typescript-specialist.md   (specialized - only for frontend repos)
+├── backend-python-developer.md         (specialized - only for backend repos)
+└── ml-python-specialist.md             (specialized - only for ML repos)
+
+your-frontend-repo/.claude/agents/
+├── code-architecture-reviewer.md → ../../../orchestrator/shared/agents/code-architecture-reviewer.md
+├── refactor-planner.md → ../../../orchestrator/shared/agents/refactor-planner.md
+└── frontend-typescript-specialist.md → ../../../orchestrator/shared/agents/frontend-typescript-specialist.md
+```
+
+**Benefits:**
+- Central updates propagate to all repos automatically
+- Each repo sees only relevant agents
+- Clean namespace without unrelated agents
+- Easy to add new specialized agents
+
 ---
 
 ## How to Invoke Agents
@@ -39,6 +72,7 @@ Task tool:
 
 | Agent | When to Use | Location |
 |-------|-------------|----------|
+| **setup-wizard** | First-time orchestrator configuration | `shared/agents/setup-wizard.md` |
 | **code-architecture-reviewer** | Review code for architectural issues, best practices, consistency | `shared/agents/code-architecture-reviewer.md` |
 | **refactor-planner** | Plan a refactoring project before execution | `shared/agents/refactor-planner.md` |
 | **code-refactor-master** | Execute a refactoring systematically | `shared/agents/code-refactor-master.md` |

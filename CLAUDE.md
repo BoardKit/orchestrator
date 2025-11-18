@@ -455,7 +455,13 @@ See [README.md](./README.md) for complete architecture diagram.
 - **Settings:** `.claude/settings.json`
 
 **Symlinks:**
-- Your repositories symlink to `shared/skills/`, `shared/hooks/`, `shared/commands/`
+- **Agents:** Individual file symlinks (each agent is symlinked separately)
+  - Example: `your-repo/.claude/agents/code-architecture-reviewer.md -> ../../../orchestrator/shared/agents/code-architecture-reviewer.md`
+  - Each repo only gets symlinks for the agents it needs
+  - NOT a directory symlink - selective distribution
+- **Skills, Hooks, Commands:** Directory symlinks (entire directories)
+  - Example: `your-repo/.claude/skills -> ../../orchestrator/shared/skills/`
+  - All repos get access to all skills, hooks, and commands
 - Orchestrator also symlinks to its own shared resources in `.claude/`
 
 ---
@@ -485,27 +491,39 @@ See [README.md](./README.md) for complete architecture diagram.
 
 ### 3. Repo-Specific vs Shared
 
-**Shared (in orchestrator):**
-- Generic agents (code review, planning, documentation)
+**Centrally Managed (in orchestrator/shared/):**
+- **All agents** (both generic and repo-specific)
+  - Generic agents: code-architecture-reviewer, refactor-planner, etc.
+  - Repo-specific agents: frontend-typescript-specialist, backend-python-developer, ml-python-specialist, etc.
+  - All agents stored in `shared/agents/` (flat structure, no subdirectories)
+  - Selectively symlinked to repos based on need
 - **[Your organization]**-specific skills **[(will be generated during setup)]**
 - Hooks (skill activation, file tracking)
-- Commands (dev-docs)
+- Commands (dev-docs, setup-orchestrator)
 - Guidelines (architecture, error handling, testing)
 
-**Repo-Specific (in your repos):**
+**In Each Application Repo:**
 **[YOUR REPOSITORIES - will be listed here after setup]**
 - **[repo-1]:**
-  - Repo-specific agents: **[e.g., frontend-typescript-dev, backend-python-engineer]**
+  - Individual agent symlinks (only agents needed for this repo)
+  - Directory symlinks for skills, hooks, commands
   - Repo's CLAUDE.md (repo-specific context)
 - **[repo-2]:**
-  - Repo-specific agents: **[e.g., frontend-typescript-dev, backend-python-engineer]**
+  - Individual agent symlinks (different set than repo-1)
+  - Directory symlinks for skills, hooks, commands
   - Repo's CLAUDE.md (repo-specific context)
 - **[etc.]**
 
+**Key Principle:**
+- **All agents managed centrally** in orchestrator (single source of truth)
+- **Selective distribution** via individual symlinks (each repo gets only what it needs)
+- Example: Frontend repo gets `frontend-typescript-specialist.md` but NOT `backend-python-developer.md`
+
 **When to update where:**
-- Generic pattern used across projects → Orchestrator
-- Repo-specific pattern → Orchestrator (repo-*-guidelines skills)
-- Single-repo-only pattern → That repo's specific agents/CLAUDE.md
+- Any agent (generic or specialized) → Orchestrator `shared/agents/`
+- Skills for any repo → Orchestrator `shared/skills/`
+- Guidelines → Orchestrator `shared/guidelines/`
+- Repo-specific CLAUDE.md → That specific repo
 
 ### 4. Symlink Requirements
 
@@ -516,13 +534,23 @@ See [README.md](./README.md) for complete architecture diagram.
 
 **Verification:**
 ```bash
-# Check symlinks exist
+# Check directory symlinks exist
 ls -la your-repo/.claude/
-# Should show: skills -> ../../orchestrator/shared/skills
+# Should show:
+#   skills -> ../../orchestrator/shared/skills
+#   hooks -> ../../orchestrator/shared/hooks
+#   commands -> ../../orchestrator/shared/commands
+
+# Check individual agent symlinks
+ls -la your-repo/.claude/agents/
+# Should show individual symlinks like:
+#   code-architecture-reviewer.md -> ../../../orchestrator/shared/agents/code-architecture-reviewer.md
+#   refactor-planner.md -> ../../../orchestrator/shared/agents/refactor-planner.md
+#   (only agents assigned to this repo)
 
 # Test symlink works
-cat your-repo/.claude/skills/skill-rules.json
-# Should display content
+cat your-repo/.claude/agents/code-architecture-reviewer.md
+# Should display agent content
 ```
 
 ---
@@ -535,10 +563,17 @@ See [README.md](./README.md) and [QUICKSTART.md](./QUICKSTART.md) for detailed t
 
 **Symlinks broken:**
 ```bash
+# Fix directory symlinks
 cd your-repo/.claude
 ln -sf ../../orchestrator/shared/skills skills
 ln -sf ../../orchestrator/shared/hooks hooks
 ln -sf ../../orchestrator/shared/commands commands
+
+# Fix individual agent symlinks (replace with your actual agents)
+cd your-repo/.claude/agents
+ln -sf ../../../orchestrator/shared/agents/code-architecture-reviewer.md code-architecture-reviewer.md
+ln -sf ../../../orchestrator/shared/agents/refactor-planner.md refactor-planner.md
+# ... repeat for each agent this repo needs
 ```
 
 **Hooks not working:**

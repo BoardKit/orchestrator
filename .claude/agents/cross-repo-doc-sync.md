@@ -1,0 +1,1 @@
+../../shared/agents/cross-repo-doc-sync.md
