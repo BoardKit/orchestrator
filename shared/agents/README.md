@@ -23,20 +23,6 @@ This directory contains AI agents that can be invoked to perform specific tasks 
 - Example: Frontend repo symlinks to `frontend-typescript-specialist.md` but NOT `backend-python-developer.md`
 - NOT directory symlinks - each agent file is symlinked separately
 
-**Structure:**
-```
-orchestrator/shared/agents/
-├── code-architecture-reviewer.md       (generic - useful for all repos)
-├── refactor-planner.md                 (generic - useful for all repos)
-├── frontend-typescript-specialist.md   (specialized - only for frontend repos)
-├── backend-python-developer.md         (specialized - only for backend repos)
-└── ml-python-specialist.md             (specialized - only for ML repos)
-
-your-frontend-repo/.claude/agents/
-├── code-architecture-reviewer.md → ../../../orchestrator/shared/agents/code-architecture-reviewer.md
-├── refactor-planner.md → ../../../orchestrator/shared/agents/refactor-planner.md
-└── frontend-typescript-specialist.md → ../../../orchestrator/shared/agents/frontend-typescript-specialist.md
-```
 
 **Benefits:**
 - Central updates propagate to all repos automatically
@@ -44,170 +30,61 @@ your-frontend-repo/.claude/agents/
 - Clean namespace without unrelated agents
 - Easy to add new specialized agents
 
----
-
 ## How to Invoke Agents
 
-### Using the Task Tool
+ - You just ask Claude Code normally: "Review my auth code" or "Help me plan a refactor". Claude Code decides if it needs to launch a specialized agent; if yes, Claude Code internally uses the Task tool to launch that agent. You see the result.
 
-Agents are invoked using the Task tool with the `subagent_type` parameter:
+- Or, if you want to explicitly invoke an agent, you ask Claude Code to use the specific agent's name.
 
-```
-Task tool with:
-- subagent_type: "agent-name" (matches filename without .md)
-- prompt: "Detailed description of what you want the agent to do"
-```
-
-**Example:**
-```
-Task tool:
-  subagent_type: "code-architecture-reviewer"
-  prompt: "Review the authentication module in app/backend/auth/ for architectural issues and best practices"
-```
-
----
 
 ## Agent Inventory
 
-| Agent | When to Use | Location |
-|-------|-------------|----------|
-| **setup-wizard** | First-time orchestrator configuration | `shared/agents/setup-wizard.md` |
-| **code-architecture-reviewer** | Review code for architectural issues, best practices, consistency | `shared/agents/code-architecture-reviewer.md` |
-| **refactor-planner** | Plan a refactoring project before execution | `shared/agents/refactor-planner.md` |
-| **code-refactor-master** | Execute a refactoring systematically | `shared/agents/code-refactor-master.md` |
-| **plan-reviewer** | Review implementation plans before execution | `shared/agents/plan-reviewer.md` |
-| **documentation-architect** | Create or update documentation | `shared/agents/documentation-architect.md` |
-| **auto-error-resolver** | Fix TypeScript/build errors | `shared/agents/auto-error-resolver.md` |
-| **web-research-specialist** | Research technologies, patterns, best practices | `shared/agents/web-research-specialist.md` |
-| **cross-repo-doc-sync** | Sync orchestrator docs with application repo changes | `shared/agents/cross-repo-doc-sync.md` |
-
----
 
 ### 1. code-architecture-reviewer
 
 **What it does:** Reviews code for architectural patterns, identifies technical debt, suggests improvements, creates detailed review document
 
-**Example invocation:**
-```
-Task tool:
-  subagent_type: "code-architecture-reviewer"
-  prompt: "Review the authentication module in app/backend/auth/ for architectural issues"
-```
-
-**Output:** Code review document in `dev/active/[task]/[task]-code-review.md`
-
----
 
 ### 2. refactor-planner
 
 **What it does:** Analyzes code, creates refactoring plan with phases, identifies dependencies, assesses risks
 
-**Example invocation:**
-```
-Task tool:
-  subagent_type: "refactor-planner"
-  prompt: "Plan refactoring of the authentication system to use JWT tokens"
-```
-
-**Output:** Refactoring plan in `dev/active/[task]/[task]-plan.md`
-
----
-
 ### 3. code-refactor-master
 
 **What it does:** Executes refactoring systematically, follows plan, maintains backward compatibility, handles imports
 
-**Example invocation:**
-```
-Task tool:
-  subagent_type: "code-refactor-master"
-  prompt: "Execute the authentication refactoring per the plan in dev/active/auth-refactor/"
-```
-
-**Output:** Refactored code files, updated tests, summary of changes
-
 **Recommended workflow:** refactor-planner → plan-reviewer → code-refactor-master → code-architecture-reviewer
 
----
 
 ### 4. plan-reviewer
 
 **What it does:** Reviews plans for completeness, identifies missing considerations, validates timelines, checks risks
 
-**Example invocation:**
-```
-Task tool:
-  subagent_type: "plan-reviewer"
-  prompt: "Review the implementation plan in dev/active/png-export/"
-```
-
-**Output:** Review document with feedback categorized by severity
-
----
 
 ### 5. documentation-architect
 
 **What it does:** Creates concise documentation following standards, generates READMEs/API docs, updates CLAUDE.md, creates dev docs
 
-**Example invocation:**
-```
-Task tool:
-  subagent_type: "documentation-architect"
-  prompt: "Create documentation for the new diagram export feature"
-```
-
-**Output:** Documentation files (markdown, JSDoc, docstrings) with consistent structure
-
----
 
 ### 6. auto-error-resolver
 
 **What it does:** Analyzes TypeScript/build errors, applies fixes, handles imports/types, validates compilation
 
-**Example invocation:**
-```
-Task tool:
-  subagent_type: "auto-error-resolver"
-  prompt: "Fix TypeScript errors in the frontend components"
-```
-
-**Output:** Fixed code files, summary of errors resolved
-
 **Scope:** TypeScript/JavaScript errors, imports, types (not logical bugs)
-
----
 
 ### 7. web-research-specialist
 
 **What it does:** Conducts web research, synthesizes findings, provides recommendations, cites sources, compares approaches
 
-**Example invocation:**
-```
-Task tool:
-  subagent_type: "web-research-specialist"
-  prompt: "Research best practices for handling file uploads in FastAPI with Supabase Storage"
-```
-
 **Output:** Research summary with findings, recommendations, code examples, sources
-
----
 
 ### 8. cross-repo-doc-sync
 
 **What it does:** Monitors changes across repos, updates orchestrator documentation, validates cross-references, provides sync reports
 
-**Example invocation:**
-```
-Task tool:
-  subagent_type: "cross-repo-doc-sync"
-  prompt: "Sync orchestrator documentation based on recent changes in my application repositories"
-```
-
 **Output:** Sync report, updated orchestrator docs (CLAUDE.md, guidelines, skills)
 
-**Uses:** Reads from `SETUP_CONFIG.json`, only writes to orchestrator, preserves symlinks
-
----
+**Uses:** Reads from `SETUP_CONFIG.json`, only writes to orchestrator, preserves symlink
 
 ## Agent Invocation Patterns
 
@@ -242,7 +119,6 @@ refactor-planner → plan-reviewer → code-refactor-master → code-architectur
 - Plan → execute → review
 - Iterative refinement (review → fix → review again)
 
----
 
 ## Best Practices for Agent Prompts
 
@@ -267,7 +143,6 @@ refactor-planner → plan-reviewer → code-refactor-master → code-architectur
 ❌ "Make it better" (no specific goal)
 ```
 
----
 
 ### Providing Context
 
@@ -286,7 +161,6 @@ refactor-planner → plan-reviewer → code-refactor-master → code-architectur
     The token validation logic is in jwt_handler.py."
 ```
 
----
 
 ## Agent Outputs
 
@@ -308,7 +182,6 @@ dev/active/[task-name]/
 - Files edited directly
 - Summary provided in agent output
 
----
 
 ## Troubleshooting
 
@@ -331,7 +204,6 @@ ls shared/agents/code-architecture-reviewer.md
 # subagent_type: "code-architecture-reviewer" ✅
 ```
 
----
 
 ### Agent Produces Unexpected Output
 
@@ -364,7 +236,6 @@ ls shared/agents/code-architecture-reviewer.md
 - Break into smaller tasks
 - Be more specific about what to review
 
----
 
 ## Integration with Other Resources
 
@@ -379,7 +250,6 @@ ls shared/agents/code-architecture-reviewer.md
 Edit file → Skill provides quick tips → Need deep review → Invoke agent
 ```
 
----
 
 ### Agents + Guidelines
 
@@ -393,8 +263,6 @@ Edit file → Skill provides quick tips → Need deep review → Invoke agent
 - Apply guideline patterns
 - Reference guidelines in recommendations
 
----
-
 ### Agents + Dev Docs
 
 **Agents create and use dev docs:**
@@ -403,7 +271,6 @@ Edit file → Skill provides quick tips → Need deep review → Invoke agent
 - documentation-architect creates context/tasks files
 - code-refactor-master references plans during execution
 
----
 
 ## Advanced Usage
 
@@ -445,7 +312,6 @@ Edit file → Skill provides quick tips → Need deep review → Invoke agent
 - Provide constraints
 - Share previous decisions
 
----
 
 ## See Also
 
@@ -454,6 +320,5 @@ Edit file → Skill provides quick tips → Need deep review → Invoke agent
 - **guidelines/documentation-standards.md** - Documentation patterns
 - **skill-developer skill** - Creating new agents/skills
 
----
 
 **End of Agent Capabilities Guide**

@@ -143,103 +143,98 @@ YourOrganization/
 
 ```
 
-## BEFORE AND AFTER SETUP
+## Resources Overview
 
-There are many components that already exist in orchestrator before setup and the rest of the components get generated during setup. Here is a list of all components:
-## Before Setup
-Components that exist before setup:
+### Pre-Configured (Ready to Use)
 
-### Global Agents
-Intelligent agents that get distributed (via symlinks) to ALL repositories:
-- `code-architecture-reviewer` - Code review for best practices
-- `refactor-planner` - Plan complex refactorings
-- `code-refactor-master` - Execute refactorings
-- `plan-reviewer` - Review implementation plans
-- `documentation-architect` - Create/update documentation
-- `auto-error-resolver` - Fix errors automatically
-- `web-research-specialist` - Research technologies and patterns
+**Global Agents** (`shared/agents/global/`) - available to all repos via symlinks (only need to connect symlink during setup):
+- `code-architecture-reviewer`
+-  `refactor-planner`
+-  `code-refactor-master`
+-  `plan-reviewer`
+-  `documentation-architect`
+-  `auto-error-resolver`
+- `web-research-specialist`
 
-### Orchestrator Agents
-- `cross-repo-doc-sync` - Synchronize documentation across repos
+**Orchestrator Agents** (`shared/agents/orchestrator/`) - Orchestrator-only:
+- `cross-repo-doc-sync` - Syncs documentation across repos
 
-### Hooks
-Automatically run on events:
-- `skill-activation-prompt` - Suggests relevant skills
-- `post-tool-use-tracker` - Tracks file changes for skill activation
+**Hooks** - Event driven commands, auto-execute on events (only need to connect symlink during setup):
+- `skill-activation-prompt`
+- `post-tool-use-tracker`
 
-### Commands
-Slash commands available in any repo:
-- `/dev-docs` - Create development documentation for complex tasks
-- `/dev-docs-update` - Update dev docs before context resets
+**Commands** - Slash commands:
+- `/dev-docs`
+- `/dev-docs-update`
+- `/setup-orchestrator`
 
-### Guidelines
-Tech stack-specific reference documentation:
-- `architectural-principles.md` - Your system architecture
-- `error-handling.md` - Error patterns for your tech stacks
-- `testing-standards.md` - Testing strategies for your frameworks
-- `cross-repo-patterns.md` - Multi-repo workflows (if applicable)
-- `documentation-standards.md` - Documentation conventions
-- Database documentation (optional, if enabled)
+**Global Skills** (`shared/skills/global/`):
+- `skill-developer` - Meta-skill for creating skills
 
+**Global Guidelines** (`shared/guidelines/global/`):
+- `documentation-standards.md`
 
-## After Setup
+### Generated During Setup
 
-### Repository-Specific Skills
-Auto-trigger based on the files you edit:
-- `skill-developer` - Meta-skill for creating new skills
-- **One skill per repository** - Generated based on your tech stack
----
+**Repo-Specific Resources** (one per repo):
+- Skills in `shared/skills/<repo-name>/` - Auto-trigger for tech stack guidance
+- Guidelines in `shared/guidelines/<repo-name>/` - Error handling, testing, architecture patterns
+- Agents in `shared/agents/<repo-name>/` (optional) - Repo-specific specialized agents
+
 
 ## How It Works
 
-### For You (The Developer)
-1. Edit a file in any of your repositories
-2. Skills auto-trigger with relevant guidance
-3. Invoke agents when you need help
-4. Use slash commands for complex tasks
-5. Reference guidelines when needed
+### Day-to-Day Usage
 
-### For AI Agents
-1. Read `CLAUDE.md` for complete resource discovery
-2. Use repo-specific skills for context-aware guidance
-3. Invoke specialized agents for complex tasks
-4. Reference guidelines for detailed patterns
-5. Use dev docs for long-running tasks
+**1. Skills Auto-Trigger After a Message To Claude**
+- Edit a file in your repo → Orchestrator detects the file path and tech stack
+- Relevant skill activates automatically on your next prompt
+- Example: Edit `backend/app/main.py` → Python/FastAPI skill provides error handling patterns and best practices
 
+**2. Ask Claude Code for Help (Agents Invoke Automatically)**
+- Just describe what you need in natural language
+- Claude Code automatically launches the right agent (or specifically ask Claude to use an agent's name)
+- Examples:
+  - "Review my authentication code" → `code-architecture-reviewer` agent runs
+   - "Use code-architecture-reviewer agent to review my authentication code" → explicitly invokes that agent
+  - "Help me plan a refactor" → `refactor-planner` agent creates a plan
+  - "Fix these TypeScript errors" → `auto-error-resolver` agent fixes them
+
+**3. Use Slash Commands for Complex Tasks**
+- `/dev-docs feature-name and description` → Creates planning docs (plan.md, context.md, tasks.md)
+- `/dev-docs-update` → Updates dev docs before context reset
+- `/setup-orchestrator` → Runs first-time setup wizard
+
+**4. Guidelines Reference (When Needed)**
+- Skills and agents reference guidelines automatically
+- You can read them directly for detailed patterns:
+  - `shared/guidelines/<repo-name>/error-handling.md` - Error patterns for your stack
+  - `shared/guidelines/<repo-name>/testing-standards.md` - Testing strategies
+  - `shared/guidelines/<repo-name>/architectural-principles.md` - System architecture
+
+**5. Cross Repo Documentation Sync**
+- From *orchestrator* repo, ask Claude to use `cross-repo-doc-sync` agent to update the documentation from the last commits.
+- Example:
+   - "Use cross-repo-doc-sync agent to update documentation based on the last 5 commits from all repos."
+   - "Use cross-repo-doc-sync agent to update documentation based on the last 3 commits in repo-a."
+   - "Update the documentation using cross-repo-doc-sync agent based on all commits from today."
+
+**6. Everything Stays in Sync**
+- Update an agent in orchestrator → All repos get the update via symlinks
+- No manual copying, no version drift
+- One source of truth for all AI resources
 
 ## Setup Process Details
 
-### What the Setup Wizard Does
-
-1. **Collects Information**
-   - Your organization name
-   - Number of repositories
-   - For each repo: name, path, type, description
-
-2. **Analyzes Your Repositories**
-   - Scans package.json, requirements.txt, etc.
-   - Auto-detects frameworks (React, Next.js, FastAPI, Django, etc.)
-   - Identifies file patterns and keywords
-
-3. **Generates Configuration**
-   - Creates `SETUP_CONFIG.json` with your configuration
-   - Generates `CLAUDE.md` customized for your organization
-   - Updates `README.md` with your repo information
-
-4. **Creates Repository-Specific Skills**
-   - One skill per repository
-   - Includes tech stack-specific guidance
-   - Auto-triggers when editing files in that repo
-
-5. **Generates Guidelines**
-   - Error handling patterns for your tech stacks
-   - Testing strategies for your frameworks
-   - Architecture documentation for your setup
-
-6. **Validates Setup**
-   - Checks all files generated correctly
-   - Verifies no placeholders remain
-   - Validates JSON files
+The wizard:
+1. Collects org name, repo count, and repo details (name, path, type)
+2. Scans repos to detect tech stacks
+3. Generates `SETUP_CONFIG.json`, customizes `CLAUDE.md`, and updates `README.md` in orchestrator.
+4. Creates `CLAUDE.md` for each repo. 
+5. Creates repo-specific skills (auto-trigger for each repo's tech stack)
+6. Generates repo-specific guidelines (error handling, testing, architecture)
+7. Creates settings.json for each repo (links skills/hooks)
+8. Validates all generated files
 
 ## Compatibility
 
@@ -261,11 +256,14 @@ Auto-trigger based on the files you edit:
 - **[shared/agents/README.md](./shared/agents/README.md)** - Agent capabilities guide
 - **[dev/README.md](./dev/README.md)** - Dev docs pattern explanation
 
-Additional reference docs:
+**Additional reference docs:**
 - **[docs/reconfiguration.md](./docs/reconfiguration.md)** - Reconfiguration
 - **[docs/troubleshooting.md](./docs/troubleshooting.md)** - Troubleshooting
 - **[docs/supported-tech-stacks.md](./docs/supported-tech-stacks.md)** - Supported tech stacks
 - **[docs/new-shared-resources.md](./docs/new-shared-resources.md)** - Adding new shared resources
+- **[docs/skills_vs_guidelines.md](./docs/skills_vs_guidelines.md)** - Skills vs Guidelines
+- **[docs/repo-specific-agents.md](./docs/repo-specific-agents.md)** - Repo-specific agents
+- **[docs/repo-specific-skills.md](./docs/repo-specific-skills.md)** - Repo-specific skills
 
 
 ## Extensions
