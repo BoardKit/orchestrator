@@ -143,17 +143,25 @@ for i in $(seq 0 $((REPO_COUNT - 1))); do
 
     ERRORS=0
 
-    # 1. AGENTS: Global (all repos) + Repo-specific (only this repo)
+    # 1. AGENTS: Global (all repos) + Orchestrator-only (orchestrator repo) + Repo-specific (only this repo)
     echo -e "${YELLOW}  Agents:${NC}"
 
-    # Global agents
+    # Global agents (available to all repos)
     create_symlink \
         "$ORCHESTRATOR_ROOT/shared/agents/global" \
         "$CLAUDE_DIR/agents/global" \
         "Global agents" || ((ERRORS++))
 
+    # Orchestrator-only agents (only for orchestrator repo)
+    if [ "$REPO_NAME" = "orchestrator" ]; then
+        create_symlink \
+            "$ORCHESTRATOR_ROOT/shared/agents/orchestrator" \
+            "$CLAUDE_DIR/agents/orchestrator" \
+            "Orchestrator-only agents" || ((ERRORS++))
+    fi
+
     # Repo-specific agents (if exist)
-    if [ -d "$ORCHESTRATOR_ROOT/shared/agents/$REPO_NAME" ]; then
+    if [ -d "$ORCHESTRATOR_ROOT/shared/agents/$REPO_NAME" ] && [ "$REPO_NAME" != "orchestrator" ]; then
         create_symlink \
             "$ORCHESTRATOR_ROOT/shared/agents/$REPO_NAME" \
             "$CLAUDE_DIR/agents/$REPO_NAME" \
@@ -301,7 +309,8 @@ if [ $SUCCESS_COUNT -eq $REPO_COUNT ]; then
     echo ""
     echo "What was created (per repository):"
     echo "  ✓ .claude/agents/global/ → orchestrator/shared/agents/global/"
-    echo "  ✓ .claude/agents/{repo}/ → orchestrator/shared/agents/{repo}/ (if exists)"
+    echo "  ✓ .claude/agents/orchestrator/ → orchestrator/shared/agents/orchestrator/ (orchestrator repo only)"
+    echo "  ✓ .claude/agents/{repo}/ → orchestrator/shared/agents/{repo}/ (if repo-specific agents exist)"
     echo "  ✓ .claude/skills/global/ → orchestrator/shared/skills/global/"
     echo "  ✓ .claude/skills/{repo}/ → orchestrator/shared/skills/{repo}/"
     echo "  ✓ .claude/skills/skill-rules.json → orchestrator/shared/skills/skill-rules.json"

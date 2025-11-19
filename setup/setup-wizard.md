@@ -449,7 +449,32 @@ Wait for completion, then show:
    - shared/guidelines/testing-standards.md
 ```
 
-#### 6.4: Generate CLAUDE.md
+#### 6.4: Generate Settings Files
+
+For **each repository**, create settings directory and file:
+
+```
+[{{N}}/{{TOTAL}}] Creating settings for {{repo_name}}...
+```
+
+Create directory and settings file:
+```bash
+mkdir -p shared/settings/{{repo_name}}
+```
+
+Read template: `setup/templates/settings.json`
+
+Replace placeholders (if any):
+- `{{REPO_NAME}}` → repository name
+- `{{TIMESTAMP}}` → current timestamp
+
+Write to: `shared/settings/{{repo_name}}/settings.json`
+
+```
+✅ Settings created: shared/settings/{{repo_name}}/settings.json
+```
+
+#### 6.5: Generate CLAUDE.md
 
 Read template: `setup/templates/CLAUDE.template.md`
 
@@ -468,7 +493,7 @@ Write to: `CLAUDE.md`
 ✅ Main context file created: CLAUDE.md
 ```
 
-#### 6.5: Generate README.md
+#### 6.6: Generate README.md
 
 Read template: `setup/templates/README.template.md`
 Replace placeholders (similar to CLAUDE.md)
@@ -478,7 +503,7 @@ Write to: `README.md`
 ✅ README updated: README.md
 ```
 
-#### 6.6: Generate Repository CLAUDE.md Files
+#### 6.7: Generate Repository CLAUDE.md Files
 
 For **each repository**, generate their own CLAUDE.md:
 

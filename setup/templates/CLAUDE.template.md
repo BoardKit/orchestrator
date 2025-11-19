@@ -77,7 +77,7 @@ Task tool with:
 
 **Tech stack:** {{COMBINED_TECH_STACK}}
 
-**Location:** `shared/agents/code-architecture-reviewer.md`
+**Location:** `shared/agents/global/code-architecture-reviewer.md`
 
 #### refactor-planner
 **When to use:** Planning a refactoring project
@@ -92,7 +92,7 @@ Task tool with:
 - Suggests implementation phases
 - Assesses risks
 
-**Location:** `shared/agents/refactor-planner.md`
+**Location:** `shared/agents/global/refactor-planner.md`
 
 #### code-refactor-master
 **When to use:** Executing a refactoring (after planning)
@@ -107,7 +107,7 @@ Task tool with:
 - Ensures no broken imports
 - Maintains backward compatibility
 
-**Location:** `shared/agents/code-refactor-master.md`
+**Location:** `shared/agents/global/code-refactor-master.md`
 
 #### plan-reviewer
 **When to use:** Review an implementation plan before execution
@@ -122,7 +122,7 @@ Task tool with:
 - Suggests improvements
 - Validates timelines
 
-**Location:** `shared/agents/plan-reviewer.md`
+**Location:** `shared/agents/global/plan-reviewer.md`
 
 #### documentation-architect
 **When to use:** Create or update documentation
@@ -137,7 +137,7 @@ Task tool with:
 - References: guidelines/documentation-standards.md
 - Maintains consistent structure
 
-**Location:** `shared/agents/documentation-architect.md`
+**Location:** `shared/agents/global/documentation-architect.md`
 
 #### auto-error-resolver
 **When to use:** Fix errors or resolve build issues
@@ -152,7 +152,7 @@ Task tool with:
 - Checks cached error logs
 - Validates fixes
 
-**Location:** `shared/agents/auto-error-resolver.md`
+**Location:** `shared/agents/global/auto-error-resolver.md`
 
 #### web-research-specialist
 **When to use:** Need web research on technologies, patterns, or approaches
@@ -167,7 +167,7 @@ Task tool with:
 - Provides actionable recommendations
 - Cites sources
 
-**Location:** `shared/agents/web-research-specialist.md`
+**Location:** `shared/agents/global/web-research-specialist.md`
 
 {{CROSS_REPO_DOC_SYNC_SECTION}}
 
@@ -376,8 +376,8 @@ See [README.md](./README.md) for complete architecture diagram.
 **Why:** Changes propagate automatically to all repos via symlinks
 
 **Example:**
-- ✅ Edit `orchestrator/shared/agents/code-architecture-reviewer.md`
-- ❌ Edit `your-repo/.claude/agents/code-architecture-reviewer.md` (it's a symlink!)
+- ✅ Edit `orchestrator/shared/agents/global/code-architecture-reviewer.md`
+- ❌ Edit `your-repo/.claude/agents/global/code-architecture-reviewer.md` (it's a symlink!)
 
 ### 2. Test in Application Repos
 
@@ -454,7 +454,9 @@ cat orchestrator/shared/skills/skill-rules.json | jq .
 **Agent not found:**
 ```bash
 - Verify `subagent_type` matches filename (without .md)
-- Check agent exists in `shared/agents/`
+- Check agent exists in `shared/agents/global/` or `shared/agents/orchestrator/`
+- Check repo-specific agents in `shared/agents/{repo-name}/`
+- Verify symlinks: `ls -la your-repo/.claude/agents/global/`
 ```
 ---
 
@@ -558,11 +560,16 @@ cat orchestrator/shared/skills/skill-rules.json | jq .
 ### File Locations Quick Map
 
 - **This file:** `{{ORG_NAME}}-orchestrator/CLAUDE.md`
-- **Skills:** `shared/skills/[skill-name]/`
-- **Agents:** `shared/agents/[agent-name].md`
-- **Guidelines:** `shared/guidelines/[guideline-name].md`
+- **Global skills:** `shared/skills/global/[skill-name]/`
+- **Repo skills:** `shared/skills/[repo-name]/`
+- **Global agents:** `shared/agents/global/[agent-name].md`
+- **Orchestrator agents:** `shared/agents/orchestrator/[agent-name].md`
+- **Repo agents:** `shared/agents/[repo-name]/[agent-name].md`
+- **Global guidelines:** `shared/guidelines/global/[guideline-name].md`
+- **Repo guidelines:** `shared/guidelines/[repo-name]/[guideline-name].md`
 - **Commands:** `shared/commands/[command-name].md`
 - **Hooks:** `shared/hooks/`
+- **Settings:** `shared/settings/[repo-name]/settings.json`
 
 ---
 

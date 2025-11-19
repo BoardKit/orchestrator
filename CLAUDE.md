@@ -94,7 +94,7 @@ Task tool with:
 
 **Tech stack:** **[Will be customized based on your detected tech stacks]**
 
-**Location:** `shared/agents/code-architecture-reviewer.md`
+**Location:** `shared/agents/global/code-architecture-reviewer.md`
 
 #### refactor-planner
 **When to use:** Planning a refactoring project
@@ -109,7 +109,7 @@ Task tool with:
 - Suggests implementation phases
 - Assesses risks
 
-**Location:** `shared/agents/refactor-planner.md`
+**Location:** `shared/agents/global/refactor-planner.md`
 
 #### code-refactor-master
 **When to use:** Executing a refactoring (after planning)
@@ -124,7 +124,7 @@ Task tool with:
 - Ensures no broken imports
 - Maintains backward compatibility
 
-**Location:** `shared/agents/code-refactor-master.md`
+**Location:** `shared/agents/global/code-refactor-master.md`
 
 #### plan-reviewer
 **When to use:** Review an implementation plan before execution
@@ -139,7 +139,7 @@ Task tool with:
 - Suggests improvements
 - Validates timelines
 
-**Location:** `shared/agents/plan-reviewer.md`
+**Location:** `shared/agents/global/plan-reviewer.md`
 
 #### documentation-architect
 **When to use:** Create or update documentation
@@ -154,7 +154,7 @@ Task tool with:
 - References: guidelines/documentation-standards.md
 - Maintains consistent structure
 
-**Location:** `shared/agents/documentation-architect.md`
+**Location:** `shared/agents/global/documentation-architect.md`
 
 #### auto-error-resolver
 **When to use:** Fix errors or resolve build issues
@@ -169,7 +169,7 @@ Task tool with:
 - Checks cached error logs
 - Validates fixes
 
-**Location:** `shared/agents/auto-error-resolver.md`
+**Location:** `shared/agents/global/auto-error-resolver.md`
 
 #### web-research-specialist
 **When to use:** Need web research on technologies, patterns, or approaches
@@ -184,7 +184,7 @@ Task tool with:
 - Provides actionable recommendations
 - Cites sources
 
-**Location:** `shared/agents/web-research-specialist.md`
+**Location:** `shared/agents/global/web-research-specialist.md`
 
 #### cross-repo-doc-sync (Orchestrator-Only)
 **When to use:** Synchronize orchestrator documentation with changes in **[your repositories]**
@@ -457,14 +457,23 @@ See [README.md](./README.md) for complete architecture diagram.
 - **Settings:** `.claude/settings.json`
 
 **Symlinks:**
-- **Agents:** Individual file symlinks (each agent is symlinked separately)
-  - Example: `your-repo/.claude/agents/code-architecture-reviewer.md -> ../../../orchestrator/shared/agents/code-architecture-reviewer.md`
-  - Each repo only gets symlinks for the agents it needs
-  - NOT a directory symlink - selective distribution
-- **Skills, Hooks, Commands:** Directory symlinks (entire directories)
-  - Example: `your-repo/.claude/skills -> ../../orchestrator/shared/skills/`
-  - All repos get access to all skills, hooks, and commands
-- Orchestrator also symlinks to its own shared resources in `.claude/`
+- **Directory-based structure** with global and repo-specific subdirectories:
+  - **Agents:**
+    - `your-repo/.claude/agents/global/ -> ../../../orchestrator/shared/agents/global/`
+    - `your-repo/.claude/agents/your-repo/ -> ../../../orchestrator/shared/agents/your-repo/` (if repo-specific agents exist)
+  - **Skills:**
+    - `your-repo/.claude/skills/global/ -> ../../../orchestrator/shared/skills/global/`
+    - `your-repo/.claude/skills/your-repo/ -> ../../../orchestrator/shared/skills/your-repo/`
+    - `your-repo/.claude/skills/skill-rules.json -> ../../../orchestrator/shared/skills/skill-rules.json`
+  - **Guidelines:**
+    - `your-repo/.claude/guidelines/global/ -> ../../../orchestrator/shared/guidelines/global/`
+    - `your-repo/.claude/guidelines/your-repo/ -> ../../../orchestrator/shared/guidelines/your-repo/`
+  - **Hooks, Commands:** Full directory symlinks
+    - `your-repo/.claude/hooks/ -> ../../../orchestrator/shared/hooks/`
+    - `your-repo/.claude/commands/ -> ../../../orchestrator/shared/commands/` (filtered for non-orchestrator repos)
+  - **Settings:** Individual file symlink
+    - `your-repo/.claude/settings.json -> ../../../orchestrator/shared/settings/your-repo/settings.json`
+- This structure allows selective distribution while maintaining organization
 
 ---
 
@@ -495,36 +504,50 @@ See [README.md](./README.md) for complete architecture diagram.
 
 **Centrally Managed (in orchestrator/shared/):**
 - **All agents** (both generic and repo-specific)
-  - Generic agents: code-architecture-reviewer, refactor-planner, etc.
-  - Repo-specific agents: frontend-typescript-specialist, backend-python-developer, ml-python-specialist, etc.
-  - All agents stored in `shared/agents/` (flat structure, no subdirectories)
-  - Selectively symlinked to repos based on need
-- **[Your organization]**-specific skills **[(will be generated during setup)]**
-- Hooks (skill activation, file tracking)
-- Commands (dev-docs, setup-orchestrator)
-- Guidelines (architecture, error handling, testing)
+  - **Global agents** (available to all repos): code-architecture-reviewer, refactor-planner, etc.
+    - Stored in `shared/agents/global/`
+  - **Orchestrator-only agents**: cross-repo-doc-sync, setup-wizard
+    - Stored in `shared/agents/orchestrator/`
+  - **Repo-specific agents** (optional, per repository): frontend-specialist, backend-specialist, etc.
+    - Stored in `shared/agents/{repo-name}/` (will be generated during setup if needed)
+- **Skills** organized in global and repo-specific subdirectories
+  - Global skills in `shared/skills/global/`
+  - Repo skills in `shared/skills/{repo-name}/` (generated during setup)
+- **Guidelines** organized in global and repo-specific subdirectories
+  - Global guidelines in `shared/guidelines/global/`
+  - Repo guidelines in `shared/guidelines/{repo-name}/` (generated during setup)
+- **Hooks** (skill activation, file tracking) - shared by all
+- **Commands** (dev-docs, setup-orchestrator) - shared by all (filtered per repo)
+- **Settings** per repository in `shared/settings/{repo-name}/settings.json`
 
 **In Each Application Repo:**
 **[YOUR REPOSITORIES - will be listed here after setup]**
 - **[repo-1]:**
-  - Individual agent symlinks (only agents needed for this repo)
-  - Directory symlinks for skills, hooks, commands
+  - Directory symlinks: `.claude/agents/global/`, `.claude/agents/repo-1/` (if exists)
+  - Directory symlinks: `.claude/skills/global/`, `.claude/skills/repo-1/`
+  - Directory symlinks: `.claude/guidelines/global/`, `.claude/guidelines/repo-1/`
+  - Directory symlinks: `.claude/hooks/`, `.claude/commands/`
+  - File symlink: `.claude/settings.json`
   - Repo's CLAUDE.md (repo-specific context)
 - **[repo-2]:**
-  - Individual agent symlinks (different set than repo-1)
-  - Directory symlinks for skills, hooks, commands
+  - Similar structure with repo-2 specific subdirectories
   - Repo's CLAUDE.md (repo-specific context)
 - **[etc.]**
 
 **Key Principle:**
-- **All agents managed centrally** in orchestrator (single source of truth)
-- **Selective distribution** via individual symlinks (each repo gets only what it needs)
-- Example: Frontend repo gets `frontend-typescript-specialist.md` but NOT `backend-python-developer.md`
+- **All resources managed centrally** in orchestrator (single source of truth)
+- **Selective distribution** via directory structure (global + repo-specific subdirectories)
+- Each repo gets access to global resources + its own specific resources
+- Example: All repos get `agents/global/code-architecture-reviewer.md`, but only frontend repo gets `agents/frontend/frontend-specialist.md`
 
 **When to update where:**
-- Any agent (generic or specialized) → Orchestrator `shared/agents/`
-- Skills for any repo → Orchestrator `shared/skills/`
-- Guidelines → Orchestrator `shared/guidelines/`
+- Global agents → Orchestrator `shared/agents/global/`
+- Orchestrator-only agents → Orchestrator `shared/agents/orchestrator/`
+- Repo-specific agents → Orchestrator `shared/agents/{repo-name}/`
+- Global skills → Orchestrator `shared/skills/global/`
+- Repo skills → Orchestrator `shared/skills/{repo-name}/`
+- Global guidelines → Orchestrator `shared/guidelines/global/`
+- Repo guidelines → Orchestrator `shared/guidelines/{repo-name}/`
 - Repo-specific CLAUDE.md → That specific repo
 
 ### 4. Symlink Requirements
@@ -539,19 +562,34 @@ See [README.md](./README.md) for complete architecture diagram.
 # Check directory symlinks exist
 ls -la your-repo/.claude/
 # Should show:
-#   skills -> ../../orchestrator/shared/skills
+#   agents/ (directory)
+#   skills/ (directory)
+#   guidelines/ (directory)
 #   hooks -> ../../orchestrator/shared/hooks
-#   commands -> ../../orchestrator/shared/commands
+#   commands -> ../../orchestrator/shared/commands (or directory with individual symlinks)
+#   settings.json -> ../../orchestrator/shared/settings/your-repo/settings.json
 
-# Check individual agent symlinks
+# Check agent subdirectories
 ls -la your-repo/.claude/agents/
-# Should show individual symlinks like:
-#   code-architecture-reviewer.md -> ../../../orchestrator/shared/agents/code-architecture-reviewer.md
-#   refactor-planner.md -> ../../../orchestrator/shared/agents/refactor-planner.md
-#   (only agents assigned to this repo)
+# Should show:
+#   global -> ../../../orchestrator/shared/agents/global
+#   your-repo -> ../../../orchestrator/shared/agents/your-repo (if repo-specific agents exist)
+
+# Check skills subdirectories
+ls -la your-repo/.claude/skills/
+# Should show:
+#   global -> ../../../orchestrator/shared/skills/global
+#   your-repo -> ../../../orchestrator/shared/skills/your-repo
+#   skill-rules.json -> ../../../orchestrator/shared/skills/skill-rules.json
+
+# Check guidelines subdirectories
+ls -la your-repo/.claude/guidelines/
+# Should show:
+#   global -> ../../../orchestrator/shared/guidelines/global
+#   your-repo -> ../../../orchestrator/shared/guidelines/your-repo
 
 # Test symlink works
-cat your-repo/.claude/agents/code-architecture-reviewer.md
+cat your-repo/.claude/agents/global/code-architecture-reviewer.md
 # Should display agent content
 ```
 
@@ -565,17 +603,33 @@ See [README.md](./README.md) and [QUICKSTART.md](./QUICKSTART.md) for detailed t
 
 **Symlinks broken:**
 ```bash
-# Fix directory symlinks
+# Fix directory symlinks for agents, skills, guidelines
 cd your-repo/.claude
-ln -sf ../../orchestrator/shared/skills skills
+mkdir -p agents skills guidelines
+
+# Agents
+cd agents
+ln -sf ../../../orchestrator/shared/agents/global global
+ln -sf ../../../orchestrator/shared/agents/your-repo your-repo  # if repo-specific agents exist
+
+# Skills
+cd ../skills
+ln -sf ../../../orchestrator/shared/skills/global global
+ln -sf ../../../orchestrator/shared/skills/your-repo your-repo
+ln -sf ../../../orchestrator/shared/skills/skill-rules.json skill-rules.json
+
+# Guidelines
+cd ../guidelines
+ln -sf ../../../orchestrator/shared/guidelines/global global
+ln -sf ../../../orchestrator/shared/guidelines/your-repo your-repo
+
+# Hooks and commands
+cd ..
 ln -sf ../../orchestrator/shared/hooks hooks
 ln -sf ../../orchestrator/shared/commands commands
 
-# Fix individual agent symlinks (replace with your actual agents)
-cd your-repo/.claude/agents
-ln -sf ../../../orchestrator/shared/agents/code-architecture-reviewer.md code-architecture-reviewer.md
-ln -sf ../../../orchestrator/shared/agents/refactor-planner.md refactor-planner.md
-# ... repeat for each agent this repo needs
+# Settings
+ln -sf ../../orchestrator/shared/settings/your-repo/settings.json settings.json
 ```
 
 **Hooks not working:**
@@ -591,7 +645,9 @@ cat orchestrator/shared/skills/skill-rules.json | jq .
 **Agent not found:**
 ```bash
 - Verify `subagent_type` matches filename (without .md)
-- Check agent exists in `shared/agents/`
+- Check agent exists in `shared/agents/global/` or `shared/agents/orchestrator/`
+- Check repo-specific agents in `shared/agents/{repo-name}/`
+- Verify symlinks: `ls -la your-repo/.claude/agents/global/`
 ```
 
 ---
@@ -729,11 +785,16 @@ cat orchestrator/shared/skills/skill-rules.json | jq .
 ### File Locations Quick Map
 
 - **This file:** `orchestrator/CLAUDE.md`
-- **Skills:** `shared/skills/[skill-name]/`
-- **Agents:** `shared/agents/[agent-name].md`
-- **Guidelines:** `shared/guidelines/[guideline-name].md`
+- **Global skills:** `shared/skills/global/[skill-name]/`
+- **Repo skills:** `shared/skills/[repo-name]/`
+- **Global agents:** `shared/agents/global/[agent-name].md`
+- **Orchestrator agents:** `shared/agents/orchestrator/[agent-name].md`
+- **Repo agents:** `shared/agents/[repo-name]/[agent-name].md`
+- **Global guidelines:** `shared/guidelines/global/[guideline-name].md`
+- **Repo guidelines:** `shared/guidelines/[repo-name]/[guideline-name].md`
 - **Commands:** `shared/commands/[command-name].md`
 - **Hooks:** `shared/hooks/`
+- **Settings:** `shared/settings/[repo-name]/settings.json`
 
 ---
 
