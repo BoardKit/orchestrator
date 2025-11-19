@@ -69,7 +69,7 @@ The wizard will:
 - Generate customized configuration files
 - Create repository-specific skills and guidelines
 
-**Time:** Depends on complexity of your repos. For mid-sized 2 repo structure it should take ~15 minutes. 
+**Time:** Depends on complexity of your repos. For mid-sized 2 repo structure it should take ~30 minutes. 
 
 ### 3. Create Symlinks
 
@@ -144,43 +144,33 @@ YourOrganization/
 ```
 
 ## Resources Overview
+For in depth details on all the resources in the orchestrator, see: [docs/orchestrator-resources.md](./docs/orchestrator-resources.md)
 
 ### Pre-Configured (Ready to Use)
+During setup, symlinks are created to connect each repository to the shared resources in the orchestrator.
 
-**Global Agents** (`shared/agents/global/`) - available to all repos via symlinks (only need to connect symlink during setup):
-- `code-architecture-reviewer`
--  `refactor-planner`
--  `code-refactor-master`
--  `plan-reviewer`
--  `documentation-architect`
--  `auto-error-resolver`
-- `web-research-specialist`
+**Global Agents** (`shared/agents/global/`)
+7 specialized agents for code review, refactoring, planning, documentation, error fixing, and web research. Available to all repos.
 
-**Orchestrator Agents** (`shared/agents/orchestrator/`) - Orchestrator-only:
-- `cross-repo-doc-sync` - Syncs documentation across repos
+**Orchestrator Agent** (`shared/agents/orchestrator/`)
+Cross-repo documentation sync agent that keeps orchestrator docs aligned with your evolving codebase. Runs only from orchestrator.
 
-**Hooks** - Event driven commands, auto-execute on events (only need to connect symlink during setup):
-- `skill-activation-prompt`
-- `post-tool-use-tracker`
+**Hooks** (`shared/hooks/`)
+Event-driven scripts that auto-suggest skills and track file changes.
 
-**Commands** - Slash commands:
-- `/dev-docs`
-- `/dev-docs-update`
-- `/setup-orchestrator`
+**Commands** (`shared/commands/`)
+Slash commands like `/dev-docs` for creating planning docs and `/setup-orchestrator` for initial configuration.
 
-**Global Skills** (`shared/skills/global/`):
-- `skill-developer` - Meta-skill for creating skills
+**Global Skills** (`shared/skills/global/`)
+Meta-skill for creating new skills. Auto-triggers when working on the skill system. 
 
-**Global Guidelines** (`shared/guidelines/global/`):
-- `documentation-standards.md`
+**Global Guidelines** (`shared/guidelines/global/`)
+Documentation standards that all agents and skills follow. Language-agnostic best practices.
 
 ### Generated During Setup
 
-**Repo-Specific Resources** (one per repo):
-- Skills in `shared/skills/<repo-name>/` - Auto-trigger for tech stack guidance
-- Guidelines in `shared/guidelines/<repo-name>/` - Error handling, testing, architecture patterns
-- Agents in `shared/agents/<repo-name>/` (optional) - Repo-specific specialized agents
-
+**Repo-Specific Resources** (one set per repository)
+The wizard generates custom skills, guidelines, and optionally agents tailored to each repo's tech stack. Skills auto-trigger when sending a message in Claude Code in that repo, guidelines provide tech-specific patterns, and agents offer specialized assistance.
 
 ## How It Works
 
@@ -264,6 +254,7 @@ The wizard:
 - **[docs/skills_vs_guidelines.md](./docs/skills_vs_guidelines.md)** - Skills vs Guidelines
 - **[docs/repo-specific-agents.md](./docs/repo-specific-agents.md)** - Repo-specific agents
 - **[docs/repo-specific-skills.md](./docs/repo-specific-skills.md)** - Repo-specific skills
+- **[docs/orchestrator-resources.md](./docs/orchestrator-resources.md)** - Orchestrator resources
 
 
 ## Extensions
