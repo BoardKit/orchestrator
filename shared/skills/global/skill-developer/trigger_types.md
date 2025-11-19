@@ -297,9 +297,7 @@ cat <<'EOF' | npx tsx .claude/hooks/skill-verification-guard.ts
 EOF
 ```
 
----
-
 **Related Files:**
-- [SKILL.md](SKILL.md) - Main skill guide
-- [SKILL_RULES_REFERENCE.md](SKILL_RULES_REFERENCE.md) - Complete skill-rules.json schema
-- [PATTERNS_LIBRARY.md](PATTERNS_LIBRARY.md) - Ready-to-use pattern library
+- [skill.md](skill.md) - Main skill guide
+- [skill_rules_reference.md](skill_rules_reference.md) - Complete skill-rules.json schema
+- [patterns_library.md](patterns_library.md) - Ready-to-use pattern library

@@ -11,16 +11,18 @@
 
 ## What Is This?
 
-The Orchestrator is a **shared AI infrastructure** for organizations using Claude Code (and eventually expand for other AI tools) across multiple repositories.
+The Orchestrator is a **shared AI infrastructure** for organizations using Claude Code (and is designed to be expandable to other AI tools) across multiple repositories.
 Instead of duplicating agents, skills, prompts, and guidelines in every repo, you maintain them in **one place**, and each project auto-propagates them via symlinks.
 
 
 **Key Features:**
-- 📚 **Centralized Shared Resources** - One source of truth for agents, skills, hooks, commands, and guidelines (documentation) - they all live in *Orchestrator*. All repos can have access to all resources or just a subset depending on your use case and needs
-- 🤖 **Specialized Agents** - preconfigured several specialized agents for wide-range of tasks. You can edit them as needed or add any number of agents
+- 📚 **Centralized Shared Resources** - One source of truth for agents, skills, hooks, commands, and guidelines (documentation) - they all live in *Orchestrator*. All repos can have access or just a subset by symlinking selected directories/resources into the repo
+- 🤖 **Specialized Agents** - comes with several preconfigured specialized agents for wide-range of tasks. You can edit them as needed or add any number of agents
 - 🤖 **Self-configuring** - Setup wizard that walks you through your entire configuration. You do not have to do it all by yourself
-- 🔄 **Cross Repo Documentation Synchronization Agent** - Other than your other specialized agents, you have an agent inside the *orchestrator* keeping documentation in sync across all repos. You must invoke it once in a while and let it do its job
-- 🛠️ **Customizable** - Each repo can have its own agents, guidelines or skills. There is not one right way to use this orchestrator
+- 🔄 **Cross Repo Documentation Synchronization Agent** - This agent lives inside the *orchestrator* and its job is to keep **documentation in sync across all repos.** 
+   - **How It Works**: From the *orchestrator* repo, you simply ask claude to activate the agent and ask it to update the documentation based on the last *n* commits. It is recommended to do this daily (if in active development) or after key codebase changes.
+   - **NOTE: This agent is not automated** because documentation updates may require human review. 
+- 🛠️ **Customizable** - Each repo can have its own agents, guidelines or skills. There is no one right way to use this orchestrator
 
 ## Why This Exists 
 
@@ -37,7 +39,7 @@ The Orchestrator solves all these problems by:
 - centralizing best practices and patterns for your codebase
 - reducing duplicated efforts across multiple repositories
 
-This makes AI assistance context-aware, more predictable and accurate, and consistent across your entire engineering organization.
+This makes AI assistance **context-aware, more predictable and accurate**, and consistent across your entire engineering organization.
 
 ## Quick Start
 
@@ -67,7 +69,7 @@ The wizard will:
 - Generate customized configuration files
 - Create repository-specific skills and guidelines
 
-**Time:** Depends on complexity of your repos. 
+**Time:** Depends on complexity of your repos. For mid-sized 2 repo structure it should take ~15 minutes. 
 
 ### 3. Create Symlinks
 
@@ -102,37 +104,53 @@ rm -rf setup/
 **IMPORTANT! Below is how the orchestrator and each repo are structured:** If after setup your structure looks different(i.e. missing files), then it is not setup properly. You can ask Claude Code to help you fix it.
 ```
 YourOrganization/
-├── orchestrator/                  # Central shared AI infrastructure
+├── orchestrator/
 │   └── shared/
-│       ├── agents/                # Global agents
-│       ├── skills/                # Auto-trigger skills
-│       ├── hooks/                 # Repo event hooks
-│       ├── commands/              # Slash commands
-│       └── guidelines/            # Reference documentation
+│       ├── agents/
+│       │   └── global/               # Global agents for all repos
+│       │   └── orchestrator/         # Orchestrator-only agents
+│       │   └── <repo-name>/          # (OPTIONAL) Repo-specific agents (directory for each repo)
+│       ├── chatmodes/                # Co-pilot agents
+│       ├── commands/                 # Wrappers around agents/skills
+│       ├── guidelines/               # Long-form documentation
+│       │   └── global/               # Global guidelines (for all repos)
+│       │   └── <repo-name>/          #  (OPTIONAL) Repo-specific guidelines (directory for each repo)
+│       ├── settings/                 # Auto-trigger skills
+│       ├── hooks/                    # Even-driven commands
+│       ├── skills/                   # Small, focused behavior
+│             └── global/             # Skill-developer, logging conventions, security-guardrails, testing-convention
+│             └── <repo-name>/        #  (OPTIONAL) Repo-specific skills (directory per repo)
+│      
 │
 ├── repo-a/
 │   └── .claude/
-│       ├── agents/   -> symlink to orchestrator/shared/agents
-│       ├── skills    -> symlink to orchestrator/shared/skills
-│       ├── hooks     -> symlink to orchestrator/shared/hooks
-│       ├── commands  -> symlink to orchestrator/shared/commands
-│       └── settings.json 
-│    └── CLAUDE.md -> MUST HAVE IN EACH REPO!!
+│       ├── agents/ 
+│       │   └── global/               # symlink to orchestrator/shared/agents/global
+│       │   └── <repo-a>/             # symlink to orchestrator/shared/agents/<repo-a>
+│       ├── commands/                 # symlink to orchestrator/shared/commands
+│       ├── guidelines/              
+│       │   └── global/               # symlink to orchestrator/shared/guidelines/global
+│       │   └── <repo-a>/             # symlink to orchestrator/shared/guidelines/<repo-a>
+│       ├── hooks/                    # symlink to orchestrator/shared/hooks
+│       ├── skills/
+│             └── global/             # symlink to orchestrator/shared/skills/global
+│             └── <repo-a>/           # symlink to orchestrator/shared/skills/<repo-a>
+│       └── settings.json             # symlink to orchestrator/shared/settings/<repo-a>/settings.json
+│    └── CLAUDE.md ->                 # Repo Specific Entry Point; MUST exist
 │...
 
 (you can have any number of repositories)
 
 ```
 
+## BEFORE AND AFTER SETUP
 
+There are many components that already exist in orchestrator before setup and the rest of the components get generated during setup. Here is a list of all components:
+## Before Setup
+Components that exist before setup:
 
-
-## What Gets Generated
-
-After you run the setup wizard, the orchestrator generates:
-
-### Shared Agents
-Intelligent agents you can invoke in any repository:
+### Global Agents
+Intelligent agents that get distributed (via symlinks) to ALL repositories:
 - `code-architecture-reviewer` - Code review for best practices
 - `refactor-planner` - Plan complex refactorings
 - `code-refactor-master` - Execute refactorings
@@ -140,12 +158,9 @@ Intelligent agents you can invoke in any repository:
 - `documentation-architect` - Create/update documentation
 - `auto-error-resolver` - Fix errors automatically
 - `web-research-specialist` - Research technologies and patterns
-- `cross-repo-doc-sync` - Synchronize documentation across repos
 
-### Repository-Specific Skills
-Auto-trigger based on the files you edit:
-- `skill-developer` - Meta-skill for creating new skills
-- **One skill per repository** - Generated based on your tech stack
+### Orchestrator Agents
+- `cross-repo-doc-sync` - Synchronize documentation across repos
 
 ### Hooks
 Automatically run on events:
@@ -166,6 +181,13 @@ Tech stack-specific reference documentation:
 - `documentation-standards.md` - Documentation conventions
 - Database documentation (optional, if enabled)
 
+
+## After Setup
+
+### Repository-Specific Skills
+Auto-trigger based on the files you edit:
+- `skill-developer` - Meta-skill for creating new skills
+- **One skill per repository** - Generated based on your tech stack
 ---
 
 ## How It Works

@@ -1,7 +1,7 @@
 {
   "skills": [
     {
-      "name": "skill-developer",
+      "name": "global/skill-developer",
       "filePatterns": [
         "**/.claude/skills/**"
       ],
@@ -11,7 +11,7 @@
       ]
     },
     {
-      "name": "orchestrator-guidelines",
+      "name": "global/orchestrator",
       "filePatterns": [
         "**/shared/agents/**/*.md",
         "**/shared/skills/**/*.md",

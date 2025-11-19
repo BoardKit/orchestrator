@@ -283,7 +283,7 @@ When creating a new skill, verify:
 
 For detailed information on specific topics, see:
 
-### [TRIGGER_TYPES.md](TRIGGER_TYPES.md)
+### [trigger_types.md](trigger_types.md)
 Complete guide to all trigger types:
 - Keyword triggers (explicit topic matching)
 - Intent patterns (implicit action detection)
@@ -292,7 +292,7 @@ Complete guide to all trigger types:
 - Best practices and examples for each
 - Common pitfalls and testing strategies
 
-### [SKILL_RULES_REFERENCE.md](SKILL_RULES_REFERENCE.md)
+### [skill_rules_reference.md](skill_rules_reference.md)
 Complete skill-rules.json schema:
 - Full TypeScript interface definitions
 - Field-by-field explanations
@@ -300,7 +300,7 @@ Complete skill-rules.json schema:
 - Complete domain skill example
 - Validation guide and common errors
 
-### [HOOK_MECHANISMS.md](HOOK_MECHANISMS.md)
+### [hook_mechanisms.md](hook_mechanisms.md)
 Deep dive into hook internals:
 - UserPromptSubmit flow (detailed)
 - PostToolUse flow (detailed)
@@ -310,7 +310,7 @@ Deep dive into hook internals:
 
 **Note:** This file may reference PreToolUse hooks which are not currently implemented.
 
-### [TROUBLESHOOTING.md](TROUBLESHOOTING.md)
+### [troubleshooting.md](troubleshooting.md)
 Comprehensive debugging guide:
 - Skill not triggering (UserPromptSubmit)
 - PostToolUse not tracking files
@@ -320,7 +320,7 @@ Comprehensive debugging guide:
 
 **Note:** This file may reference PreToolUse debugging which is not applicable to current implementation.
 
-### [PATTERNS_LIBRARY.md](PATTERNS_LIBRARY.md)
+### [patterns_library.md](patterns_library.md)
 Ready-to-use pattern collection:
 - Intent pattern library (regex)
 - File path pattern library (glob)
@@ -328,7 +328,7 @@ Ready-to-use pattern collection:
 - Organized by use case
 - Copy-paste ready
 
-### [ADVANCED.md](ADVANCED.md)
+### [advanced.md](advanced.md)
 Future enhancements and ideas:
 - Dynamic rule updates
 - Skill dependencies
@@ -355,7 +355,7 @@ Future enhancements and ideas:
 - **File Paths**: Location-based activation
 - **Content**: Technology-specific detection
 
-See [TRIGGER_TYPES.md](TRIGGER_TYPES.md) for complete details.
+See [trigger_types.md](trigger_types.md) for complete details.
 
 ### Enforcement
 
@@ -391,7 +391,7 @@ echo '{"tool_name":"Edit","tool_input":{"file_path":"test.ts"}}' | \
   .claude/hooks/post-tool-use-tracker.sh
 ```
 
-See [TROUBLESHOOTING.md](TROUBLESHOOTING.md) for complete debugging guide.
+See [troubleshooting.md](troubleshooting.md) for complete debugging guide.
 
 ---
 
@@ -407,7 +407,7 @@ See [TROUBLESHOOTING.md](TROUBLESHOOTING.md) for complete debugging guide.
 - `.claude/hooks/post-tool-use-tracker.sh` - PostToolUse (file change tracking)
 
 **All Skills:**
-- `.claude/skills/*/SKILL.md` - Skill content files
+- `.claude/skills/*/skill.md` - Skill content files
 
 ---
 

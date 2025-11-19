@@ -1,6 +1,6 @@
 # Orchestrator - Agent Capabilities Guide
 
-**Last Updated: 2025-11-12**
+**Last Updated: 2025-11-18**
 
 ---
 
@@ -15,8 +15,7 @@ This directory contains AI agents that can be invoked to perform specific tasks 
 ## Agent Storage and Distribution
 
 **Central Management:**
-- All agents (generic and repo-specific) are stored in `orchestrator/shared/agents/`
-- Flat directory structure (no subdirectories)
+- All agents (global and repo-specific) are stored in `orchestrator/shared/agents/`
 - Single source of truth for all agent definitions
 
 **Selective Distribution:**

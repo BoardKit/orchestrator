@@ -310,6 +310,6 @@ If valid, jq will pretty-print the JSON. If invalid, it will show the error.
 ---
 
 **Related Files:**
-- [SKILL.md](SKILL.md) - Main skill guide
-- [TRIGGER_TYPES.md](TRIGGER_TYPES.md) - Complete trigger documentation
-- [TROUBLESHOOTING.md](TROUBLESHOOTING.md) - Debugging configuration issues
+- [skill.md](skill.md) - Main skill guide
+- [trigger_types.md](trigger_types.md) - Complete trigger documentation
+- [troubleshooting.md](troubleshooting.md) - Debugging configuration issues

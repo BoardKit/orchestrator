@@ -4,8 +4,6 @@
 This orchestrator currently implements:
 - ✅ **UserPromptSubmit** hook - Debuggable (see sections below)
 - ✅ **PostToolUse** hook - Debuggable (file tracking)
-- ❌ **PreToolUse** hook - Not implemented (PreToolUse sections below are for reference only)
-
 ---
 
 Complete debugging guide for skill activation problems.
@@ -14,7 +12,6 @@ Complete debugging guide for skill activation problems.
 
 - [Skill Not Triggering](#skill-not-triggering)
   - [UserPromptSubmit Not Suggesting](#userpromptsubmit-not-suggesting) ✅ Applicable
-  - [PreToolUse Not Blocking](#pretooluse-not-blocking) ❌ Not applicable (not implemented)
   - [PostToolUse Not Tracking](#posttooluse-not-tracking) ✅ Applicable
 - [False Positives](#false-positives) ✅ Applicable
 - [Hook Not Executing](#hook-not-executing) ✅ Applicable
@@ -207,17 +204,6 @@ echo '{"session_id":"debug","tool_name":"Edit","tool_input":{"file_path":"src/te
 
 ---
 
-### PreToolUse Not Blocking
-
-**⚠️ NOT APPLICABLE - PreToolUse hooks are not implemented in this orchestrator.**
-
-This section is kept for reference in case PreToolUse hooks are added in the future.
-
----
-
-**Symptoms:** Edit a file that should trigger a guardrail, but no block occurs.
-
-**Common Causes:**
 
 #### 1. File Path Doesn't Match Patterns
 
@@ -458,7 +444,6 @@ This makes it advisory instead of blocking.
 **Check `.claude/settings.json`:**
 ```bash
 cat .claude/settings.json | jq '.hooks.UserPromptSubmit'
-cat .claude/settings.json | jq '.hooks.PreToolUse'
 ```
 
 Expected: Hook entries present
@@ -596,19 +581,12 @@ Content pattern matching reads entire file - slow for large files.
 # UserPromptSubmit
 time echo '{"prompt":"test"}' | npx tsx .claude/hooks/skill-activation-prompt.ts
 
-# PreToolUse
-time cat <<'EOF' | npx tsx .claude/hooks/skill-verification-guard.ts
-{"tool_name":"Edit","tool_input":{"file_path":"test.ts"}}
-EOF
 ```
 
 **Target metrics:**
 - UserPromptSubmit: < 100ms
-- PreToolUse: < 200ms
-
----
 
 **Related Files:**
-- [SKILL.md](SKILL.md) - Main skill guide
-- [HOOK_MECHANISMS.md](HOOK_MECHANISMS.md) - How hooks work
-- [SKILL_RULES_REFERENCE.md](SKILL_RULES_REFERENCE.md) - Configuration reference
+- [skill.md](skill.md) - Main skill guide
+- [hook_mechanisms.md](hook_mechanisms.md) - How hooks work
+- [skill_rules_reference.md](skill_rules_reference.md) - Configuration reference

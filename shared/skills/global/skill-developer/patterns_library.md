@@ -147,6 +147,6 @@ useState|useEffect              # React hooks
 ---
 
 **Related Files:**
-- [SKILL.md](SKILL.md) - Main skill guide
-- [TRIGGER_TYPES.md](TRIGGER_TYPES.md) - Detailed trigger documentation
-- [SKILL_RULES_REFERENCE.md](SKILL_RULES_REFERENCE.md) - Complete schema
+- [skill.md](skill.md) - Main skill guide
+- [trigger_types.md](trigger_types.md) - Detailed trigger documentation
+- [skill_rules_reference.md](skill_rules_reference.md) - Complete schema
