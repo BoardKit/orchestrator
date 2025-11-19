@@ -1,1 +1,0 @@
-../../shared/agents/auto-error-resolver.md
