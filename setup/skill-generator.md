@@ -14,9 +14,8 @@ You are the **Skill Generator**, responsible for creating repository-specific sk
 Given a repository name and configuration from `SETUP_CONFIG.json`, you will:
 1. Read the repository's tech stack and patterns
 2. Generate skill.md with relevant guidance
-3. Generate README.md for the skill
-4. Create skill-rules.json entry
-5. Return confirmation and skill details
+3. Create skill-rules.json entry
+4. Return confirmation and skill details
 
 ## Generation Process
 
@@ -50,8 +49,7 @@ Also read:
 Create directory structure:
 ```
 shared/skills/{{repo-name}}-guidelines/
-├── skill.md
-└── README.md
+└── skill.md
 ```
 
 ### Step 3: Generate skill.md
@@ -345,25 +343,7 @@ When making changes that affect multiple repos:
 
 **Write complete skill.md to:** `shared/skills/{{repo-name}}-guidelines/skill.md`
 
-### Step 4: Generate README.md
-
-Read template: `setup/templates/repo-skill-template/README.template.md`
-
-Replace placeholders:
-- `{{REPO_NAME}}` → repo name
-- `{{REPO_TYPE}}` → repo type
-- `{{REPO_DESCRIPTION}}` → description
-- `{{FILE_PATTERNS_LIST}}` → bulleted list of patterns
-- `{{KEYWORDS_LIST}}` → bulleted list of keywords
-- `{{PRIMARY_TECH_STACK}}` → main frameworks
-- `{{TECH_STACK_FULL}}` → complete tech stack breakdown
-- `{{ENFORCEMENT}}` → enforcement type (suggest/warn/block)
-- `{{FILE_PATTERNS_JSON}}` → JSON array of patterns
-- `{{KEYWORDS_JSON}}` → JSON array of keywords
-
-**Write complete README.md to:** `shared/skills/{{repo-name}}-guidelines/README.md`
-
-### Step 5: Generate skill-rules.json Entry
+### Step 4: Generate skill-rules.json Entry
 
 Create JSON entry for this skill:
 
@@ -394,17 +374,16 @@ Create JSON entry for this skill:
 
 **Return this JSON** (don't write to file yet - setup-wizard will combine all entries)
 
-### Step 6: Validate Generated Files
+### Step 5: Validate Generated Files
 
 Check:
 - ✅ skill.md exists and has no `{{PLACEHOLDERS}}`
-- ✅ README.md exists and has no `{{PLACEHOLDERS}}`
 - ✅ JSON entry is valid JSON
 - ✅ File patterns match repo structure
 - ✅ Keywords are relevant
 - ✅ Tech stack sections are populated
 
-### Step 7: Return Confirmation
+### Step 6: Return Confirmation
 
 Return structured response to setup-wizard:
 
@@ -414,8 +393,7 @@ Return structured response to setup-wizard:
   "repositoryName": "{{repo-name}}",
   "skillDirectory": "shared/skills/{{repo-name}}-guidelines/",
   "filesCreated": [
-    "shared/skills/{{repo-name}}-guidelines/skill.md",
-    "shared/skills/{{repo-name}}-guidelines/README.md"
+    "shared/skills/{{repo-name}}-guidelines/skill.md"
   ],
   "skillRulesEntry": {
     "{{repo-name}}-guidelines": { ... }
@@ -533,7 +511,6 @@ Type: fullstack
 Tech Stack: React, Next.js, FastAPI, PostgreSQL
 
 ✅ Created: shared/skills/app-guidelines/skill.md
-✅ Created: shared/skills/app-guidelines/README.md
 ✅ Generated: skill-rules.json entry
 
 Summary:

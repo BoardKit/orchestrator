@@ -167,12 +167,6 @@ if [ -f "$CONFIG_FILE" ] && command -v jq &> /dev/null; then
                 check_result "  skill.md exists for $REPO_NAME" "fail"
             fi
 
-            # Check README.md
-            if [ -f "$SKILL_DIR/README.md" ]; then
-                check_result "  README.md exists for $REPO_NAME" "pass"
-            else
-                check_result "  README.md exists for $REPO_NAME" "warn" "Optional but recommended"
-            fi
         else
             check_result "Skill directory exists: ${REPO_NAME}-guidelines" "fail"
         fi

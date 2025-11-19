@@ -152,7 +152,7 @@ Store: Feature flags in config
 
 For each repository:
 ```
-Generate: shared/skills/[repo-name]-guidelines/
+Generate: shared/skills/[repo-name]/
 ├── skill.md (contains inline guidance for that repo's tech stack)
 └── associated entry in shared/skills/skill-rules.json
 
@@ -164,28 +164,35 @@ Include:
   - Testing approaches
   - Common pitfalls
   - Best practices
-- References to guidelines/error-handling.md
-- References to guidelines/testing-standards.md
+- References to guidelines/[repo-name]/error-handling.md
+- References to guidelines/[repo-name]/testing-standards.md
 ```
 
 **Step 7: Generate Guidelines**
 
-**architectural-principles.md:**
+For each repository:
 ```
-Include:
-- List of all repositories and their purposes
-- What belongs in each repo
-- Cross-repo integration patterns (if applicable)
-- When to update which repo
-- Repository structure conventions
+Create directory: shared/guidelines/[repo-name]/
+
+Generate the following files in that directory:
 ```
 
-**error-handling.md:**
+**shared/guidelines/[repo-name]/architectural-principles.md:**
 ```
-For each unique tech stack:
-- Error handling patterns
+Include:
+- Purpose of this specific repository
+- What belongs in this repo vs others
+- Internal structure and organization
+- Integration patterns with other repos (if applicable)
+- Repository-specific conventions
+```
+
+**shared/guidelines/[repo-name]/error-handling.md:**
+```
+For this repo's tech stack:
+- Error handling patterns specific to the frameworks used
 - Exception types and when to use
-- Logging standards
+- Logging standards for this repo
 - Recovery strategies
 
 Examples:
@@ -194,11 +201,11 @@ Examples:
 - Go: error returns, panic/recover
 ```
 
-**testing-standards.md:**
+**shared/guidelines/[repo-name]/testing-standards.md:**
 ```
-For each unique testing framework:
-- Test organization
-- Mock patterns
+For this repo's testing framework:
+- Test organization specific to this repo
+- Mock patterns for the frameworks used
 - Fixture usage
 - Coverage expectations
 
@@ -208,27 +215,27 @@ Examples:
 - Go testing: table-driven tests, test helpers
 ```
 
-**cross-repo-patterns.md (optional):**
+**shared/guidelines/[repo-name]/cross-repo-patterns.md (optional):**
 ```
-Only if multiple repositories:
-- Cross-repo workflow guidelines
-- Testing changes across repos
-- Dev docs strategy for multi-repo work
-- Coordination patterns
+Only if multiple repositories and this repo interacts with others:
+- How this repo integrates with other repos
+- Testing changes that affect multiple repos
+- API contracts and dependencies
+- Deployment coordination
 ```
 
-**database documentation (optional):**
+**shared/guidelines/[repo-name]/DATABASE_*.md (optional):**
 ```
-If user enabled database docs:
+If user enabled database docs for this repo:
 
 DATABASE_SCHEMA.md:
-- Table structures
+- Table structures used by this repo
 - Column definitions
 - Relationships
 - Custom types
 
 DATABASE_OPERATIONS.md:
-- Common query patterns
+- Common query patterns for this repo
 - Performance optimization
 - Migration guidelines
 
@@ -271,39 +278,71 @@ For each repository:
 ```
 Check: Does repo/.claude/ exist?
 - If not, create it
-- Create subdirectories: agents/, skills/, hooks/, commands/
+- Create subdirectories:
+  - agents/
+  - commands/
+  - guidelines/
+  - hooks/
+  - skills/
 ```
 
-**Step 10: Create Individual Agent Symlinks**
+**Step 10: Create Agent Symlinks**
 
 For each repository:
 ```
 In repo/.claude/agents/:
 
-For each agent assigned to this repo:
-- Create symlink: agent-name.md -> ../../../orchestrator/shared/agents/agent-name.md
-- Verify symlink works (can read file through symlink)
+1. Create symlink to global agents directory:
+   global/ -> ../../../orchestrator/shared/agents/global/
 
-Example for frontend-repo needing 3 agents:
+2. If repo has custom agents, create symlink to repo-specific agents:
+   [repo-name]/ -> ../../../orchestrator/shared/agents/[repo-name]/
+
+Example for frontend-repo:
 frontend-repo/.claude/agents/
-├── code-architecture-reviewer.md -> ../../../orchestrator/shared/agents/code-architecture-reviewer.md
-├── refactor-planner.md -> ../../../orchestrator/shared/agents/refactor-planner.md
-└── frontend-typescript-specialist.md -> ../../../orchestrator/shared/agents/frontend-typescript-specialist.md
+├── global/ -> ../../../orchestrator/shared/agents/global/
+└── frontend/ -> ../../../orchestrator/shared/agents/frontend/  (if custom agents exist)
 
-DO NOT create a directory symlink!
-Each agent is a separate symlink.
+These are DIRECTORY symlinks, not individual file symlinks.
 ```
 
 **Step 11: Create Skills Symlinks**
 
 For each repository:
 ```
-In repo/.claude/:
-- Create directory symlink: skills -> ../../orchestrator/shared/skills/
-- Verify symlink works
+In repo/.claude/skills/:
+
+1. Create symlink to global skills directory:
+   global/ -> ../../../orchestrator/shared/skills/global/
+
+2. Create symlink to repo-specific skills:
+   [repo-name]/ -> ../../../orchestrator/shared/skills/[repo-name]/
+
+Example for frontend-repo:
+frontend-repo/.claude/skills/
+├── global/ -> ../../../orchestrator/shared/skills/global/
+└── frontend/ -> ../../../orchestrator/shared/skills/frontend/
 ```
 
-**Step 12: Create Hooks Symlinks**
+**Step 12: Create Guidelines Symlinks**
+
+For each repository:
+```
+In repo/.claude/guidelines/:
+
+1. Create symlink to global guidelines directory:
+   global/ -> ../../../orchestrator/shared/guidelines/global/
+
+2. Create symlink to repo-specific guidelines:
+   [repo-name]/ -> ../../../orchestrator/shared/guidelines/[repo-name]/
+
+Example for frontend-repo:
+frontend-repo/.claude/guidelines/
+├── global/ -> ../../../orchestrator/shared/guidelines/global/
+└── frontend/ -> ../../../orchestrator/shared/guidelines/frontend/
+```
+
+**Step 13: Create Hooks Symlinks**
 
 For each repository:
 ```
@@ -313,7 +352,7 @@ In repo/.claude/:
 - Verify symlink works
 ```
 
-**Step 13: Create Commands Symlinks**
+**Step 14: Create Commands Symlinks**
 
 For each repository:
 ```
@@ -322,28 +361,90 @@ In repo/.claude/:
 - Verify symlink works
 ```
 
-**Step 14: Create or Update settings.json**
+**Step 15: Create Repository Settings Files**
 
 For each repository:
 ```
-Check if repo/.claude/settings.json exists:
-- If exists: Read current settings, merge with hook configuration
-- If not: Create from template
+Create settings file: shared/settings/[repo-name]/settings.json
 
-Ensure hooks are configured:
+Content:
 {
   "hooks": {
     "userPromptSubmit": "./hooks/skill-activation-prompt.sh",
     "postToolUse": "./hooks/post-tool-use-tracker.sh"
+  },
+  "repository": {
+    "name": "[repo-name]",
+    "type": "[frontend/backend/fullstack/etc]",
+    "techStack": "[primary tech stack]"
   }
 }
+
+Then create symlink in repository:
+repo/.claude/settings.json -> ../../orchestrator/shared/settings/[repo-name]/settings.json
 ```
 
 ---
 
 ### Phase 4: Documentation Updates
 
-**Step 15: Update CLAUDE.md**
+**Step 16: Create Repository-Specific CLAUDE.md Files**
+
+For each repository:
+```
+Create: [repo-path]/CLAUDE.md (in repository root, not in .claude/)
+
+Content should include:
+1. Repository purpose and overview
+2. Tech stack and architecture
+3. Key directories and files
+4. Development patterns specific to this repo
+5. Available agents for this repo (list symlinked agents)
+6. Available skills (list from shared/skills/[repo-name]/)
+7. Guidelines references (link to shared/guidelines/[repo-name]/)
+8. Common tasks and workflows
+9. Testing and deployment instructions
+10. Cross-references to orchestrator CLAUDE.md
+
+Template:
+# [Repository Name] - Claude Code Context
+
+**Repository Type:** [frontend/backend/fullstack/etc]
+**Tech Stack:** [primary technologies]
+**Purpose:** [what this repo does]
+
+## Architecture Overview
+[Brief description of repo structure]
+
+## Available Resources
+
+### Agents
+[List agents symlinked for this repo]
+
+### Skills
+- `[repo-name]` skill - Auto-triggers for this repo's files
+- Global skills available
+
+### Guidelines
+- Architecture: `.claude/guidelines/[repo-name]/architectural-principles.md`
+- Error Handling: `.claude/guidelines/[repo-name]/error-handling.md`
+- Testing: `.claude/guidelines/[repo-name]/testing-standards.md`
+
+## Development Patterns
+[Repo-specific patterns and conventions]
+
+## Common Tasks
+[How to do common operations in this repo]
+
+## Testing
+[How to run tests, what frameworks are used]
+
+## Related Documentation
+- Orchestrator: `../orchestrator/CLAUDE.md`
+- Global guidelines: `.claude/guidelines/global/`
+```
+
+**Step 17: Update Orchestrator CLAUDE.md**
 
 ```
 Replace placeholder sections with actual information:
@@ -371,7 +472,7 @@ Replace placeholder sections with actual information:
 6. Remove setup instructions section (no longer needed)
 ```
 
-**Step 16: Update README.md**
+**Step 18: Update README.md**
 
 ```
 Add organization-specific information:
@@ -381,7 +482,7 @@ Add organization-specific information:
 - Remove generic placeholders
 ```
 
-**Step 17: Create SETUP_CONFIG.json**
+**Step 19: Create SETUP_CONFIG.json**
 
 ```
 Create configuration file for future reference and updates:
@@ -403,16 +504,26 @@ Create configuration file for future reference and updates:
         "frameworks": ["React", "Vite"],
         "testing": ["Jest", "React Testing Library"]
       },
-      "agents": [
-        "code-architecture-reviewer",
-        "refactor-planner",
-        "frontend-typescript-specialist"
+      "agentsAvailable": [
+        "global/*",
+        "frontend-app/*"  // if custom agents exist
       ],
       "symlinksCreated": {
-        "agents": ["code-architecture-reviewer.md", ...],
-        "skills": true,
+        "agents": {
+          "global": true,
+          "repo-specific": true  // if exists
+        },
+        "skills": {
+          "global": true,
+          "repo-specific": true
+        },
+        "guidelines": {
+          "global": true,
+          "repo-specific": true
+        },
         "hooks": true,
-        "commands": true
+        "commands": true,
+        "settings": true
       }
     },
     ...
@@ -423,9 +534,14 @@ Create configuration file for future reference and updates:
     "apiDocs": false
   },
   "generatedResources": {
-    "skills": ["frontend-app-guidelines", "backend-api-guidelines"],
-    "guidelines": ["architectural-principles.md", "error-handling.md", ...],
-    "customAgents": []
+    "skills": ["frontend-app", "backend-api"],
+    "guidelines": {
+      "frontend-app": ["architectural-principles.md", "error-handling.md", "testing-standards.md"],
+      "backend-api": ["architectural-principles.md", "error-handling.md", "testing-standards.md"]
+    },
+    "settings": ["frontend-app/settings.json", "backend-api/settings.json"],
+    "customAgents": [],
+    "repositoryClaude": ["frontend-app/CLAUDE.md", "backend-api/CLAUDE.md"]
   }
 }
 
@@ -436,7 +552,7 @@ Save to: orchestrator/SETUP_CONFIG.json
 
 ### Phase 5: Verification and Summary
 
-**Step 18: Verify Setup**
+**Step 20: Verify Setup**
 
 ```
 For each repository:
@@ -448,18 +564,22 @@ For each repository:
    - Can access skills through symlink
    - Can access hooks through symlink
    - Can access commands through symlink
+   - Can access guidelines through symlink
 
-3. Check hook executability:
+3. Check settings.json symlink:
+   - repo/.claude/settings.json -> ../../orchestrator/shared/settings/[repo-name]/settings.json
+   - Can read settings through symlink
+
+4. Check hook executability:
    - shared/hooks/*.sh have execute permissions
 
-4. Validate settings.json:
-   - Hooks properly configured
-   - No syntax errors
+5. Validate CLAUDE.md exists in repo root:
+   - [repo-path]/CLAUDE.md exists and is readable
 
 Report any failures to user
 ```
 
-**Step 19: Generate Summary Report**
+**Step 21: Generate Summary Report**
 
 ```
 Display comprehensive summary:
@@ -473,25 +593,38 @@ Repositories:
 1. [repo-name] ([type])
    - Path: [path]
    - Tech: [tech stack]
-   - Agents: [count] ([list])
+   - CLAUDE.md: ✅ Created in repo root
+   - Symlinks: agents/global, skills/[repo], guidelines/[repo], etc.
 
 2. [repo-name] ...
 
 Resources Created:
-- Skills: [count] ([list])
-- Guidelines: [count] ([list])
+- Skills: [count] repo-specific skills
+  - [repo-1]/skill.md
+  - [repo-2]/skill.md
+- Guidelines: [count] sets
+  - [repo-1]/: architectural-principles.md, error-handling.md, testing-standards.md
+  - [repo-2]/: architectural-principles.md, error-handling.md, testing-standards.md
+- Settings: [count] repo settings files
+  - settings/[repo-1]/settings.json
+  - settings/[repo-2]/settings.json
 - Custom Agents: [count] ([list])
 
-Symlinks Created:
-- Total agents symlinks: [count across all repos]
-- Skills: [count repos]
-- Hooks: [count repos]
-- Commands: [count repos]
+Symlinks Created per repo:
+- agents/global/ -> orchestrator/shared/agents/global/
+- agents/[repo]/ -> orchestrator/shared/agents/[repo]/ (if exists)
+- skills/global/ -> orchestrator/shared/skills/global/
+- skills/[repo]/ -> orchestrator/shared/skills/[repo]/
+- guidelines/global/ -> orchestrator/shared/guidelines/global/
+- guidelines/[repo]/ -> orchestrator/shared/guidelines/[repo]/
+- hooks/ -> orchestrator/shared/hooks/
+- commands/ -> orchestrator/shared/commands/
+- settings.json -> orchestrator/shared/settings/[repo]/settings.json
 
 Documentation Updated:
-✅ CLAUDE.md
+✅ Orchestrator CLAUDE.md
+✅ Repository CLAUDE.md files ([count] created)
 ✅ README.md
-✅ agents/README.md
 ✅ SETUP_CONFIG.json
 
 Next Steps:
@@ -721,24 +854,34 @@ Which agents should frontend-app have access to?
 
 Agent:
 📝 Creating repository-specific skills...
-✅ Created frontend-app-guidelines skill
-✅ Created backend-api-guidelines skill
-✅ Created core-lib-guidelines skill
+✅ Created shared/skills/frontend-app/skill.md
+✅ Created shared/skills/backend-api/skill.md
+✅ Created shared/skills/core-lib/skill.md
+
+📂 Creating guidelines...
+✅ Created shared/guidelines/frontend-app/ (3 files)
+✅ Created shared/guidelines/backend-api/ (3 files)
+✅ Created shared/guidelines/core-lib/ (3 files)
+
+⚙️ Creating settings...
+✅ Created shared/settings/frontend-app/settings.json
+✅ Created shared/settings/backend-api/settings.json
+✅ Created shared/settings/core-lib/settings.json
 
 🔗 Creating symlinks...
-✅ frontend-app: 5 agent symlinks created
-✅ backend-api: 6 agent symlinks created
-✅ core-lib: 4 agent symlinks created
+✅ frontend-app: agents, skills, guidelines, hooks, commands, settings
+✅ backend-api: agents, skills, guidelines, hooks, commands, settings
+✅ core-lib: agents, skills, guidelines, hooks, commands, settings
+
+📝 Creating repository CLAUDE.md files...
+✅ Created frontend-app/CLAUDE.md
+✅ Created backend-api/CLAUDE.md
+✅ Created core-lib/CLAUDE.md
 
 ✅ All symlinks verified
 
-📖 Generating guidelines...
-✅ architectural-principles.md
-✅ error-handling.md
-✅ testing-standards.md
-
-📝 Updating documentation...
-✅ CLAUDE.md updated
+📝 Updating orchestrator documentation...
+✅ Orchestrator CLAUDE.md updated
 ✅ README.md updated
 ✅ SETUP_CONFIG.json created
 

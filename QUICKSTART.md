@@ -32,7 +32,7 @@ Settings > Update & Security > For Developers > Developer Mode
 
 ### 2. Required Tools
 
-- **Claude Code** - Download from [claude.com](https://claude.com/claude-code) or install via terminal. Check installation [here](https://code.claude.com/docs/en/setup).
+- ⚠️ **Claude Code** - Download from [claude.com](https://claude.com/claude-code) or install via terminal. Check installation [here](https://code.claude.com/docs/en/setup).
 
 - **jq** - JSON processor for validation scripts
   ```bash
@@ -59,11 +59,8 @@ Have your repositories ready:
 ~/projects/
 ├── orchestrator/       # This repo (will be cloned here)
 ├── my-frontend/        # Your repo 1
-├── my-backend/         # Your repo 2
-└── shared-library/     # Your repo 3
+└──my-backend/          # Your repo 2
 ```
-
----
 
 ## Step 1: Clone Orchestrator
 
@@ -82,15 +79,21 @@ ls -la
 # Should see: setup/, shared/, dev/, README.md, CLAUDE.md, etc.
 ```
 
----
-
 ## Step 2: Run Setup Wizard
 
 Open the orchestrator directory in Claude Code:
 
 ```bash
-# From orchestrator directory
-claude-code .
+# From orchestrator directory run claude
+claude
+```
+You will see something like:
+```
+(base) your-computer-name orchestrator % claude
+
+ ▐▛███▜▌   Claude Code v2.0.42
+▝▜█████▛▘  Sonnet 4.5 · Claude Max
+  ▘▘ ▝▝    /yourlocal/path/to/orchestrator
 ```
 
 In Claude Code, run the setup wizard:
@@ -107,7 +110,6 @@ The wizard will guide you through configuration. Here's what to expect:
 
 ```
 Q: What is your organization or project name?
-
 ```
 
 **Tip:** Use a short, clear name (will appear in documentation).
@@ -233,15 +235,31 @@ Q: Generate detailed guidelines with examples?
 
 **This will take a while!**
 
-The wizard will then:
+The wizard will generate files in two locations:
 
-1. **Generate SETUP_CONFIG.json** - Your configuration
-2. **Analyze each repository** - Detect tech stacks
-3. **Generate skills** - One per repository
-4. **Generate guidelines** - Architecture, error handling, testing
-5. **Generate CLAUDE.md** - Main context file
-6. **Update README.md** - With your configuration
-7. **Validate setup** - Check everything is correct
+#### Files Generated in Orchestrator:
+
+1. **`SETUP_CONFIG.json`** - Your organization's configuration
+2. **`CLAUDE.md`** (customized) - Updated with your organization details
+3. **`README.md`** (updated) - Updated with repository information
+4. **Repository-specific skills** - One directory per repository:
+   - `shared/skills/<repo-name>/skill.md`
+5. **Repository-specific guidelines** - One directory per repository:
+   - `shared/guidelines/<repo-name>/architectural-principles.md`
+   - `shared/guidelines/<repo-name>/error-handling.md`
+   - `shared/guidelines/<repo-name>/testing-standards.md`
+   - (Optional) `shared/guidelines/<repo-name>/cross-repo-patterns.md`
+   - (Optional) Database documentation files
+6. **Repository-specific agents** (optional):
+   - `shared/agents/<repo-name>/` - If specialized agents needed
+7. **Repository settings files**:
+   - `shared/settings/<repo-name>/settings.json`
+8. **Updated skill rules**:
+   - `shared/skills/skill-rules.json` (updated with new skills)
+
+#### Files Generated in Each Application Repository:
+
+1. **`CLAUDE.md`** - Created in the root of each repository with repo-specific context
 
 You'll see progress like:
 ```
@@ -250,23 +268,45 @@ Generating Orchestrator Files...
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 [1/3] Generating skill for app...
-✅ Skill created: shared/skills/app-guidelines/
+✅ Skill created: shared/skills/app/
 
 [2/3] Generating skill for backend...
-✅ Skill created: shared/skills/backend-guidelines/
+✅ Skill created: shared/skills/backend/
 
 [3/3] Generating skill for library...
-✅ Skill created: shared/skills/library-guidelines/
+✅ Skill created: shared/skills/library/
 
-✅ Skill rules created: shared/skills/skill-rules.json
+✅ Skill rules updated: shared/skills/skill-rules.json
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Generating Guidelines...
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-✅ Generated: shared/guidelines/architectural-principles.md
-✅ Generated: shared/guidelines/error-handling.md
-✅ Generated: shared/guidelines/testing-standards.md
+✅ Generated: shared/guidelines/app/architectural-principles.md
+✅ Generated: shared/guidelines/app/error-handling.md
+✅ Generated: shared/guidelines/app/testing-standards.md
+✅ Generated: shared/guidelines/backend/architectural-principles.md
+✅ Generated: shared/guidelines/backend/error-handling.md
+✅ Generated: shared/guidelines/backend/testing-standards.md
+✅ Generated: shared/guidelines/library/architectural-principles.md
+✅ Generated: shared/guidelines/library/error-handling.md
+✅ Generated: shared/guidelines/library/testing-standards.md
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Generating Settings Files...
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ Generated: shared/settings/app/settings.json
+✅ Generated: shared/settings/backend/settings.json
+✅ Generated: shared/settings/library/settings.json
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Creating Repository CLAUDE.md Files...
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ Created: ../my-app/CLAUDE.md
+✅ Created: ../my-backend/CLAUDE.md
+✅ Created: ../shared-library/CLAUDE.md
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Validating Setup...
@@ -285,8 +325,6 @@ Validating Setup...
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
----
-
 ## Step 3: Create Symlinks
 
 (You need symlinks to activate the functionalities from this repo.)
@@ -302,9 +340,26 @@ Now create symlinks in your repositories to use the shared resources:
 **What this does:**
 - Reads SETUP_CONFIG.json
 - For each repository:
-  - Creates `.claude/` directory if needed
-  - Creates symlinks to `shared/skills`, `shared/hooks`, `shared/commands`
+  - Creates `.claude/` directory structure if needed
+  - Creates all necessary symlinks to shared resources
   - Validates symlinks work
+
+**Symlinks created in each repository:**
+```
+your-repo/.claude/
+├── agents/
+│   ├── global/ → orchestrator/shared/agents/global/
+│   └── <repo-name>/ → orchestrator/shared/agents/<repo-name>/
+├── commands/ → orchestrator/shared/commands/
+├── guidelines/
+│   ├── global/ → orchestrator/shared/guidelines/global/
+│   └── <repo-name>/ → orchestrator/shared/guidelines/<repo-name>/
+├── hooks/ → orchestrator/shared/hooks/
+├── skills/
+│   ├── global/ → orchestrator/shared/skills/global/
+│   └── <repo-name>/ → orchestrator/shared/skills/<repo-name>/
+└── settings.json → orchestrator/shared/settings/<repo-name>/settings.json
+```
 
 **Output:**
 ```
@@ -324,23 +379,41 @@ Repositories to process: 3
 
 [1/3] Repository: app
   Path: ../my-app
-  ✓ Created skills symlink
-  ✓ Created hooks symlink
+  ✓ Created agents/global symlink
+  ✓ Created agents/app symlink
   ✓ Created commands symlink
+  ✓ Created guidelines/global symlink
+  ✓ Created guidelines/app symlink
+  ✓ Created hooks symlink
+  ✓ Created skills/global symlink
+  ✓ Created skills/app symlink
+  ✓ Created settings.json symlink
   ✓ Repository configured successfully
 
 [2/3] Repository: backend
   Path: ../my-backend
-  ✓ Created skills symlink
-  ✓ Created hooks symlink
+  ✓ Created agents/global symlink
+  ✓ Created agents/backend symlink
   ✓ Created commands symlink
+  ✓ Created guidelines/global symlink
+  ✓ Created guidelines/backend symlink
+  ✓ Created hooks symlink
+  ✓ Created skills/global symlink
+  ✓ Created skills/backend symlink
+  ✓ Created settings.json symlink
   ✓ Repository configured successfully
 
 [3/3] Repository: library
   Path: ../shared-library
-  ✓ Created skills symlink
-  ✓ Created hooks symlink
+  ✓ Created agents/global symlink
+  ✓ Created agents/library symlink
   ✓ Created commands symlink
+  ✓ Created guidelines/global symlink
+  ✓ Created guidelines/library symlink
+  ✓ Created hooks symlink
+  ✓ Created skills/global symlink
+  ✓ Created skills/library symlink
+  ✓ Created settings.json symlink
   ✓ Repository configured successfully
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -404,7 +477,7 @@ Checking Skills Configuration...
   → Skills configured: 4
 
 Checking Repository Skills...
-✓ Skill directory exists: app-guidelines
+✓ Skill directory exists: app
   ✓ skill.md exists for app
   ✓ skill.md has no placeholders
   ✓ README.md exists for app
@@ -434,13 +507,22 @@ cd ../my-app/.claude
 ls -la
 
 # You should see:
-# skills -> ../../orchestrator/shared/skills
-# hooks -> ../../orchestrator/shared/hooks
-# commands -> ../../orchestrator/shared/commands
+# agents/
+#   global/ -> ../../orchestrator/shared/agents/global/
+#   app/ -> ../../orchestrator/shared/agents/app/
+# commands/ -> ../../orchestrator/shared/commands/
+# guidelines/
+#   global/ -> ../../orchestrator/shared/guidelines/global/
+#   app/ -> ../../orchestrator/shared/guidelines/app/
+# hooks/ -> ../../orchestrator/shared/hooks/
+# skills/
+#   global/ -> ../../orchestrator/shared/skills/global/
+#   app/ -> ../../orchestrator/shared/skills/app/
+# settings.json -> ../../orchestrator/shared/settings/app/settings.json
 
 # Test symlink works
-cat skills/skill-rules.json
-# Should display the JSON content
+cat skills/app/skill.md
+# Should display the skill content for your app
 ```
 
 ### Test 2: Test Skill Activation
@@ -603,21 +685,59 @@ Agents are invoked automatically by Claude Code's Task tool, but you can request
 
 **macOS/Linux:**
 ```bash
-# Manually create symlinks
+# Manually create symlinks (example for 'app' repository)
 cd ../my-app/.claude
-ln -sf ../../orchestrator/shared/skills skills
-ln -sf ../../orchestrator/shared/hooks hooks
+mkdir -p agents guidelines skills
+
+# Create agent symlinks
+ln -sf ../../../orchestrator/shared/agents/global agents/global
+ln -sf ../../../orchestrator/shared/agents/app agents/app
+
+# Create commands symlink
 ln -sf ../../orchestrator/shared/commands commands
+
+# Create guidelines symlinks
+ln -sf ../../../orchestrator/shared/guidelines/global guidelines/global
+ln -sf ../../../orchestrator/shared/guidelines/app guidelines/app
+
+# Create hooks symlink
+ln -sf ../../orchestrator/shared/hooks hooks
+
+# Create skills symlinks
+ln -sf ../../../orchestrator/shared/skills/global skills/global
+ln -sf ../../../orchestrator/shared/skills/app skills/app
+
+# Create settings symlink
+ln -sf ../../orchestrator/shared/settings/app/settings.json settings.json
 ```
 
 **Windows:**
 ```powershell
 # Ensure Developer Mode is enabled
-# Then use mklink:
+# Then use mklink (example for 'app' repository):
 cd ..\my-app\.claude
-mklink /D skills ..\..\orchestrator\shared\skills
-mklink /D hooks ..\..\orchestrator\shared\hooks
+mkdir agents guidelines skills
+
+# Create agent symlinks
+mklink /D agents\global ..\..\..\orchestrator\shared\agents\global
+mklink /D agents\app ..\..\..\orchestrator\shared\agents\app
+
+# Create commands symlink
 mklink /D commands ..\..\orchestrator\shared\commands
+
+# Create guidelines symlinks
+mklink /D guidelines\global ..\..\..\orchestrator\shared\guidelines\global
+mklink /D guidelines\app ..\..\..\orchestrator\shared\guidelines\app
+
+# Create hooks symlink
+mklink /D hooks ..\..\orchestrator\shared\hooks
+
+# Create skills symlinks
+mklink /D skills\global ..\..\..\orchestrator\shared\skills\global
+mklink /D skills\app ..\..\..\orchestrator\shared\skills\app
+
+# Create settings symlink
+mklink settings.json ..\..\orchestrator\shared\settings\app\settings.json
 ```
 
 ### Issue: Skills Not Triggering
@@ -625,10 +745,12 @@ mklink /D commands ..\..\orchestrator\shared\commands
 **Problem:** Edit files but skills don't activate
 
 **Check:**
-1. Symlinks exist and work: `ls -la ../my-app/.claude/skills`
-2. skill-rules.json is valid: `jq . shared/skills/skill-rules.json`
-3. File patterns match: Check `skill-rules.json` for your repo's patterns
-4. Hooks are executable: `chmod +x shared/hooks/*.sh`
+1. Symlinks exist and work: `ls -la ../my-app/.claude/skills/`
+2. Repo-specific skill exists: `ls -la ../my-app/.claude/skills/app/`
+3. skill-rules.json is valid: `jq . shared/skills/skill-rules.json`
+4. File patterns match: Check `skill-rules.json` for your repo's patterns
+5. Hooks are executable: `chmod +x shared/hooks/*.sh`
+6. Settings file linked: `ls -la ../my-app/.claude/settings.json`
 
 ### Issue: Validation Failures
 
@@ -688,8 +810,8 @@ cp SETUP_CONFIG.json SETUP_CONFIG.backup.json
 After setup, you can customize skills:
 
 ```bash
-# Edit skill for your repo
-vim shared/skills/app-guidelines/skill.md
+# Edit skill for your repo (use actual repo name)
+vim shared/skills/app/skill.md
 
 # Add custom patterns, examples, or guidance
 # Save and test
@@ -698,8 +820,11 @@ vim shared/skills/app-guidelines/skill.md
 ### Customizing Guidelines
 
 ```bash
-# Edit guidelines with your org-specific patterns
-vim shared/guidelines/error-handling.md
+# Edit repo-specific guidelines
+vim shared/guidelines/app/error-handling.md
+
+# Or edit global guidelines that apply to all repos
+vim shared/guidelines/global/documentation-standards.md
 
 # Add examples, update patterns
 # Reference from skills as needed

@@ -182,7 +182,6 @@ Orchestrator-specific development skill.
 
 Typical structure:
 - `skill.md` - Main skill with tech stack-specific patterns
-- `README.md` - Skill overview and trigger patterns
 
 ---
 
@@ -256,7 +255,6 @@ Typical structure:
 | Template | Purpose |
 |----------|---------|
 | `skill.template.md` | Template for repo-specific skill main file |
-| `README.template.md` | Template for skill README |
 
 #### Examples (`setup/examples/`)
 
