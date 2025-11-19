@@ -72,3 +72,5 @@ shared/settings/*.json
 # Setup directory (optional - can be removed after setup)
 # Uncomment the line below after completing setup if you want git to ignore it:
 # setup/
+setup/SETUP_ANALYSIS.md
+
