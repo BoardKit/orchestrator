@@ -1,6 +1,8 @@
 ---
-description: Configure the orchestrator for your organization - first-time setup wizard
+description: Configure the orchestrator for your organization - first-time setup wizard (ORCHESTRATOR ONLY)
 ---
+
+**⚠️ IMPORTANT:** This command should ONLY be run from the orchestrator repository, not from application repositories.
 
 You are launching the **Orchestrator Setup Wizard** to configure this orchestrator for a new organization.
 

@@ -30,25 +30,90 @@ Open this repository in Claude Code and run:
 
 The wizard will ask about:
 - Your organization name
-- Your repositories (names, paths, types)
-- Tech stacks (auto-detected, you confirm)
-- Optional features (cross-repo doc sync, database docs)
+- Number of application repositories (orchestrator is automatically included)
+- For each repository:
+  - Name (short, lowercase)
+  - Path (relative to orchestrator)
+  - Type (fullstack/frontend/backend/library/service/monorepo)
+  - Description (one sentence)
+  - Tech stack (auto-detected, you can confirm/override)
+- Optional features:
+  - Database documentation
+  - Detailed guidelines
+
+Note: The orchestrator is always included as a repository, and cross-repo documentation synchronization is always enabled.
 
 ### 3. Review Generated Files
 
-The wizard will create:
-- `SETUP_CONFIG.json` - Your configuration
-- `CLAUDE.md` - Customized context file
-- `shared/skills/` - Repository-specific skills
-- `shared/guidelines/` - Tech stack-specific guidelines
-- `README.md` - Updated with your org info
+The wizard creates the following structure:
 
-### 4. Delete This Directory
+**In Orchestrator:**
+```
+orchestrator/
+├── SETUP_CONFIG.json                     # Your configuration
+├── CLAUDE.md                             # Customized context file
+├── README.md                             # Updated with your org info
+├── shared/
+│   ├── skills/
+│   │   ├── global/                       # Pre-existing global skills
+│   │   ├── <repo-name>/                  # One directory per repo
+│   │   │   └── skill.md                  # Repo-specific skill
+│   │   └── skill-rules.json              # Updated with all skills
+│   ├── guidelines/
+│   │   ├── global/                       # Global guidelines
+│   │   └── <repo-name>/                  # Repo-specific guidelines
+│   │       ├── architectural-principles.md
+│   │       ├── error-handling.md
+│   │       ├── testing-standards.md
+│   │       ├── cross-repo-patterns.md    # (if multiple repos)
+│   │       └── DATABASE_*.md             # (if database docs enabled)
+│   ├── agents/
+│   │   └── <repo-name>/                  # (optional repo-specific agents)
+│   └── settings/
+│       └── <repo-name>/settings.json     # Per-repo settings
+```
+
+**In Each Application Repository:**
+```
+<repo-path>/
+├── CLAUDE.md                             # Repo-specific context
+└── .claude/
+    ├── agents/
+    │   ├── global/ → orchestrator/shared/agents/global/
+    │   └── <repo-name>/ → orchestrator/shared/agents/<repo-name>/
+    ├── skills/
+    │   ├── global/ → orchestrator/shared/skills/global/
+    │   └── <repo-name>/ → orchestrator/shared/skills/<repo-name>/
+    ├── guidelines/
+    │   ├── global/ → orchestrator/shared/guidelines/global/
+    │   └── <repo-name>/ → orchestrator/shared/guidelines/<repo-name>/
+    ├── commands/ → orchestrator/shared/commands/
+    ├── hooks/ → orchestrator/shared/hooks/
+    └── settings.json → orchestrator/shared/settings/<repo-name>/settings.json
+```
+
+### 4. Create Symlinks
+
+After the wizard completes, run:
+
+```bash
+./setup/scripts/create-symlinks.sh
+```
+
+This creates all necessary symlinks in your repositories.
+
+### 5. Validate Setup
+
+```bash
+./setup/scripts/validate-setup.sh
+```
+
+### 6. Delete This Directory
 
 ```bash
 rm -rf setup/
 git add .
-git commit -m "Remove setup wizard after configuration"
+git commit -m "Configure orchestrator for [YourOrg]"
 ```
 
 ---
@@ -62,17 +127,19 @@ git commit -m "Remove setup wizard after configuration"
 - `doc-generator.md` - Generates customized guidelines
 
 ### Templates
-- `templates/CLAUDE.template.md` - Template for main context file
+- `templates/CLAUDE.template.md` - Template for orchestrator CLAUDE.md
+- `templates/repo-CLAUDE.template.md` - Template for repository CLAUDE.md
 - `templates/README.template.md` - Template for README
 - `templates/settings.json` - Standard settings.json for repositories
 - `templates/skill-rules.template.json` - Template for skill triggers
-- `templates/repo-skill-template/` - Template for generating repo skills
-- `templates/guidelines/` - Templates for guidelines
+- `templates/repo-skill-template/skill.template.md` - Template for repo skills
+- `templates/guidelines/*.template.md` - Templates for guidelines
 
 ### Scripts
 - `scripts/create-symlinks.sh` - Creates symlinks in your repos
 - `scripts/validate-setup.sh` - Validates setup completed correctly
 - `scripts/detect-tech-stack.sh` - Helper for tech stack detection
+- `scripts/manage-gitignore.sh` - Updates .gitignore files
 
 ### Examples
 - `examples/` - Example configurations for common tech stacks
@@ -103,9 +170,48 @@ If you prefer not to use the wizard:
 
 1. Copy an example from `setup/examples/` to `SETUP_CONFIG.json`
 2. Edit `SETUP_CONFIG.json` with your information
-3. Manually create skills in `shared/skills/`
-4. Manually update `CLAUDE.md`
+3. Manually create the directory structure:
+   ```bash
+   # Create skill directories
+   mkdir -p shared/skills/{repo-name}/
+
+   # Create guideline directories
+   mkdir -p shared/guidelines/{repo-name}/
+
+   # Create settings directories
+   mkdir -p shared/settings/
+   ```
+4. Copy templates and customize them
 5. Run `setup/scripts/validate-setup.sh` to check
+
+---
+
+## Directory Structure After Setup
+
+The correct structure follows this pattern:
+
+```
+shared/
+├── agents/
+│   ├── global/               # Global agents (pre-existing)
+│   ├── orchestrator/         # Orchestrator-only agents
+│   └── <repo-name>/          # Optional repo-specific agents
+├── guidelines/
+│   ├── global/               # Global guidelines
+│   └── <repo-name>/          # Repo-specific guidelines
+├── skills/
+│   ├── global/               # Global skills (pre-existing)
+│   └── <repo-name>/          # Repo-specific skills
+├── settings/
+│   └── <repo-name>/settings.json
+├── commands/                 # Shared commands (pre-existing)
+└── hooks/                    # Shared hooks (pre-existing)
+```
+
+Each repository gets symlinks to:
+- Their own repo-specific directories (`<repo-name>/`)
+- The global directories (`global/`)
+- Shared resources (commands, hooks)
 
 ---
 

@@ -48,7 +48,7 @@ Also read:
 
 Create directory structure:
 ```
-shared/skills/{{repo-name}}-guidelines/
+shared/skills/{{repo-name}}/
 └── skill.md
 ```
 
@@ -341,7 +341,7 @@ When making changes that affect multiple repos:
 - When in doubt, check `CLAUDE.md` for the decision tree
 ```
 
-**Write complete skill.md to:** `shared/skills/{{repo-name}}-guidelines/skill.md`
+**Write complete skill.md to:** `shared/skills/{{repo-name}}/skill.md`
 
 ### Step 4: Generate skill-rules.json Entry
 
@@ -349,7 +349,7 @@ Create JSON entry for this skill:
 
 ```json
 {
-  "{{repo-name}}-guidelines": {
+  "{{repo-name}}": {
     "type": "domain",
     "enforcement": "suggest",
     "priority": "high",
@@ -391,12 +391,12 @@ Return structured response to setup-wizard:
 {
   "success": true,
   "repositoryName": "{{repo-name}}",
-  "skillDirectory": "shared/skills/{{repo-name}}-guidelines/",
+  "skillDirectory": "shared/skills/{{repo-name}}/",
   "filesCreated": [
-    "shared/skills/{{repo-name}}-guidelines/skill.md"
+    "shared/skills/{{repo-name}}/skill.md"
   ],
   "skillRulesEntry": {
-    "{{repo-name}}-guidelines": { ... }
+    "{{repo-name}}": { ... }
   },
   "summary": {
     "techStack": "{{primary frameworks}}",
@@ -503,14 +503,14 @@ Return structured response to setup-wizard:
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Generating Skill: app-guidelines
+Generating Skill: app
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 Repository: app
 Type: fullstack
 Tech Stack: React, Next.js, FastAPI, PostgreSQL
 
-✅ Created: shared/skills/app-guidelines/skill.md
+✅ Created: shared/skills/app/skill.md
 ✅ Generated: skill-rules.json entry
 
 Summary:

@@ -56,55 +56,68 @@ else
     check_fail "shared/ directory missing" "Run: mkdir -p shared"
 fi
 
-# Check 2: Generic agents directory
-if [ -d "shared/agents/generic" ]; then
-    check_pass "shared/agents/generic/ exists"
+# Check 2: Global agents directory
+if [ -d "shared/agents/global" ]; then
+    check_pass "shared/agents/global/ exists"
 
-    # Count generic agents
-    agent_count=$(find shared/agents/generic -name "*.md" -not -name "README.md" | wc -l | tr -d ' ')
-    if [ "$agent_count" -ge 8 ]; then
-        check_pass "Found $agent_count generic agents (expected ≥8)"
+    # Count global agents
+    agent_count=$(find shared/agents/global -name "*.md" -not -name "README.md" | wc -l | tr -d ' ')
+    if [ "$agent_count" -ge 7 ]; then
+        check_pass "Found $agent_count global agents (expected ≥7)"
     else
-        check_fail "Found only $agent_count generic agents (expected ≥8)"
+        check_fail "Found only $agent_count global agents (expected ≥7)"
     fi
 
-    # Check specific required agents
+    # Check specific required global agents
     for agent in "code-architecture-reviewer" "refactor-planner" "code-refactor-master" \
                  "plan-reviewer" "documentation-architect" "auto-error-resolver" \
-                 "web-research-specialist" "cross-repo-doc-sync"; do
-        if [ -f "shared/agents/generic/$agent.md" ]; then
-            check_pass "Agent: $agent.md exists"
+                 "web-research-specialist"; do
+        if [ -f "shared/agents/global/$agent.md" ]; then
+            check_pass "Global Agent: $agent.md exists"
         else
-            check_fail "Agent: $agent.md missing"
+            check_fail "Global Agent: $agent.md missing"
         fi
     done
+
+    # Check orchestrator-specific agents
+    if [ -f "shared/agents/orchestrator/cross-repo-doc-sync.md" ]; then
+        check_pass "Orchestrator Agent: cross-repo-doc-sync.md exists"
+    else
+        check_fail "Orchestrator Agent: cross-repo-doc-sync.md missing"
+    fi
+
+    if [ -f "shared/agents/orchestrator/setup-wizard.md" ]; then
+        check_pass "Orchestrator Agent: setup-wizard.md exists"
+    else
+        check_fail "Orchestrator Agent: setup-wizard.md missing"
+    fi
 else
-    check_fail "shared/agents/generic/ missing" "Run: mkdir -p shared/agents/generic"
+    check_fail "shared/agents/global/ missing" "Run: mkdir -p shared/agents/global"
 fi
 
 echo ""
-echo -e "${CYAN}Generic Skills${NC}"
+echo -e "${CYAN}Global Skills${NC}"
 echo "---"
 
-# Check 3: Generic skills directory
-if [ -d "shared/skills/generic" ]; then
-    check_pass "shared/skills/generic/ exists"
+# Check 3: Global skills directory
+if [ -d "shared/skills/global" ]; then
+    check_pass "shared/skills/global/ exists"
 
     # Check skill-developer
-    if [ -d "shared/skills/generic/skill-developer" ] && [ -f "shared/skills/generic/skill-developer/SKILL.md" ]; then
+    if [ -d "shared/skills/global/skill-developer" ] && [ -f "shared/skills/global/skill-developer/skill.md" ]; then
         check_pass "skill-developer exists and configured"
     else
         check_fail "skill-developer missing or incomplete"
     fi
 
-    # Check orchestrator-guidelines
-    if [ -d "shared/skills/generic/orchestrator-guidelines" ] && [ -f "shared/skills/generic/orchestrator-guidelines/skill.md" ]; then
-        check_pass "orchestrator-guidelines exists and configured"
+    # Check orchestrator skill
+    if [ -d "shared/skills/global/orchestrator" ] && [ -f "shared/skills/global/orchestrator/skill.md" ]; then
+        check_pass "orchestrator skill exists and configured"
     else
-        check_fail "orchestrator-guidelines missing or incomplete"
+        check_fail "orchestrator skill missing or incomplete"
     fi
 else
-    check_fail "shared/skills/generic/ missing" "Run: mkdir -p shared/skills/generic"
+    check_fail "shared/skills/global/ missing" "Run: mkdir -p shared/skills/global"
 fi
 
 # Check 4: skill-rules.json

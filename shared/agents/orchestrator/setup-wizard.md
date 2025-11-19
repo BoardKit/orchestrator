@@ -65,10 +65,12 @@ Check:
 ```
 Ask user:
 1. Organization name (e.g., "Acme Corp", "My Projects")
-2. How many repositories to manage (excluding orchestrator)?
+2. How many application repositories to manage?
    - Minimum: 1
    - Recommended: 2-5
    - Maximum: 10
+
+Note: Orchestrator will be automatically included as an additional repository.
 ```
 
 **Step 3: Repository Discovery**
@@ -119,7 +121,8 @@ Ask user to select agents for this repo:
    - code-refactor-master
    - auto-error-resolver
    - web-research-specialist
-   - cross-repo-doc-sync (if multiple repos)
+
+Note: cross-repo-doc-sync is ONLY available when working in the orchestrator repository itself (not symlinked to application repos)
 
 3. Custom agent creation:
    - "Create custom agent for this repo?" (yes/no)
@@ -131,15 +134,14 @@ Store: List of agents for each repo
 **Step 5: Feature Configuration**
 ```
 Ask user:
-1. Enable cross-repo documentation sync? (yes/no)
-   - Only if multiple repositories
-
-2. Create database documentation? (yes/no)
+1. Create database documentation? (yes/no)
    - If yes: Which database system?
    - Split into schema/operations/security docs?
 
-3. Create API documentation guidelines? (yes/no)
+2. Create API documentation guidelines? (yes/no)
    - If yes: REST, GraphQL, gRPC, etc.
+
+Note: Cross-repo documentation sync is automatically enabled for all setups.
 
 Store: Feature flags in config
 ```
@@ -495,6 +497,38 @@ Create configuration file for future reference and updates:
   },
   "repositories": [
     {
+      "name": "orchestrator",
+      "path": ".",
+      "relativePath": ".",
+      "type": "infrastructure",
+      "techStack": {
+        "primary": "Orchestrator",
+        "frameworks": ["Claude Code Infrastructure"],
+        "testing": []
+      },
+      "agentsAvailable": [
+        "global/*",
+        "orchestrator/*"
+      ],
+      "symlinksCreated": {
+        "agents": {
+          "global": true,
+          "repo-specific": true
+        },
+        "skills": {
+          "global": true,
+          "repo-specific": true
+        },
+        "guidelines": {
+          "global": true,
+          "repo-specific": true
+        },
+        "hooks": true,
+        "commands": true,
+        "settings": true
+      }
+    },
+    {
       "name": "repo-name",
       "path": "/absolute/path/to/repo",
       "relativePath": "../repo-name",
@@ -529,7 +563,7 @@ Create configuration file for future reference and updates:
     ...
   ],
   "features": {
-    "crossRepoDocSync": true,
+    "crossRepoDocSync": true,  // Always enabled
     "databaseDocs": false,
     "apiDocs": false
   },
@@ -793,7 +827,8 @@ What is your organization name?
 User: BoardKit
 
 Agent:
-Great! How many repositories do you want to manage (excluding the orchestrator)?
+Great! How many application repositories do you want to manage?
+(Note: The orchestrator will be automatically included as an additional repository)
 
 User: 3
 

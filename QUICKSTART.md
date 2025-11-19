@@ -117,9 +117,11 @@ Q: What is your organization or project name?
 #### 2.2: Number of Repositories
 
 ```
-Q: How many repositories will this orchestrator manage?
+Q: How many application repositories will this orchestrator manage?
 
 Enter how many you will be configuring now.
+
+Note: The orchestrator will be automatically included as an additional repository.
 ```
 
 **Tip:** Start with your main repositories. You can add more later.
@@ -214,12 +216,6 @@ Q: Other important tools (comma-separated):
 #### 2.4: Feature Selection
 
 ```
-Q: Enable cross-repo documentation synchronization?
-   (yes/no)
-```
-**Recommendation:** yes, this is one of the most important features for this setup.
-
-```
 Q: Generate database documentation guidelines?
    (yes/no)
 ```
@@ -230,6 +226,8 @@ Q: Generate detailed guidelines with examples?
    (yes/no)
 ```
 **Recommendation:** yes for first setup -- this will add the initial documentation files. Strictly verify the accuracy.
+
+**Note:** Cross-repo documentation synchronization is automatically enabled for all setups.
 
 ### What the Wizard Generates
 

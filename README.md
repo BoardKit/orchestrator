@@ -150,10 +150,12 @@ For in depth details on all the resources in the orchestrator, see: [docs/orches
 During setup, symlinks are created to connect each repository to the shared resources in the orchestrator.
 
 **Global Agents** (`shared/agents/global/`)
-7 specialized agents for code review, refactoring, planning, documentation, error fixing, and web research. Available to all repos.
+7 specialized agents for code review, refactoring, planning, documentation, error fixing, and web research. Available to all repos via symlinks.
 
-**Orchestrator Agent** (`shared/agents/orchestrator/`)
-Cross-repo documentation sync agent that keeps orchestrator docs aligned with your evolving codebase. Runs only from orchestrator.
+**Orchestrator Agents** (`shared/agents/orchestrator/`)
+Agents that run ONLY from the orchestrator repository (NOT symlinked to application repos):
+- `cross-repo-doc-sync` - Keeps orchestrator docs aligned with your evolving codebase
+- `setup-wizard` - Configures the orchestrator for your organization
 
 **Hooks** (`shared/hooks/`)
 Event-driven scripts that auto-suggest skills and track file changes.
@@ -202,12 +204,13 @@ The wizard generates custom skills, guidelines, and optionally agents tailored t
   - `shared/guidelines/<repo-name>/testing-standards.md` - Testing strategies
   - `shared/guidelines/<repo-name>/architectural-principles.md` - System architecture
 
-**5. Cross Repo Documentation Sync**
-- From *orchestrator* repo, ask Claude to use `cross-repo-doc-sync` agent to update the documentation from the last commits.
-- Example:
-   - "Use cross-repo-doc-sync agent to update documentation based on the last 5 commits from all repos."
-   - "Use cross-repo-doc-sync agent to update documentation based on the last 3 commits in repo-a."
-   - "Update the documentation using cross-repo-doc-sync agent based on all commits from today."
+**5. Cross Repo Documentation Sync (Orchestrator Only)**
+- **IMPORTANT:** This agent is ONLY available when working in the orchestrator repository
+- From the *orchestrator* repo, ask Claude to use `cross-repo-doc-sync` agent to update documentation
+- Examples:
+   - "Use cross-repo-doc-sync agent to update documentation based on the last 5 commits from all repos"
+   - "Use cross-repo-doc-sync agent to update documentation based on the last 3 commits in repo-a"
+   - "Update the documentation using cross-repo-doc-sync agent based on all commits from today"
 
 **6. Everything Stays in Sync**
 - Update an agent in orchestrator → All repos get the update via symlinks

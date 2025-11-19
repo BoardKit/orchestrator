@@ -143,37 +143,37 @@ for i in $(seq 0 $((REPO_COUNT - 1))); do
 
     ERRORS=0
 
-    # 1. AGENTS: Generic (all repos) + Repo-specific (only this repo)
+    # 1. AGENTS: Global (all repos) + Repo-specific (only this repo)
     echo -e "${YELLOW}  Agents:${NC}"
 
-    # Generic agents
+    # Global agents
     create_symlink \
-        "$ORCHESTRATOR_ROOT/shared/agents/generic" \
-        "$CLAUDE_DIR/agents/generic" \
-        "Generic agents" || ((ERRORS++))
+        "$ORCHESTRATOR_ROOT/shared/agents/global" \
+        "$CLAUDE_DIR/agents/global" \
+        "Global agents" || ((ERRORS++))
 
     # Repo-specific agents (if exist)
-    if [ -d "$ORCHESTRATOR_ROOT/shared/agents/repo-specific/$REPO_NAME" ]; then
+    if [ -d "$ORCHESTRATOR_ROOT/shared/agents/$REPO_NAME" ]; then
         create_symlink \
-            "$ORCHESTRATOR_ROOT/shared/agents/repo-specific/$REPO_NAME" \
+            "$ORCHESTRATOR_ROOT/shared/agents/$REPO_NAME" \
             "$CLAUDE_DIR/agents/$REPO_NAME" \
             "Repo-specific agents" || ((ERRORS++))
     fi
 
-    # 2. SKILLS: Generic (all repos) + Repo-specific skill (only this repo)
+    # 2. SKILLS: Global (all repos) + Repo-specific skill (only this repo)
     echo -e "${YELLOW}  Skills:${NC}"
 
-    # Generic skills
+    # Global skills
     create_symlink \
-        "$ORCHESTRATOR_ROOT/shared/skills/generic" \
-        "$CLAUDE_DIR/skills/generic" \
-        "Generic skills" || ((ERRORS++))
+        "$ORCHESTRATOR_ROOT/shared/skills/global" \
+        "$CLAUDE_DIR/skills/global" \
+        "Global skills" || ((ERRORS++))
 
     # Repo-specific skill
-    if [ -d "$ORCHESTRATOR_ROOT/shared/skills/repo-specific/${REPO_NAME}-guidelines" ]; then
+    if [ -d "$ORCHESTRATOR_ROOT/shared/skills/${REPO_NAME}" ]; then
         create_symlink \
-            "$ORCHESTRATOR_ROOT/shared/skills/repo-specific/${REPO_NAME}-guidelines" \
-            "$CLAUDE_DIR/skills/${REPO_NAME}-guidelines" \
+            "$ORCHESTRATOR_ROOT/shared/skills/${REPO_NAME}" \
+            "$CLAUDE_DIR/skills/${REPO_NAME}" \
             "Repo-specific skill" || ((ERRORS++))
     fi
 
@@ -183,12 +183,36 @@ for i in $(seq 0 $((REPO_COUNT - 1))); do
         "$CLAUDE_DIR/skills/skill-rules.json" \
         "Skill rules" || ((ERRORS++))
 
-    # 3. COMMANDS: All repos get same commands
+    # 3. COMMANDS: Filter out setup-orchestrator for non-orchestrator repos
     echo -e "${YELLOW}  Commands:${NC}"
-    create_symlink \
-        "$ORCHESTRATOR_ROOT/shared/commands" \
-        "$CLAUDE_DIR/commands" \
-        "Commands" || ((ERRORS++))
+
+    # Check if this is the orchestrator repo itself
+    if [ "$REPO_NAME" = "orchestrator" ]; then
+        # Orchestrator gets all commands including setup-orchestrator
+        create_symlink \
+            "$ORCHESTRATOR_ROOT/shared/commands" \
+            "$CLAUDE_DIR/commands" \
+            "Commands (all)" || ((ERRORS++))
+    else
+        # Application repos get commands WITHOUT setup-orchestrator
+        # Create filtered commands directory
+        FILTERED_COMMANDS="$CLAUDE_DIR/commands"
+        mkdir -p "$FILTERED_COMMANDS"
+
+        # Symlink each command file except setup-orchestrator.md
+        for cmd_file in "$ORCHESTRATOR_ROOT/shared/commands"/*.md; do
+            if [ -f "$cmd_file" ]; then
+                cmd_name=$(basename "$cmd_file")
+                if [ "$cmd_name" != "setup-orchestrator.md" ]; then
+                    create_symlink \
+                        "$cmd_file" \
+                        "$FILTERED_COMMANDS/$cmd_name" \
+                        "Command: $cmd_name" || ((ERRORS++))
+                fi
+            fi
+        done
+        echo -e "  ${GREEN}✓${NC} Commands (excluding setup-orchestrator)"
+    fi
 
     # 4. HOOKS: All repos get same hooks
     echo -e "${YELLOW}  Hooks:${NC}"
@@ -200,21 +224,38 @@ for i in $(seq 0 $((REPO_COUNT - 1))); do
     # Make hooks executable
     chmod +x "$ORCHESTRATOR_ROOT/shared/hooks/"*.sh 2>/dev/null || true
 
-    # 5. GUIDELINES: All repos get same guidelines
+    # 5. GUIDELINES: Global (all repos) + Repo-specific (only this repo)
     echo -e "${YELLOW}  Guidelines:${NC}"
+
+    # Global guidelines
     create_symlink \
-        "$ORCHESTRATOR_ROOT/shared/guidelines" \
-        "$CLAUDE_DIR/guidelines" \
-        "Guidelines" || ((ERRORS++))
+        "$ORCHESTRATOR_ROOT/shared/guidelines/global" \
+        "$CLAUDE_DIR/guidelines/global" \
+        "Global guidelines" || ((ERRORS++))
+
+    # Repo-specific guidelines
+    if [ -d "$ORCHESTRATOR_ROOT/shared/guidelines/${REPO_NAME}" ]; then
+        create_symlink \
+            "$ORCHESTRATOR_ROOT/shared/guidelines/${REPO_NAME}" \
+            "$CLAUDE_DIR/guidelines/${REPO_NAME}" \
+            "Repo-specific guidelines" || ((ERRORS++))
+    fi
 
     # 6. SETTINGS: Symlink to repo-specific settings file
     echo -e "${YELLOW}  Settings:${NC}"
-    SETTINGS_FILE="$ORCHESTRATOR_ROOT/shared/settings/${REPO_NAME}-settings.json"
+    SETTINGS_FILE="$ORCHESTRATOR_ROOT/shared/settings/${REPO_NAME}/settings.json"
+    SETTINGS_DIR="$ORCHESTRATOR_ROOT/shared/settings/${REPO_NAME}"
 
-    # Create settings from template if doesn't exist
+    # Create settings directory and file from template if doesn't exist
     if [ ! -f "$SETTINGS_FILE" ]; then
-        cp "$ORCHESTRATOR_ROOT/shared/settings/template-settings.json" "$SETTINGS_FILE"
-        echo -e "  ${GREEN}✓${NC} Generated $REPO_NAME-settings.json"
+        mkdir -p "$SETTINGS_DIR"
+        if [ -f "$ORCHESTRATOR_ROOT/setup/templates/settings.json" ]; then
+            cp "$ORCHESTRATOR_ROOT/setup/templates/settings.json" "$SETTINGS_FILE"
+        else
+            # Use a default template
+            echo '{"version": "1.0"}' > "$SETTINGS_FILE"
+        fi
+        echo -e "  ${GREEN}✓${NC} Generated ${REPO_NAME}/settings.json"
     fi
 
     create_symlink \
@@ -259,15 +300,17 @@ if [ $SUCCESS_COUNT -eq $REPO_COUNT ]; then
     echo -e "${GREEN}✅ All repositories configured!${NC}"
     echo ""
     echo "What was created (per repository):"
-    echo "  ✓ .claude/agents/generic/ → orchestrator/shared/agents/generic/"
-    echo "  ✓ .claude/agents/{repo}/ → orchestrator/shared/agents/repo-specific/{repo}/ (if exists)"
-    echo "  ✓ .claude/skills/generic/ → orchestrator/shared/skills/generic/"
-    echo "  ✓ .claude/skills/{repo}-guidelines/ → orchestrator/shared/skills/repo-specific/{repo}-guidelines/"
+    echo "  ✓ .claude/agents/global/ → orchestrator/shared/agents/global/"
+    echo "  ✓ .claude/agents/{repo}/ → orchestrator/shared/agents/{repo}/ (if exists)"
+    echo "  ✓ .claude/skills/global/ → orchestrator/shared/skills/global/"
+    echo "  ✓ .claude/skills/{repo}/ → orchestrator/shared/skills/{repo}/"
     echo "  ✓ .claude/skills/skill-rules.json → orchestrator/shared/skills/skill-rules.json"
-    echo "  ✓ .claude/commands/ → orchestrator/shared/commands/"
+    echo "  ✓ .claude/commands/ → orchestrator/shared/commands/ (orchestrator only: all commands)"
+    echo "  ✓ .claude/commands/*.md → orchestrator/shared/commands/*.md (other repos: excluding setup-orchestrator)"
     echo "  ✓ .claude/hooks/ → orchestrator/shared/hooks/"
-    echo "  ✓ .claude/guidelines/ → orchestrator/shared/guidelines/"
-    echo "  ✓ .claude/settings.json → orchestrator/shared/settings/{repo}-settings.json"
+    echo "  ✓ .claude/guidelines/global/ → orchestrator/shared/guidelines/global/"
+    echo "  ✓ .claude/guidelines/{repo}/ → orchestrator/shared/guidelines/{repo}/"
+    echo "  ✓ .claude/settings.json → orchestrator/shared/settings/{repo}/settings.json"
     echo "  ✓ .gitignore updated with .claude/tsc-cache"
     echo ""
     echo "Next steps:"

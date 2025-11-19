@@ -15,20 +15,24 @@ This directory contains AI agents that can be invoked to perform specific tasks 
 ## Agent Storage and Distribution
 
 **Central Management:**
-- All agents (global and repo-specific) are stored in `orchestrator/shared/agents/`
-- Single source of truth for all agent definitions
+- All agents are stored in `orchestrator/shared/agents/`
+- Organized in subdirectories:
+  - `global/` - Available to all repositories via symlinks
+  - `orchestrator/` - Only available when working in orchestrator (NOT symlinked)
+  - `<repo-name>/` - (Optional) Repository-specific agents
 
 **Selective Distribution:**
-- Each repository gets **individual symlinks** for only the agents it needs
-- Example: Frontend repo symlinks to `frontend-typescript-specialist.md` but NOT `backend-python-developer.md`
-- NOT directory symlinks - each agent file is symlinked separately
-
+- Application repositories get symlinks ONLY to:
+  - `global/` agents directory
+  - Their own `<repo-name>/` agents directory (if it exists)
+- Orchestrator-only agents (`orchestrator/` directory) are NEVER symlinked
+- Example: The `cross-repo-doc-sync` agent in `orchestrator/` is only accessible from the orchestrator repository
 
 **Benefits:**
 - Central updates propagate to all repos automatically
 - Each repo sees only relevant agents
 - Clean namespace without unrelated agents
-- Easy to add new specialized agents
+- Orchestrator-specific tools remain isolated
 
 ## How to Invoke Agents
 
@@ -39,6 +43,9 @@ This directory contains AI agents that can be invoked to perform specific tasks 
 
 ## Agent Inventory
 
+### Global Agents (Available to All Repos)
+
+These agents are located in `shared/agents/global/` and are symlinked to all application repositories.
 
 ### 1. code-architecture-reviewer
 
@@ -78,13 +85,31 @@ This directory contains AI agents that can be invoked to perform specific tasks 
 
 **Output:** Research summary with findings, recommendations, code examples, sources
 
+### Orchestrator Agents (Orchestrator Repository Only)
+
+These agents are located in `shared/agents/orchestrator/` and are ONLY available when working in the orchestrator repository. They are NOT symlinked to application repositories.
+
 ### 8. cross-repo-doc-sync
+
+**Location:** `orchestrator/cross-repo-doc-sync.md` (orchestrator-only)
 
 **What it does:** Monitors changes across repos, updates orchestrator documentation, validates cross-references, provides sync reports
 
 **Output:** Sync report, updated orchestrator docs (CLAUDE.md, guidelines, skills)
 
-**Uses:** Reads from `SETUP_CONFIG.json`, only writes to orchestrator, preserves symlink
+**Uses:** Reads from `SETUP_CONFIG.json`, only writes to orchestrator, preserves symlinks
+
+**Important:** This agent must be invoked from within the orchestrator repository. It has access to read all configured repositories to sync documentation.
+
+### 9. setup-wizard
+
+**Location:** `orchestrator/setup-wizard.md` (orchestrator-only)
+
+**What it does:** Guides through first-time orchestrator configuration, collects org info, creates symlinks, generates documentation
+
+**Output:** SETUP_CONFIG.json, customized CLAUDE.md, repo-specific skills and guidelines
+
+**Important:** Run via `/setup-orchestrator` command from orchestrator repository
 
 ## Agent Invocation Patterns
 

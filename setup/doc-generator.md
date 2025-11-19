@@ -33,9 +33,11 @@ Read `SETUP_CONFIG.json` and extract:
 }
 ```
 
+**Note:** Guidelines will be generated in `shared/guidelines/<repo-name>/` for each repository.
+
 ### Step 2: Generate architectural-principles.md
 
-Read template: `setup/templates/guidelines/architectural-principles.template.md`
+For **each repository**, read template: `setup/templates/guidelines/architectural-principles.template.md`
 
 #### Replace Basic Placeholders:
 - `{{ORG_NAME}}` → organization name
@@ -215,11 +217,11 @@ If `repositories.length > 1`:
 {{/each}}
 ```
 
-**Write to:** `shared/guidelines/architectural-principles.md`
+**Write to:** `shared/guidelines/<repo-name>/architectural-principles.md` (for each repository)
 
 ### Step 3: Generate error-handling.md
 
-Read template: `setup/templates/guidelines/error-handling.template.md`
+For **each repository**, read template: `setup/templates/guidelines/error-handling.template.md`
 
 #### Group Repositories by Tech Stack:
 
@@ -456,11 +458,11 @@ console.error('Error occurred', {
 {{/each}}
 ```
 
-**Write to:** `shared/guidelines/error-handling.md`
+**Write to:** `shared/guidelines/<repo-name>/error-handling.md` (for each repository)
 
 ### Step 4: Generate testing-standards.md
 
-Read template: `setup/templates/guidelines/testing-standards.template.md`
+For **each repository**, read template: `setup/templates/guidelines/testing-standards.template.md`
 
 #### Generate Testing by Tech Stack:
 
@@ -535,7 +537,7 @@ async def test_async_function():
 {{/if}}
 ```
 
-**Write to:** `shared/guidelines/testing-standards.md`
+**Write to:** `shared/guidelines/<repo-name>/testing-standards.md` (for each repository)
 
 ### Step 5: Generate Database Documentation (if enabled)
 
@@ -610,7 +612,7 @@ Security best practices and RLS policies.
 {{/if}}
 ```
 
-**Write to:** `shared/guidelines/DATABASE_*.md`
+**Write to:** `shared/guidelines/<repo-name>/DATABASE_*.md` (for each repository with databases)
 
 ### Step 6: Validate Generated Files
 
@@ -627,9 +629,12 @@ Check:
 {
   "success": true,
   "filesGenerated": [
-    "shared/guidelines/architectural-principles.md",
-    "shared/guidelines/error-handling.md",
-    "shared/guidelines/testing-standards.md"
+    "shared/guidelines/<repo1>/architectural-principles.md",
+    "shared/guidelines/<repo1>/error-handling.md",
+    "shared/guidelines/<repo1>/testing-standards.md",
+    "shared/guidelines/<repo2>/architectural-principles.md",
+    "shared/guidelines/<repo2>/error-handling.md",
+    "shared/guidelines/<repo2>/testing-standards.md"
   ],
   "databaseDocsGenerated": true,
   "summary": {

@@ -141,96 +141,120 @@ else
 fi
 echo ""
 
-# Check 7: Repository skills
+# Check 7: Repository-specific resources
 if [ -f "$CONFIG_FILE" ] && command -v jq &> /dev/null; then
-    echo -e "${CYAN}Checking Repository Skills...${NC}"
+    echo -e "${CYAN}Checking Repository-Specific Resources...${NC}"
 
     REPO_COUNT=$(jq '.repositories | length' "$CONFIG_FILE")
     for i in $(seq 0 $((REPO_COUNT - 1))); do
         REPO_NAME=$(jq -r ".repositories[$i].name" "$CONFIG_FILE")
-        SKILL_DIR="$ORCHESTRATOR_ROOT/shared/skills/${REPO_NAME}-guidelines"
+        REPO_PATH=$(jq -r ".repositories[$i].path" "$CONFIG_FILE")
 
+        echo -e "${CYAN}Repository: $REPO_NAME${NC}"
+
+        # Check skill directory
+        SKILL_DIR="$ORCHESTRATOR_ROOT/shared/skills/${REPO_NAME}"
         if [ -d "$SKILL_DIR" ]; then
-            check_result "Skill directory exists: ${REPO_NAME}-guidelines" "pass"
+            check_result "  Skill directory exists: shared/skills/${REPO_NAME}/" "pass"
 
             # Check skill.md
             if [ -f "$SKILL_DIR/skill.md" ]; then
-                check_result "  skill.md exists for $REPO_NAME" "pass"
+                check_result "    skill.md exists" "pass"
 
                 # Check for placeholders
                 if grep -q "{{.*}}" "$SKILL_DIR/skill.md"; then
-                    check_result "  skill.md has no placeholders" "fail" "Found unreplaced {{PLACEHOLDERS}}"
+                    check_result "    skill.md has no placeholders" "fail" "Found unreplaced {{PLACEHOLDERS}}"
                 else
-                    check_result "  skill.md has no placeholders" "pass"
+                    check_result "    skill.md has no placeholders" "pass"
                 fi
             else
-                check_result "  skill.md exists for $REPO_NAME" "fail"
+                check_result "    skill.md exists" "fail"
             fi
-
         else
-            check_result "Skill directory exists: ${REPO_NAME}-guidelines" "fail"
+            check_result "  Skill directory exists: shared/skills/${REPO_NAME}/" "fail"
         fi
+
+        # Check guidelines directory
+        GUIDELINES_DIR="$ORCHESTRATOR_ROOT/shared/guidelines/${REPO_NAME}"
+        if [ -d "$GUIDELINES_DIR" ]; then
+            check_result "  Guidelines directory exists: shared/guidelines/${REPO_NAME}/" "pass"
+
+            # Check files
+            for file in "architectural-principles.md" "error-handling.md" "testing-standards.md"; do
+                if [ -f "$GUIDELINES_DIR/$file" ]; then
+                    check_result "    $file exists" "pass"
+
+                    if grep -q "{{.*}}" "$GUIDELINES_DIR/$file"; then
+                        check_result "    $file has no placeholders" "fail"
+                    else
+                        check_result "    $file has no placeholders" "pass"
+                    fi
+                else
+                    check_result "    $file exists" "fail"
+                fi
+            done
+        else
+            check_result "  Guidelines directory exists: shared/guidelines/${REPO_NAME}/" "fail"
+        fi
+
+        # Check settings
+        SETTINGS_FILE="$ORCHESTRATOR_ROOT/shared/settings/${REPO_NAME}/settings.json"
+        if [ -f "$SETTINGS_FILE" ]; then
+            check_result "  Settings file exists: shared/settings/${REPO_NAME}/settings.json" "pass"
+        else
+            check_result "  Settings file exists: shared/settings/${REPO_NAME}/settings.json" "fail"
+        fi
+
+        # Check repository CLAUDE.md
+        if [ -n "$REPO_PATH" ] && [ "$REPO_PATH" != "." ]; then
+            REPO_CLAUDE="${REPO_PATH}/CLAUDE.md"
+            if [ -f "$REPO_CLAUDE" ]; then
+                check_result "  Repository CLAUDE.md exists" "pass"
+            else
+                check_result "  Repository CLAUDE.md exists" "warn" "Not found at $REPO_CLAUDE"
+            fi
+        fi
+
+        echo ""
     done
-    echo ""
 fi
 
-# Check 8: Guidelines
-echo -e "${CYAN}Checking Guidelines...${NC}"
-GUIDELINES_DIR="$ORCHESTRATOR_ROOT/shared/guidelines"
+# Check 8: Global resources
+echo -e "${CYAN}Checking Global Resources...${NC}"
 
-if [ -f "$GUIDELINES_DIR/architectural-principles.md" ]; then
-    check_result "architectural-principles.md exists" "pass"
-
-    # Check for placeholders
-    if grep -q "{{.*}}" "$GUIDELINES_DIR/architectural-principles.md"; then
-        check_result "  architectural-principles.md has no placeholders" "fail"
-    else
-        check_result "  architectural-principles.md has no placeholders" "pass"
-    fi
+# Check global skills directory
+if [ -d "$ORCHESTRATOR_ROOT/shared/skills/global" ]; then
+    check_result "Global skills directory exists: shared/skills/global/" "pass"
 else
-    check_result "architectural-principles.md exists" "fail"
+    check_result "Global skills directory exists: shared/skills/global/" "warn" "Should contain global skills like skill-developer"
 fi
 
-if [ -f "$GUIDELINES_DIR/error-handling.md" ]; then
-    check_result "error-handling.md exists" "pass"
-
-    if grep -q "{{.*}}" "$GUIDELINES_DIR/error-handling.md"; then
-        check_result "  error-handling.md has no placeholders" "fail"
-    else
-        check_result "  error-handling.md has no placeholders" "pass"
-    fi
+# Check global guidelines directory
+if [ -d "$ORCHESTRATOR_ROOT/shared/guidelines/global" ]; then
+    check_result "Global guidelines directory exists: shared/guidelines/global/" "pass"
 else
-    check_result "error-handling.md exists" "fail"
+    check_result "Global guidelines directory exists: shared/guidelines/global/" "warn" "Should contain global guidelines"
 fi
 
-if [ -f "$GUIDELINES_DIR/testing-standards.md" ]; then
-    check_result "testing-standards.md exists" "pass"
-
-    if grep -q "{{.*}}" "$GUIDELINES_DIR/testing-standards.md"; then
-        check_result "  testing-standards.md has no placeholders" "fail"
-    else
-        check_result "  testing-standards.md has no placeholders" "pass"
-    fi
+# Check global agents directory
+if [ -d "$ORCHESTRATOR_ROOT/shared/agents/global" ]; then
+    check_result "Global agents directory exists: shared/agents/global/" "pass"
+    AGENT_COUNT=$(find "$ORCHESTRATOR_ROOT/shared/agents/global" -name "*.md" -type f | wc -l | tr -d ' ')
+    echo -e "  ${CYAN}→${NC} Global agents found: $AGENT_COUNT"
 else
-    check_result "testing-standards.md exists" "fail"
+    check_result "Global agents directory exists: shared/agents/global/" "warn" "Should contain global agents"
 fi
 
-if [ -f "$GUIDELINES_DIR/documentation-standards.md" ]; then
-    check_result "documentation-standards.md exists" "pass"
+# Check orchestrator agents directory
+if [ -d "$ORCHESTRATOR_ROOT/shared/agents/orchestrator" ]; then
+    check_result "Orchestrator agents directory exists: shared/agents/orchestrator/" "pass"
 else
-    check_result "documentation-standards.md exists" "warn" "Should exist (not auto-generated)"
+    check_result "Orchestrator agents directory exists: shared/agents/orchestrator/" "warn" "Should contain orchestrator-specific agents"
 fi
 echo ""
 
-# Check 9: Shared directories
-echo -e "${CYAN}Checking Shared Resources...${NC}"
-if [ -d "$ORCHESTRATOR_ROOT/shared/agents" ]; then
-    check_result "shared/agents/ directory exists" "pass"
-    AGENT_COUNT=$(find "$ORCHESTRATOR_ROOT/shared/agents" -name "*.md" -type f | wc -l | tr -d ' ')
-    echo -e "  ${CYAN}→${NC} Agents found: $AGENT_COUNT"
-else
-    check_result "shared/agents/ directory exists" "fail"
-fi
+# Check 9: Other shared directories
+echo -e "${CYAN}Checking Other Shared Resources...${NC}"
 
 if [ -d "$ORCHESTRATOR_ROOT/shared/hooks" ]; then
     check_result "shared/hooks/ directory exists" "pass"
@@ -245,7 +269,7 @@ else
 fi
 echo ""
 
-# Check 11: Repository paths
+# Check 10: Repository paths
 if [ -f "$CONFIG_FILE" ] && command -v jq &> /dev/null; then
     echo -e "${CYAN}Checking Repository Paths...${NC}"
 
@@ -253,12 +277,24 @@ if [ -f "$CONFIG_FILE" ] && command -v jq &> /dev/null; then
     for i in $(seq 0 $((REPO_COUNT - 1))); do
         REPO_NAME=$(jq -r ".repositories[$i].name" "$CONFIG_FILE")
         REPO_PATH=$(jq -r ".repositories[$i].path" "$CONFIG_FILE")
-        REPO_ABS_PATH="$ORCHESTRATOR_ROOT/$REPO_PATH"
 
-        if [ -d "$REPO_ABS_PATH" ]; then
-            check_result "Repository exists: $REPO_NAME at $REPO_PATH" "pass"
+        # Handle relative paths
+        if [[ "$REPO_PATH" == "." ]] || [[ "$REPO_NAME" == "orchestrator" ]]; then
+            check_result "Repository path for $REPO_NAME: orchestrator itself" "pass"
+        elif [[ "$REPO_PATH" == ../* ]]; then
+            # Relative path from orchestrator
+            if [ -d "$ORCHESTRATOR_ROOT/$REPO_PATH" ]; then
+                check_result "Repository exists: $REPO_NAME at $REPO_PATH" "pass"
+            else
+                check_result "Repository exists: $REPO_NAME at $REPO_PATH" "warn" "Directory not found (may need to be created)"
+            fi
         else
-            check_result "Repository exists: $REPO_NAME at $REPO_PATH" "warn" "Directory not found (setup may be incomplete)"
+            # Absolute path
+            if [ -d "$REPO_PATH" ]; then
+                check_result "Repository exists: $REPO_NAME at $REPO_PATH" "pass"
+            else
+                check_result "Repository exists: $REPO_NAME at $REPO_PATH" "warn" "Directory not found"
+            fi
         fi
     done
     echo ""
@@ -279,27 +315,19 @@ if [ $WARNING_CHECKS -gt 0 ]; then
 fi
 echo ""
 
-# Exit status
+# Final result
 if [ $FAILED_CHECKS -eq 0 ]; then
-    echo -e "${GREEN}✓ Setup validation passed!${NC}"
-    echo ""
-    echo "Your orchestrator is properly configured."
+    echo -e "${GREEN}✅ Setup validation PASSED!${NC}"
     echo ""
     echo "Next steps:"
-    echo "  1. Create symlinks: ./setup/scripts/create-symlinks.sh"
-    echo "  2. Test in a repository"
+    echo "  1. Run: ./setup/scripts/create-symlinks.sh"
+    echo "  2. Test in Claude Code"
     echo "  3. Delete setup directory: rm -rf setup/"
-    echo ""
     exit 0
 else
-    echo -e "${RED}✗ Setup validation failed${NC}"
+    echo -e "${RED}❌ Setup validation FAILED!${NC}"
     echo ""
-    echo "Please fix the errors above and run validation again."
-    echo ""
-    echo "Common fixes:"
-    echo "  - Re-run setup wizard: /setup-orchestrator"
-    echo "  - Check SETUP_CONFIG.json is valid"
-    echo "  - Ensure all templates were processed"
-    echo ""
+    echo "Please fix the issues above and re-run the setup wizard."
+    echo "Run: /setup-orchestrator"
     exit 1
 fi

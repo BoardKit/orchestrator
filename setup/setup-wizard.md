@@ -80,8 +80,9 @@ Store as: `includeOrchestrator` (boolean)
   - path: "."
   - type: "infrastructure"
   - filePatterns: agents, skills, guidelines, setup files
-- cross-repo-doc-sync can monitor orchestrator changes
-- orchestrator-guidelines skill will be added to skill-rules.json
+- cross-repo-doc-sync agent (located in shared/agents/orchestrator/) can monitor orchestrator changes
+- orchestrator skill will be added to skill-rules.json
+- Note: cross-repo-doc-sync is ONLY accessible from orchestrator repo (not symlinked to app repos)
 
 **Note:** This is safe and prevents infinite loops because:
 - Doc sync is manually invoked (not automatic)
@@ -409,7 +410,7 @@ prompt: "Generate skill for repository '{{repo_name}}' using SETUP_CONFIG.json"
 
 Wait for completion, then show:
 ```
-✅ Skill created: shared/skills/{{repo_name}}-guidelines/
+✅ Skill created: shared/skills/{{repo_name}}/skill.md
 ```
 
 #### 6.2: Generate skill-rules.json
@@ -477,6 +478,28 @@ Write to: `README.md`
 ✅ README updated: README.md
 ```
 
+#### 6.6: Generate Repository CLAUDE.md Files
+
+For **each repository**, generate their own CLAUDE.md:
+
+Read template: `setup/templates/repo-CLAUDE.template.md`
+
+Replace placeholders:
+- `{{REPO_NAME}}` → repository name
+- `{{REPO_TYPE}}` → repository type
+- `{{REPO_DESCRIPTION}}` → repository description
+- `{{FRONTEND_STACK}}` → frontend tech stack
+- `{{BACKEND_STACK}}` → backend tech stack
+- `{{DATABASE_STACK}}` → database tech stack
+- `{{OTHER_STACK}}` → other tools
+- `{{TIMESTAMP}}` → current timestamp
+
+Write to: `{{repo_path}}/CLAUDE.md` (in each repository)
+
+```
+✅ Repository CLAUDE.md created: {{repo_path}}/CLAUDE.md
+```
+
 ---
 
 ### Step 7: Validate Setup
@@ -492,11 +515,13 @@ Validating Setup...
 Check:
 - ✅ SETUP_CONFIG.json exists and is valid JSON
 - ✅ All repository paths are valid
-- ✅ CLAUDE.md generated with no placeholders
+- ✅ Orchestrator CLAUDE.md generated with no placeholders
 - ✅ README.md generated
 - ✅ skill-rules.json is valid JSON
-- ✅ Each repo has a skill directory
-- ✅ Guidelines directory populated
+- ✅ Each repo has a skill directory in shared/skills/{repo}/
+- ✅ Each repo has guidelines in shared/guidelines/{repo}/
+- ✅ Each repo has settings in shared/settings/{repo}/settings.json
+- ✅ Each repo has its own CLAUDE.md file
 - ✅ No remaining "{{PLACEHOLDER}}" strings (case-insensitive)
 
 For each check, show:
@@ -528,7 +553,22 @@ test -f shared/guidelines/testing-standards.md && echo "✅ testing-standards.md
 
 # Check each repo skill
 for repo in {{repo_names}}; do
-  test -d shared/skills/${repo}-guidelines && echo "✅ shared/skills/${repo}-guidelines/" || echo "❌ ${repo}-guidelines/ MISSING"
+  test -d shared/skills/${repo} && echo "✅ shared/skills/${repo}/" || echo "❌ shared/skills/${repo}/ MISSING"
+done
+
+# Check each repo guidelines
+for repo in {{repo_names}}; do
+  test -d shared/guidelines/${repo} && echo "✅ shared/guidelines/${repo}/" || echo "❌ shared/guidelines/${repo}/ MISSING"
+done
+
+# Check each repo settings
+for repo in {{repo_names}}; do
+  test -f shared/settings/${repo}/settings.json && echo "✅ shared/settings/${repo}/settings.json" || echo "❌ shared/settings/${repo}/settings.json MISSING"
+done
+
+# Check each repo CLAUDE.md
+for repo in {{repo_names}}; do
+  test -f ${repo_path}/CLAUDE.md && echo "✅ ${repo_path}/CLAUDE.md" || echo "❌ ${repo_path}/CLAUDE.md MISSING"
 done
 
 # Check database docs if enabled
@@ -560,20 +600,24 @@ Core Configuration:
 Skills (Auto-Triggering):
 ✅ shared/skills/skill-rules.json - Skill activation rules
 {{#each repositories}}
-✅ shared/skills/{{name}}-guidelines/ - {{name}} repository skill
-   ├── skill.md - Skill prompt
-   └── README.md - Skill documentation
+✅ shared/skills/{{name}}/ - {{name}} repository skill
+   └── skill.md - Skill prompt
 {{/each}}
 
 Guidelines (Referenced Documentation):
-✅ shared/guidelines/architectural-principles.md
-✅ shared/guidelines/error-handling.md
-✅ shared/guidelines/testing-standards.md
-{{#if databaseDocs}}
-✅ shared/guidelines/DATABASE_SCHEMA.md
-✅ shared/guidelines/DATABASE_OPERATIONS.md
-✅ shared/guidelines/DATABASE_SECURITY.md
+{{#each repositories}}
+✅ shared/guidelines/{{name}}/architectural-principles.md
+✅ shared/guidelines/{{name}}/error-handling.md
+✅ shared/guidelines/{{name}}/testing-standards.md
+{{#if ../features.crossRepoDocSync and repositories.length > 1}}
+✅ shared/guidelines/{{name}}/cross-repo-patterns.md
 {{/if}}
+{{#if ../features.databaseDocs}}
+✅ shared/guidelines/{{name}}/DATABASE_SCHEMA.md
+✅ shared/guidelines/{{name}}/DATABASE_OPERATIONS.md
+✅ shared/guidelines/{{name}}/DATABASE_SECURITY.md
+{{/if}}
+{{/each}}
 
 Shared Resources (Already Present):
 ✅ shared/agents/ - 13 shared agents

@@ -186,8 +186,10 @@ Task tool with:
 
 **Location:** `shared/agents/web-research-specialist.md`
 
-#### cross-repo-doc-sync
+#### cross-repo-doc-sync (Orchestrator-Only)
 **When to use:** Synchronize orchestrator documentation with changes in **[your repositories]**
+
+**Availability:** ONLY available when working in the orchestrator repository
 
 **How to invoke:**
 - Task tool with subagent_type: "cross-repo-doc-sync"
@@ -215,9 +217,9 @@ Task tool with:
 - Regenerate dashboard: `./doc-sync-logs/scripts/generate-metrics-dashboard.sh`
 - See `doc-sync-logs/README.md` for full documentation
 
-**Location:** `shared/agents/cross-repo-doc-sync.md`
+**Location:** `shared/agents/orchestrator/cross-repo-doc-sync.md`
 
-**Note:** Cross-repo doc sync is optional. Enable during setup if managing multiple repositories.
+**Note:** Cross-repo doc sync is always enabled and available in the orchestrator repository.
 
 ### Guidelines (Explicit Reference)
 
@@ -645,8 +647,9 @@ cat orchestrator/shared/skills/skill-rules.json | jq .
 - Task tool with subagent_type: "web-research-specialist"
 - Provide prompt: "Research [topic]"
 
-### I need to sync orchestrator docs after changes (Optional - if enabled)
-→ **Invoke cross-repo-doc-sync agent**
+### I need to sync orchestrator docs after changes
+→ **Invoke cross-repo-doc-sync agent (from orchestrator repo only)**
+- Must be working in the orchestrator repository
 - Task tool with subagent_type: "cross-repo-doc-sync"
 - Prompt: "Sync orchestrator docs based on recent changes"
 - After completion: Update with actual tokens using UPDATE MODE
@@ -699,7 +702,7 @@ cat orchestrator/shared/skills/skill-rules.json | jq .
 
 **For your repo-specific context:** See `your-repo/CLAUDE.md` (in each repository)
 
-**For cross-repo-doc-sync metrics:** See `doc-sync-logs/README.md` (if enabled)
+**For cross-repo-doc-sync metrics:** See `doc-sync-logs/README.md`
 
 ---
 
@@ -716,7 +719,7 @@ cat orchestrator/shared/skills/skill-rules.json | jq .
 | Plan refactoring | refactor-planner agent | Task tool invocation |
 | Fix errors | auto-error-resolver agent | Task tool invocation |
 | Create docs | documentation-architect agent | Task tool invocation |
-| Sync cross-repo docs | cross-repo-doc-sync agent | Task tool invocation (if enabled) |
+| Sync cross-repo docs | cross-repo-doc-sync agent | Task tool invocation (orchestrator-only) |
 | Plan complex task | /dev-docs command | `/dev-docs task-name` |
 | Architecture patterns | guidelines/architectural-principles.md | Direct read |
 | Error handling | guidelines/error-handling.md | Direct read |
