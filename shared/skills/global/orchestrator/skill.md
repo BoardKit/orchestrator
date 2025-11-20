@@ -45,7 +45,7 @@ Before committing changes:
 ## Common Tasks
 
 **Adding a new agent:**
-1. Create `shared/agents/new-agent.md` with frontmatter
+1. Create `shared/agents/global/new-agent.md` (or `shared/agents/{repo-name}/` for repo-specific) with frontmatter
 2. Update `shared/agents/README.md`
 3. Update CLAUDE.md Resource Discovery Map
 4. Test invocation via Task tool

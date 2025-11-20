@@ -74,42 +74,110 @@ SUCCESS_COUNT=0
 FAILURE_COUNT=0
 SKIP_COUNT=0
 
-# Function to create symlink safely
+# Function to create symlink safely with comprehensive error handling
 create_symlink() {
     local target="$1"
     local link_name="$2"
     local description="$3"
+    local link_type="${4:-file}"  # file or directory
 
-    # Check if target exists
-    if [ ! -e "$target" ] && [ ! -L "$target" ]; then
-        echo -e "  ${YELLOW}⚠${NC} Target does not exist (optional): $target"
-        return 1
-    fi
-
-    # Remove existing symlink if it exists
-    if [ -L "$link_name" ]; then
-        rm "$link_name"
-    elif [ -e "$link_name" ]; then
-        echo -e "  ${YELLOW}⚠${NC} Backing up existing: $link_name"
-        mv "$link_name" "${link_name}.backup"
-    fi
-
-    # Create parent directory
-    mkdir -p "$(dirname "$link_name")"
-
-    # Calculate relative path
-    local link_dir="$(dirname "$link_name")"
-    local rel_target="$(python3 -c "import os.path; print(os.path.relpath('$target', '$link_dir'))")"
-
-    # Create symlink
-    ln -s "$rel_target" "$link_name"
-
-    if [ -L "$link_name" ] && [ -e "$link_name" ]; then
-        echo -e "  ${GREEN}✓${NC} $description"
-        return 0
+    # Step 1: Validate source exists
+    if [ "$link_type" = "directory" ]; then
+        if [ ! -d "$target" ]; then
+            echo -e "  ${RED}✗ ERROR: Source directory does not exist: $target${NC}"
+            return 1
+        fi
     else
-        echo -e "  ${RED}✗${NC} Failed to create symlink: $link_name"
+        if [ ! -f "$target" ] && [ ! -e "$target" ]; then
+            echo -e "  ${YELLOW}⚠${NC} Target does not exist (optional): $target"
+            return 1
+        fi
+    fi
+
+    # Step 2: Check if target directory exists, create if needed
+    local target_dir=$(dirname "$link_name")
+    if [ ! -d "$target_dir" ]; then
+        if ! mkdir -p "$target_dir" 2>/dev/null; then
+            echo -e "  ${RED}✗ ERROR: Failed to create directory: $target_dir${NC}"
+            return 1
+        fi
+    fi
+
+    # Step 3: Handle existing target
+    if [ -e "$link_name" ] || [ -L "$link_name" ]; then
+        if [ -L "$link_name" ]; then
+            # It's a symlink - check if it points to correct location
+            local current_target=$(readlink "$link_name")
+            local link_dir="$(dirname "$link_name")"
+            local rel_target="$(python3 -c "import os.path; print(os.path.relpath('$target', '$link_dir'))" 2>/dev/null || echo "$target")"
+
+            if [ "$current_target" = "$rel_target" ]; then
+                echo -e "  ${GREEN}✓${NC} $description (already correct)"
+                return 0
+            else
+                # Symlink exists but points elsewhere, remove it
+                rm "$link_name"
+            fi
+        else
+            # It's a real file/directory, back it up
+            local backup_name="${link_name}.backup.$(date +%s)"
+            echo -e "  ${YELLOW}⚠ Backing up existing: $link_name → $backup_name${NC}"
+            if ! mv "$link_name" "$backup_name" 2>/dev/null; then
+                echo -e "  ${RED}✗ ERROR: Cannot backup existing target: $link_name${NC}"
+                echo -e "  ${YELLOW}  Please remove or backup manually: $link_name${NC}"
+                return 1
+            fi
+        fi
+    fi
+
+    # Step 4: Calculate relative path
+    local link_dir="$(dirname "$link_name")"
+    local rel_target
+    if ! rel_target="$(python3 -c "import os.path; print(os.path.relpath('$target', '$link_dir'))" 2>/dev/null)"; then
+        echo -e "  ${RED}✗ ERROR: Failed to calculate relative path${NC}"
+        echo -e "  ${YELLOW}  Target: $target${NC}"
+        echo -e "  ${YELLOW}  Link: $link_name${NC}"
         return 1
+    fi
+
+    # Step 5: Create the symlink
+    if ! ln -s "$rel_target" "$link_name" 2>/dev/null; then
+        echo -e "  ${RED}✗ ERROR: Failed to create symlink${NC}"
+        echo -e "  ${YELLOW}  Target: $target${NC}"
+        echo -e "  ${YELLOW}  Link: $link_name${NC}"
+        return 1
+    fi
+
+    # Step 6: Validate symlink after creation
+    if [ ! -L "$link_name" ]; then
+        echo -e "  ${RED}✗ ERROR: Not a symlink after creation: $link_name${NC}"
+        return 1
+    fi
+
+    if [ ! -e "$link_name" ]; then
+        echo -e "  ${RED}✗ ERROR: Broken symlink created: $link_name${NC}"
+        echo -e "  ${YELLOW}  Points to: $(readlink "$link_name")${NC}"
+        echo -e "  ${YELLOW}  Expected: $target${NC}"
+        rm "$link_name" 2>/dev/null || true
+        return 1
+    fi
+
+    echo -e "  ${GREEN}✓${NC} $description"
+    return 0
+}
+
+# Function to rollback symlinks for a repository
+rollback_repo_symlinks() {
+    local repo_path="$1"
+    local claude_path="$2"
+
+    echo -e "${YELLOW}Rolling back symlinks for $repo_path...${NC}"
+
+    local claude_dir="$repo_path/$claude_path"
+    if [ -d "$claude_dir" ]; then
+        # Remove symlinks but keep backed up files
+        find "$claude_dir" -type l -delete 2>/dev/null || true
+        echo -e "${GREEN}✓ Symlinks removed${NC}"
     fi
 }
 
@@ -150,14 +218,16 @@ for i in $(seq 0 $((REPO_COUNT - 1))); do
     create_symlink \
         "$ORCHESTRATOR_ROOT/shared/agents/global" \
         "$CLAUDE_DIR/agents/global" \
-        "Global agents" || ((ERRORS++))
+        "Global agents" \
+        "directory" || ((ERRORS++))
 
     # Orchestrator-only agents (only for orchestrator repo)
     if [ "$REPO_NAME" = "orchestrator" ]; then
         create_symlink \
             "$ORCHESTRATOR_ROOT/shared/agents/orchestrator" \
             "$CLAUDE_DIR/agents/orchestrator" \
-            "Orchestrator-only agents" || ((ERRORS++))
+            "Orchestrator-only agents" \
+            "directory" || ((ERRORS++))
     fi
 
     # Repo-specific agents (if exist)
@@ -165,7 +235,8 @@ for i in $(seq 0 $((REPO_COUNT - 1))); do
         create_symlink \
             "$ORCHESTRATOR_ROOT/shared/agents/$REPO_NAME" \
             "$CLAUDE_DIR/agents/$REPO_NAME" \
-            "Repo-specific agents" || ((ERRORS++))
+            "Repo-specific agents" \
+            "directory" || ((ERRORS++))
     fi
 
     # 2. SKILLS: Global (all repos) + Repo-specific skill (only this repo)
@@ -175,14 +246,16 @@ for i in $(seq 0 $((REPO_COUNT - 1))); do
     create_symlink \
         "$ORCHESTRATOR_ROOT/shared/skills/global" \
         "$CLAUDE_DIR/skills/global" \
-        "Global skills" || ((ERRORS++))
+        "Global skills" \
+        "directory" || ((ERRORS++))
 
     # Repo-specific skill
     if [ -d "$ORCHESTRATOR_ROOT/shared/skills/${REPO_NAME}" ]; then
         create_symlink \
             "$ORCHESTRATOR_ROOT/shared/skills/${REPO_NAME}" \
             "$CLAUDE_DIR/skills/${REPO_NAME}" \
-            "Repo-specific skill" || ((ERRORS++))
+            "Repo-specific skill" \
+            "directory" || ((ERRORS++))
     fi
 
     # skill-rules.json (shared by all)
@@ -200,7 +273,8 @@ for i in $(seq 0 $((REPO_COUNT - 1))); do
         create_symlink \
             "$ORCHESTRATOR_ROOT/shared/commands" \
             "$CLAUDE_DIR/commands" \
-            "Commands (all)" || ((ERRORS++))
+            "Commands (all)" \
+            "directory" || ((ERRORS++))
     else
         # Application repos get commands WITHOUT setup-orchestrator
         # Create filtered commands directory
@@ -227,7 +301,8 @@ for i in $(seq 0 $((REPO_COUNT - 1))); do
     create_symlink \
         "$ORCHESTRATOR_ROOT/shared/hooks" \
         "$CLAUDE_DIR/hooks" \
-        "Hooks" || ((ERRORS++))
+        "Hooks" \
+        "directory" || ((ERRORS++))
 
     # Make hooks executable
     chmod +x "$ORCHESTRATOR_ROOT/shared/hooks/"*.sh 2>/dev/null || true
@@ -239,14 +314,16 @@ for i in $(seq 0 $((REPO_COUNT - 1))); do
     create_symlink \
         "$ORCHESTRATOR_ROOT/shared/guidelines/global" \
         "$CLAUDE_DIR/guidelines/global" \
-        "Global guidelines" || ((ERRORS++))
+        "Global guidelines" \
+        "directory" || ((ERRORS++))
 
     # Repo-specific guidelines
     if [ -d "$ORCHESTRATOR_ROOT/shared/guidelines/${REPO_NAME}" ]; then
         create_symlink \
             "$ORCHESTRATOR_ROOT/shared/guidelines/${REPO_NAME}" \
             "$CLAUDE_DIR/guidelines/${REPO_NAME}" \
-            "Repo-specific guidelines" || ((ERRORS++))
+            "Repo-specific guidelines" \
+            "directory" || ((ERRORS++))
     fi
 
     # 6. SETTINGS: Symlink to repo-specific settings file

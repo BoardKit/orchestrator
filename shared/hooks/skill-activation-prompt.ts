@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-import { readFileSync } from 'fs';
-import { join } from 'path';
+import { readFileSync, existsSync } from 'fs';
+import { join, basename } from 'path';
 
 interface HookInput {
     session_id: string;
@@ -19,6 +19,7 @@ interface SkillRule {
     type: 'guardrail' | 'domain';
     enforcement: 'block' | 'suggest' | 'warn';
     priority: 'critical' | 'high' | 'medium' | 'low';
+    scope?: string; // "all" | "orchestrator" | specific repo name
     promptTriggers?: PromptTriggers;
 }
 
@@ -33,6 +34,58 @@ interface MatchedSkill {
     config: SkillRule;
 }
 
+interface RepoConfig {
+    repoName: string;
+    repoType: string;
+    orchestratorPath?: string;
+}
+
+/**
+ * Detect which repository we're currently in
+ * Returns the repo name (e.g., "frontend", "backend", "orchestrator")
+ */
+function detectCurrentRepo(projectDir: string): string {
+    // Try to read repo config file
+    const configPath = join(projectDir, '.claude', 'repo-config.json');
+    if (existsSync(configPath)) {
+        try {
+            const config: RepoConfig = JSON.parse(readFileSync(configPath, 'utf-8'));
+            return config.repoName;
+        } catch (err) {
+            // Fall through to directory-based detection
+        }
+    }
+
+    // Fallback: detect from directory name
+    // If projectDir contains "orchestrator" → orchestrator repo
+    // Otherwise, use the last directory name
+    const dirName = basename(projectDir);
+
+    if (dirName.includes('orchestrator') || projectDir.includes('/orchestrator')) {
+        return 'orchestrator';
+    }
+
+    // Return directory name as repo name
+    return dirName;
+}
+
+/**
+ * Check if a skill's scope matches the current repository
+ */
+function skillMatchesScope(skillConfig: SkillRule, currentRepo: string): boolean {
+    const scope = skillConfig.scope || 'all'; // Default to 'all' if not specified
+
+    if (scope === 'all') {
+        return true; // Available to all repos
+    }
+
+    if (scope === currentRepo) {
+        return true; // Scope matches current repo
+    }
+
+    return false; // Scope doesn't match
+}
+
 async function main() {
     try {
         // Read input from stdin
@@ -41,14 +94,28 @@ async function main() {
         const prompt = data.prompt.toLowerCase();
 
         // Load skill rules
-        const projectDir = process.env.CLAUDE_PROJECT_DIR || '$HOME/project';
+        const projectDir = process.env.CLAUDE_PROJECT_DIR || process.cwd();
         const rulesPath = join(projectDir, '.claude', 'skills', 'skill-rules.json');
+
+        if (!existsSync(rulesPath)) {
+            // No skill rules file, exit silently
+            process.exit(0);
+        }
+
         const rules: SkillRules = JSON.parse(readFileSync(rulesPath, 'utf-8'));
+
+        // Detect current repository
+        const currentRepo = detectCurrentRepo(projectDir);
 
         const matchedSkills: MatchedSkill[] = [];
 
         // Check each skill for matches
         for (const [skillName, config] of Object.entries(rules.skills)) {
+            // Filter by scope first
+            if (!skillMatchesScope(config, currentRepo)) {
+                continue; // Skip skills not meant for this repo
+            }
+
             const triggers = config.promptTriggers;
             if (!triggers) {
                 continue;
@@ -81,6 +148,7 @@ async function main() {
         if (matchedSkills.length > 0) {
             let output = '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n';
             output += '🎯 SKILL ACTIVATION CHECK\n';
+            output += `📍 Repository: ${currentRepo}\n`;
             output += '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n';
 
             // Group by priority
@@ -90,7 +158,7 @@ async function main() {
             const low = matchedSkills.filter(s => s.config.priority === 'low');
 
             if (critical.length > 0) {
-                output += '⚠️ CRITICAL SKILLS (REQUIRED):\n';
+                output += '⚠️  CRITICAL SKILLS (REQUIRED):\n';
                 critical.forEach(s => output += `  → ${s.name}\n`);
                 output += '\n';
             }

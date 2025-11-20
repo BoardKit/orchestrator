@@ -222,7 +222,7 @@ dev/active/[task-name]/
 **Fix:**
 ```bash
 # Check agent exists
-ls shared/agents/code-architecture-reviewer.md
+ls shared/agents/global/code-architecture-reviewer.md
 
 # Verify filename matches subagent_type
 # Filename: code-architecture-reviewer.md

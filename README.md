@@ -238,7 +238,14 @@ The wizard:
 
 ### AI Coding Tools
 - ✅ **Claude Code** (primary target)
-- ✅ **GitHub Copilot** (agents work as chatmodes)
+- ✅ **GitHub Copilot** (simplified compatibility):
+   - Uses basic agent markdown files in `shared/chatmodes/`
+   - Less comprehensive than Claude Code agents but functional
+   - Can be used alongside Claude Code infrastructure
+   - Agents work as simple chatmode references rather than full skill integration
+   - **Cost-effective for routine tasks** - Leverage Copilot for simpler queries and code completion
+   - **Smart token allocation** - Use Copilot for basic tasks, preserve Claude Code tokens for complex reasoning and architecture work
+   - **Budget optimization** - Allocate easier development tasks to Copilot while reserving Claude's full capabilities for critical problem-solving
 - ✅ **Any tool** respecting `.claude/` directory structure
 
 

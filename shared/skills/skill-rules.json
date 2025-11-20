@@ -1,24 +1,48 @@
 {
-  "skills": [
-    {
-      "name": "global/skill-developer",
+  "version": "1.0",
+  "skills": {
+    "global/skill-developer": {
+      "type": "domain",
+      "enforcement": "suggest",
+      "priority": "high",
+      "scope": "all",
       "filePatterns": [
         "**/.claude/skills/**"
       ],
       "keywords": [
         "skill",
         "skill-rules.json"
-      ]
+      ],
+      "promptTriggers": {
+        "keywords": [
+          "create skill",
+          "new skill",
+          "skill trigger",
+          "how do skills work",
+          "skill activation"
+        ],
+        "intentPatterns": [
+          "how (do|does) .*skill.*work",
+          "create.*skill",
+          "add.*skill",
+          "skill.*system"
+        ]
+      }
     },
-    {
-      "name": "global/orchestrator",
+    "global/orchestrator": {
+      "type": "domain",
+      "enforcement": "suggest",
+      "priority": "high",
+      "scope": "orchestrator",
       "filePatterns": [
         "**/shared/agents/**/*.md",
         "**/shared/skills/**/*.md",
         "**/shared/guidelines/**/*.md",
         "**/shared/hooks/**/*.sh",
+        "**/shared/hooks/**/*.ts",
         "**/shared/commands/**/*.md",
         "**/setup/**/*.md",
+        "**/setup/**/*.sh",
         "CLAUDE.md",
         "SETUP_CONFIG.json",
         "README.md"
@@ -30,8 +54,24 @@
         "orchestrator",
         "setup",
         "cross-repo",
-        "template"
-      ]
+        "template",
+        "symlink"
+      ],
+      "promptTriggers": {
+        "keywords": [
+          "setup orchestrator",
+          "configure orchestrator",
+          "orchestrator structure",
+          "shared resources",
+          "symlink"
+        ],
+        "intentPatterns": [
+          "how.*orchestrator.*work",
+          "setup.*orchestrator",
+          "configure.*repos",
+          "shared.*resources"
+        ]
+      }
     }
-  ]
+  }
 }

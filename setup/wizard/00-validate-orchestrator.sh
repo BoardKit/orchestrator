@@ -189,33 +189,60 @@ echo -e "${CYAN}Guidelines${NC}"
 echo "---"
 
 # Check 6: Guidelines directory
-if [ -d "shared/guidelines" ]; then
-    check_pass "shared/guidelines/ exists"
+if [ -d "shared/guidelines/global" ]; then
+    check_pass "shared/guidelines/global/ exists"
 
-    # Check documentation-standards.md (pre-existing)
-    if [ -f "shared/guidelines/documentation-standards.md" ]; then
-        check_pass "documentation-standards.md exists"
+    # Check documentation-standards.md (should exist in global/)
+    if [ -f "shared/guidelines/global/documentation-standards.md" ]; then
+        check_pass "Global: documentation-standards.md exists"
     else
-        check_warn "documentation-standards.md missing" "Will be generated during setup"
+        check_fail "Global: documentation-standards.md missing" "This should exist before setup"
+    fi
+else
+    check_fail "shared/guidelines/global/ missing" "Run: mkdir -p shared/guidelines/global"
+fi
+
+# Note: Repo-specific guidelines (architectural-principles, error-handling, testing-standards)
+# will be generated in shared/guidelines/{repo-name}/ during setup
+
+echo ""
+echo -e "${CYAN}Setup Templates${NC}"
+echo "---"
+
+# Check 7: Setup templates directory
+if [ -d "setup/templates" ]; then
+    check_pass "setup/templates/ exists"
+
+    # Check for guideline templates
+    if [ -d "setup/templates/guidelines" ]; then
+        check_pass "setup/templates/guidelines/ exists"
+
+        # Count guideline templates (should have at least 6)
+        template_count=$(find setup/templates/guidelines -name "*.md" | wc -l | tr -d ' ')
+        if [ "$template_count" -ge 6 ]; then
+            check_pass "Found $template_count guideline templates (expected ≥6)"
+        else
+            check_warn "Found only $template_count guideline templates (expected ≥6)"
+        fi
+    else
+        check_warn "setup/templates/guidelines/ missing" "Guideline templates may not be available"
     fi
 
-    # Other guidelines are generated during setup
-    for guideline in "architectural-principles" "error-handling" "testing-standards"; do
-        if [ -f "shared/guidelines/$guideline.md" ]; then
-            check_pass "$guideline.md exists"
-        else
-            check_warn "$guideline.md not yet generated" "Will be created during setup"
-        fi
-    done
+    # Check for repo-config template
+    if [ -f "setup/templates/repo-config.json.template" ]; then
+        check_pass "repo-config.json.template exists"
+    else
+        check_warn "repo-config.json.template missing" "Will need manual config"
+    fi
 else
-    check_fail "shared/guidelines/ missing" "Run: mkdir -p shared/guidelines"
+    check_warn "setup/templates/ missing" "Setup wizard may have limited functionality"
 fi
 
 echo ""
 echo -e "${CYAN}Commands & Settings${NC}"
 echo "---"
 
-# Check 7: Commands directory
+# Check 8: Commands directory
 if [ -d "shared/commands" ]; then
     check_pass "shared/commands/ exists"
 
@@ -230,7 +257,7 @@ else
     check_fail "shared/commands/ missing"
 fi
 
-# Check 8: Settings directory and template
+# Check 9: Settings directory and template
 if [ -d "shared/settings" ]; then
     check_pass "shared/settings/ exists"
 
@@ -254,7 +281,7 @@ echo ""
 echo -e "${CYAN}Orchestrator Configuration (Optional at this stage)${NC}"
 echo "---"
 
-# Check 9: Orchestrator's own .claude/ directory (optional before setup)
+# Check 10: Orchestrator's own .claude/ directory (optional before setup)
 if [ -d ".claude" ]; then
     check_pass ".claude/ directory exists"
 
@@ -280,7 +307,7 @@ echo ""
 echo -e "${CYAN}Environment${NC}"
 echo "---"
 
-# Check 10: Required tools
+# Check 11: Required tools
 for tool in "jq" "git" "node" "npm"; do
     if command -v "$tool" &> /dev/null; then
         version=$($tool --version 2>/dev/null | head -1 || echo "unknown")
@@ -300,7 +327,7 @@ if command -v node &> /dev/null; then
     fi
 fi
 
-# Check 11: Claude Code CLI (optional but recommended)
+# Check 12: Claude Code CLI (optional but recommended)
 if command -v claude &> /dev/null; then
     claude_version=$(claude --version 2>/dev/null || echo "unknown")
     check_pass "Claude Code CLI installed ($claude_version)"

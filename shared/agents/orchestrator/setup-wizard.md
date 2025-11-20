@@ -755,7 +755,8 @@ From orchestrator to repo:
 relativePath = calculateRelativePath(orchestratorPath, repoPath)
 
 From repo to orchestrator:
-For agents: ../../../orchestrator/shared/agents/[agent].md
+For agents (global): ../../../orchestrator/shared/agents/global/
+For agents (repo-specific): ../../../orchestrator/shared/agents/[repo-name]/
 For skills/hooks/commands: ../../orchestrator/shared/[resource]/
 ```
 
