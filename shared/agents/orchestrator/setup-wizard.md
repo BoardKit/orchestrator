@@ -22,9 +22,9 @@
      - Which agents it needs (from available generic agents + option to create custom)
 
 3. **Create Symlink Structure**
-   - Create individual agent symlinks (NOT directory symlinks)
-   - Each repo gets symlinks only for the agents it needs
-   - Create symlinks for skills, hooks, and commands (directory-level)
+   - Create directory-level symlinks for agents (global/, orchestrator/, {repo-name}/ subdirectories)
+   - Each repo gets symlinks to global agents + their repo-specific agents
+   - Create directory symlinks for skills, guidelines, hooks, and commands
 
 4. **Generate Repository-Specific Skills**
    - Create skills that auto-trigger for each repo's tech stack

@@ -400,9 +400,8 @@ if [ $SUCCESS_COUNT -eq $REPO_COUNT ]; then
     echo "  ✓ .gitignore updated with .claude/tsc-cache"
     echo ""
     echo "Next steps:"
-    echo "  1. Run health check: ./setup/scripts/health-check.sh"
-    echo "  2. Test in Claude Code"
-    echo "  3. Delete setup/ directory after validation"
+    echo "  1. Test in Claude Code"
+    echo "  2. Delete setup/ directory after validation"
     echo ""
     exit 0
 else

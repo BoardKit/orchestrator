@@ -115,8 +115,10 @@ YourOrganization/
 │       ├── guidelines/               # Long-form documentation
 │       │   └── global/               # Global guidelines (for all repos)
 │       │   └── <repo-name>/          #  (OPTIONAL) Repo-specific guidelines (directory for each repo)
-│       ├── settings/                 # Auto-trigger skills
-│       ├── hooks/                    # Even-driven commands
+│       ├── settings/                 # Repository-specific settings files
+│       │   └── <repo-name>/          # Directory per repository
+│       │       └── settings.json     # Settings file for that repo
+│       ├── hooks/                    # Event-driven scripts
 │       ├── skills/                   # Small, focused behavior
 │             └── global/             # Skill-developer, logging conventions, security-guardrails, testing-convention
 │             └── <repo-name>/        #  (OPTIONAL) Repo-specific skills (directory per repo)

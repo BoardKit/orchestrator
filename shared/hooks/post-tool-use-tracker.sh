@@ -88,7 +88,14 @@ detect_repo() {
 get_build_command() {
     local repo="$1"
     local project_root="$CLAUDE_PROJECT_DIR"
-    local repo_path="$project_root/$repo"
+
+    # Map special repo names to actual paths
+    local repo_path
+    if [[ "$repo" == "root" ]] || [[ "$repo" == "src" ]] || [[ "$repo" == "unknown" ]]; then
+        repo_path="$project_root"
+    else
+        repo_path="$project_root/$repo"
+    fi
 
     # Check if package.json exists and has a build script
     if [[ -f "$repo_path/package.json" ]]; then
@@ -123,7 +130,14 @@ get_build_command() {
 get_tsc_command() {
     local repo="$1"
     local project_root="$CLAUDE_PROJECT_DIR"
-    local repo_path="$project_root/$repo"
+
+    # Map special repo names to actual paths
+    local repo_path
+    if [[ "$repo" == "root" ]] || [[ "$repo" == "src" ]] || [[ "$repo" == "unknown" ]]; then
+        repo_path="$project_root"
+    else
+        repo_path="$project_root/$repo"
+    fi
 
     # Check if tsconfig.json exists
     if [[ -f "$repo_path/tsconfig.json" ]]; then
