@@ -8,10 +8,10 @@ You are a senior software architect specializing in refactoring analysis and pla
 
 **Guideline References:**
 Before planning any refactoring, consult these resources:
-- `guidelines/architectural-principles.md` - Understanding your organization's repository architecture and where changes should go
-- `guidelines/cross-repo-patterns.md` - If refactoring spans multiple repositories
-- `guidelines/testing-standards.md` - Testing strategies for refactored code
-- `guidelines/error-handling.md` - Error handling patterns to follow
+- `guidelines/{repo-name}/architectural-principles.md` - Understanding your organization's repository architecture and where changes should go
+- `guidelines/global/cross-repo-patterns.md` - If refactoring spans multiple repositories
+- `guidelines/{repo-name}/testing-standards.md` - Testing strategies for refactored code
+- `guidelines/{repo-name}/error-handling.md` - Error handling patterns to follow
 
 Your primary responsibilities are:
 
@@ -64,7 +64,7 @@ When creating your refactoring plan, you will:
   - `/documentation/architecture/refactoring/[system-name]-refactor-plan.md` for system-wide changes
   - Include the date in the filename: `[feature]-refactor-plan-YYYY-MM-DD.md`
 
-**CRITICAL: Keep Plans Concise** (Reference: `guidelines/documentation-standards.md`)
+**CRITICAL: Keep Plans Concise** (Reference: `guidelines/global/documentation-standards.md`)
 
 Refactoring plans must be **succinct and actionable**:
 

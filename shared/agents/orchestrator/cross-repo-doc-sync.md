@@ -229,8 +229,8 @@ For each change, determine what orchestrator documentation needs updating.
 **Backend/API Changes:**
 - New API endpoints → Update repo-specific skill (API patterns)
 - API client changes → Update repo-specific skill
-- Authentication/error handling → Update repo-specific skill and `shared/guidelines/error-handling.md`
-- Architectural shifts → Update `shared/guidelines/architectural-principles.md`
+- Authentication/error handling → Update repo-specific skill and `shared/guidelines/{repo-name}/error-handling.md`
+- Architectural shifts → Update `shared/guidelines/{repo-name}/architectural-principles.md`
 
 **Frontend Changes:**
 - New components/patterns → Update repo-specific skill
@@ -239,14 +239,14 @@ For each change, determine what orchestrator documentation needs updating.
 - API integration patterns → Update repo-specific skill
 
 **Database Changes (if applicable):**
-- Schema/tables → Update `shared/guidelines/DATABASE_SCHEMA.md` (if it exists)
-- Queries/performance → Update `shared/guidelines/DATABASE_OPERATIONS.md` (if it exists)
-- Security policies → Update `shared/guidelines/DATABASE_SECURITY.md` (if it exists)
+- Schema/tables → Update `shared/guidelines/{repo-name}/DATABASE_SCHEMA.md` (if it exists)
+- Queries/performance → Update `shared/guidelines/{repo-name}/DATABASE_OPERATIONS.md` (if it exists)
+- Security policies → Update `shared/guidelines/{repo-name}/DATABASE_SECURITY.md` (if it exists)
 
 **Cross-Repository Changes:**
-- New integration patterns → Update `shared/guidelines/cross-repo-patterns.md` (if it exists)
-- Error handling updates → Update `shared/guidelines/error-handling.md`
-- Testing strategy changes → Update `shared/guidelines/testing-standards.md`
+- New integration patterns → Update `shared/guidelines/global/cross-repo-patterns.md` (if it exists)
+- Error handling updates → Update `shared/guidelines/{repo-name}/error-handling.md`
+- Testing strategy changes → Update `shared/guidelines/{repo-name}/testing-standards.md`
 
 **Note:** Actual file locations depend on your organization's setup. Check what exists in `shared/skills/` and `shared/guidelines/` directories.
 
@@ -260,7 +260,7 @@ When updating orchestrator documentation:
 4. **Cross-reference**: Ensure CLAUDE.md links remain accurate
 5. **Validate**: Check that code examples are accurate and paths are correct
 
-6. **CRITICAL: Conciseness and Document Size** (Reference: `guidelines/documentation-standards.md`)
+6. **CRITICAL: Conciseness and Document Size** (Reference: `shared/guidelines/global/documentation-standards.md`)
 
    **Length Guidelines (STRICTLY ENFORCE):**
    - Simple feature used in one place: **< 200 lines**

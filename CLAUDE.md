@@ -189,7 +189,12 @@ Task tool with:
 #### cross-repo-doc-sync (Orchestrator-Only)
 **When to use:** Synchronize orchestrator documentation with changes in **[your repositories]**
 
-**Availability:** ONLY available when working in the orchestrator repository
+**Availability:** Must be invoked from the orchestrator repository
+
+**Important:** While the agent file is accessible from all repos via symlinks, the agent includes runtime checks and will refuse to operate if not invoked from the orchestrator directory. This is because it requires:
+- Write access to orchestrator documentation
+- Read access to all application repositories
+- Correct working directory for relative paths
 
 **How to invoke:**
 - Task tool with subagent_type: "cross-repo-doc-sync"
@@ -243,7 +248,7 @@ Guidelines are **NOT meant to be discovered organically**. They are explicitly r
 
 **Status:** ⏳ Will be generated during setup
 
-**Location:** `shared/guidelines/architectural-principles.md`
+**Location:** `shared/guidelines/**[your-repo-name]**/architectural-principles.md`
 
 #### error-handling.md
 **What it covers:**
@@ -255,7 +260,7 @@ Guidelines are **NOT meant to be discovered organically**. They are explicitly r
 
 **Status:** ⏳ Will be generated during setup
 
-**Location:** `shared/guidelines/error-handling.md`
+**Location:** `shared/guidelines/**[your-repo-name]**/error-handling.md`
 
 #### testing-standards.md
 **What it covers:**
@@ -267,7 +272,7 @@ Guidelines are **NOT meant to be discovered organically**. They are explicitly r
 
 **Status:** ⏳ Will be generated during setup
 
-**Location:** `shared/guidelines/testing-standards.md`
+**Location:** `shared/guidelines/**[your-repo-name]**/testing-standards.md`
 
 #### cross-repo-patterns.md (Optional)
 **What it covers:**
@@ -280,7 +285,7 @@ Guidelines are **NOT meant to be discovered organically**. They are explicitly r
 
 **Status:** ⏳ Will be generated if you have multiple repos
 
-**Location:** `shared/guidelines/cross-repo-patterns.md`
+**Location:** `shared/guidelines/global/cross-repo-patterns.md`
 
 #### documentation-standards.md
 **What it covers:**
@@ -299,7 +304,7 @@ Guidelines are **NOT meant to be discovered organically**. They are explicitly r
 
 **Status:** ✅ Active (generic - already exists)
 
-**Location:** `shared/guidelines/documentation-standards.md`
+**Location:** `shared/guidelines/global/documentation-standards.md`
 
 #### Database Documentation (Optional)
 **Split into 3 focused documents (or more depending on complexity):**
@@ -308,18 +313,18 @@ Guidelines are **NOT meant to be discovered organically**. They are explicitly r
 - Complete table structures, columns, relationships
 - Custom database types (enums, etc.)
 - Database functions and storage buckets
-- **Location:** `shared/guidelines/DATABASE_SCHEMA.md`
+- **Location:** `shared/guidelines/**[your-repo-name]**/DATABASE_SCHEMA.md`
 
 **DATABASE_OPERATIONS.md**
 - Common query patterns and examples
 - Migration considerations and performance optimization
 - Error handling patterns
-- **Location:** `shared/guidelines/DATABASE_OPERATIONS.md`
+- **Location:** `shared/guidelines/**[your-repo-name]**/DATABASE_OPERATIONS.md`
 
 **DATABASE_SECURITY.md**
 - Row Level Security (RLS) policies for all tables (if applicable)
 - Security best practices and recommendations
-- **Location:** `shared/guidelines/DATABASE_SECURITY.md`
+- **Location:** `shared/guidelines/**[your-repo-name]**/DATABASE_SECURITY.md`
 
 **Referenced by:** repo-guidelines skills, backend agents, API developers
 
@@ -468,9 +473,15 @@ See [README.md](./README.md) for complete architecture diagram.
   - **Guidelines:**
     - `your-repo/.claude/guidelines/global/ -> ../../../orchestrator/shared/guidelines/global/`
     - `your-repo/.claude/guidelines/your-repo/ -> ../../../orchestrator/shared/guidelines/your-repo/`
-  - **Hooks, Commands:** Full directory symlinks
+  - **Hooks:** Full directory symlink (same for all repos)
     - `your-repo/.claude/hooks/ -> ../../../orchestrator/shared/hooks/`
-    - `your-repo/.claude/commands/ -> ../../../orchestrator/shared/commands/` (filtered for non-orchestrator repos)
+  - **Commands:** Individual file symlinks (filtered per repo type)
+    - Orchestrator repo: Full directory symlink
+      - `orchestrator/.claude/commands/ -> ../shared/commands/`
+    - Application repos: Individual file symlinks (excluding orchestrator-only commands)
+      - `your-repo/.claude/commands/dev-docs.md -> ../../../orchestrator/shared/commands/dev-docs.md`
+      - `your-repo/.claude/commands/dev-docs-update.md -> ../../../orchestrator/shared/commands/dev-docs-update.md`
+      - (setup-orchestrator.md excluded from application repos)
   - **Settings:** Individual file symlink
     - `your-repo/.claude/settings.json -> ../../../orchestrator/shared/settings/your-repo/settings.json`
 - This structure allows selective distribution while maintaining organization
@@ -663,7 +674,7 @@ cat orchestrator/shared/skills/skill-rules.json | jq .
 - Provides **[your tech stack]** patterns inline
 
 ### I need detailed architectural patterns
-→ **Read guidelines/architectural-principles.md**
+→ **Read guidelines/**[your-repo-name]**/architectural-principles.md**
 - Repository structure explanation
 - When to update where
 - Cross-repo patterns (if applicable)
@@ -722,24 +733,24 @@ cat orchestrator/shared/skills/skill-rules.json | jq .
 - Captures current progress before reset
 
 ### I need error handling patterns
-→ **Read guidelines/error-handling.md**
+→ **Read guidelines/**[your-repo-name]**/error-handling.md**
 - **[Your tech stack]** patterns
 - Referenced from **[your-repo]**-guidelines skills
 
 ### I need testing patterns
-→ **Read guidelines/testing-standards.md**
+→ **Read guidelines/**[your-repo-name]**/testing-standards.md**
 - **[Your framework]** testing patterns
 - Mock patterns
 - Referenced from **[your-repo]**-guidelines skills
 
 ### I need database schema information (Optional - if enabled)
 → **Read database documentation**
-- Schema/tables: `guidelines/DATABASE_SCHEMA.md`
-- Queries/performance: `guidelines/DATABASE_OPERATIONS.md`
-- RLS/security: `guidelines/DATABASE_SECURITY.md`
+- Schema/tables: `guidelines/**[your-repo-name]**/DATABASE_SCHEMA.md`
+- Queries/performance: `guidelines/**[your-repo-name]**/DATABASE_OPERATIONS.md`
+- RLS/security: `guidelines/**[your-repo-name]**/DATABASE_SECURITY.md`
 
 ### I'm working across multiple repos (if applicable)
-→ **Read guidelines/cross-repo-patterns.md**
+→ **Read guidelines/global/cross-repo-patterns.md**
 - Cross-repo workflow
 - Testing strategies
 - Coordination patterns
@@ -777,10 +788,10 @@ cat orchestrator/shared/skills/skill-rules.json | jq .
 | Create docs | documentation-architect agent | Task tool invocation |
 | Sync cross-repo docs | cross-repo-doc-sync agent | Task tool invocation (orchestrator-only) |
 | Plan complex task | /dev-docs command | `/dev-docs task-name` |
-| Architecture patterns | guidelines/architectural-principles.md | Direct read |
-| Error handling | guidelines/error-handling.md | Direct read |
-| Testing patterns | guidelines/testing-standards.md | Direct read |
-| Database schema | guidelines/DATABASE_SCHEMA.md | Direct read (if enabled) |
+| Architecture patterns | guidelines/**[your-repo-name]**/architectural-principles.md | Direct read |
+| Error handling | guidelines/**[your-repo-name]**/error-handling.md | Direct read |
+| Testing patterns | guidelines/**[your-repo-name]**/testing-standards.md | Direct read |
+| Database schema | guidelines/**[your-repo-name]**/DATABASE_SCHEMA.md | Direct read (if enabled) |
 
 ### File Locations Quick Map
 

@@ -20,16 +20,16 @@ You have comprehensive understanding of:
 **Documentation References**:
 Before reviewing code, consult these resources:
 - `CLAUDE.md` - Discovery hub for all resources
-- `guidelines/architectural-principles.md` - Repository architecture, separation of concerns, when to update where
-- `guidelines/error-handling.md` - Error handling patterns for your tech stack
-- `guidelines/testing-standards.md` - Testing best practices and standards
+- `guidelines/{repo-name}/architectural-principles.md` - Repository architecture, separation of concerns, when to update where
+- `guidelines/{repo-name}/error-handling.md` - Error handling patterns for your tech stack
+- `guidelines/{repo-name}/testing-standards.md` - Testing best practices and standards
 - Look for task context in `./dev/active/[task-name]/` if reviewing task-related code
 
 **Architecture Principles to Apply**:
 - Verify code is in the correct repository (based on organization's structure)
 - Check separation of concerns (UI, business logic, infrastructure layers)
 - Ensure proper integration patterns between components/repos
-- Reference `guidelines/architectural-principles.md` for detailed patterns
+- Reference `guidelines/{repo-name}/architectural-principles.md` for detailed patterns
 
 When reviewing code, you will:
 

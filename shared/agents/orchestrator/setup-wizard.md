@@ -448,30 +448,57 @@ Template:
 
 **Step 17: Update Orchestrator CLAUDE.md**
 
+**CRITICAL:** Transform CLAUDE.md from template into production-ready documentation with NO setup references.
+
 ```
-Replace placeholder sections with actual information:
+Edit orchestrator/CLAUDE.md in-place with these changes:
 
-1. Repository Overview section:
-   - List actual repositories
-   - Actual repository purposes
+1. Remove setup warning at top:
+   - Delete entire line: `⚠️ **SETUP REQUIRED** - Run /setup-orchestrator to configure this for your organization.`
 
-2. Resource Discovery Map:
-   - List actual skills (one per repo)
-   - List actual agents (generic + custom)
+2. Update "Last Updated" date:
+   - Replace `**Last Updated: [DATE - will be updated by setup wizard]**`
+   - With: `**Last Updated: [current ISO date]**`
 
-3. Guidelines section:
-   - List generated guidelines
-   - Mark optional ones correctly
+3. Update Repository Overview section:
+   - Replace `**your repositories**: **[Will be listed here after setup - e.g., app repo, core repo, etc.]**`
+   - With: `**your repositories**: [actual repo names and purposes]`
 
-4. When to Use What section:
-   - Customize decision tree with actual repo names
-   - Actual tech stack examples
+4. Update ALL skill entries:
+   - Replace `**[repo-name]**-guidelines (Example)` → `[actual-repo-name]-guidelines`
+   - Replace `**[e.g., **/repo-name/**/*.tsx]**` → actual file patterns
+   - Replace `**[e.g., React, FastAPI, etc. - detected from your tech stack]**` → actual tech stack
+   - Replace `**[Tech stack-specific development patterns]**` → actual patterns
+   - Change `**Status:** ⏳ Will be created during setup` → `**Status:** ✅ Active`
+   - Remove "(Example)" from skill names
 
-5. Quick Reference table:
-   - Actual repo names
-   - Actual tech stacks
+5. Update agent descriptions:
+   - Replace `**[your organization's]**` → actual organization name
+   - Replace `**[Will be customized based on your detected tech stacks]**` → actual tech stacks
 
-6. Remove setup instructions section (no longer needed)
+6. Update guideline references:
+   - Replace `**[GUIDELINES WILL BE GENERATED DURING SETUP]**` with actual guideline list
+   - Update "Referenced by" sections with actual repo names
+   - Change all `⏳ Will be generated during setup` → `✅ Available`
+
+7. Update "When to Use What" decision tree:
+   - Replace all `**[your-repo]**` → actual repo names
+   - Replace all `**[your tech stack]**` → actual tech (React, FastAPI, etc.)
+   - Replace all `**[your repos]**` → comma-separated repo list
+
+8. Update Quick Reference table:
+   - Replace all `**[your tech]**` → actual tech stack
+   - Replace all `**[your-repo]**` → actual repo names
+
+9. Remove entire "Setup Instructions" section:
+   - Delete from `## Setup Instructions` header to end of file
+   - This section becomes obsolete after setup
+
+10. Final validation:
+    - Search for any remaining `**[` placeholders - should find NONE
+    - Search for `⏳` - should find NONE
+    - Search for "setup wizard" or "Setup Instructions" - should find NONE
+    - All content should reference actual org/repo names
 ```
 
 **Step 18: Update README.md**
