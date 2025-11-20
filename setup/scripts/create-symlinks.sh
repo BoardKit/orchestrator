@@ -55,6 +55,15 @@ REPO_COUNT=$(jq '.repositories | length' "$CONFIG_FILE")
 echo "Repositories to process: $REPO_COUNT"
 echo ""
 
+# Get feature flags (default to false if not set)
+COPILOT_AGENTS_ENABLED=$(jq -r '.features.copilotAgents // false' "$CONFIG_FILE")
+if [ "$COPILOT_AGENTS_ENABLED" = "true" ]; then
+    echo -e "GitHub Copilot agents: ${GREEN}Enabled${NC}"
+else
+    echo -e "GitHub Copilot agents: ${YELLOW}Disabled${NC}"
+fi
+echo ""
+
 # Check OS for symlink support
 OS_TYPE="$(uname -s)"
 if [[ "$OS_TYPE" == "MINGW"* ]] || [[ "$OS_TYPE" == "MSYS"* ]] || [[ "$OS_TYPE" == "CYGWIN"* ]]; then
@@ -348,7 +357,28 @@ for i in $(seq 0 $((REPO_COUNT - 1))); do
         "$CLAUDE_DIR/settings.json" \
         "Settings file" || ((ERRORS++))
 
-    # 7. GITIGNORE: Add .claude/tsc-cache
+    # 7. COPILOT AGENTS: Symlink to .github/agents/ (if enabled)
+    if [ "$COPILOT_AGENTS_ENABLED" = "true" ]; then
+        echo -e "${YELLOW}  Copilot Agents:${NC}"
+        GITHUB_DIR="$REPO_PATH/.github"
+        COPILOT_AGENTS_DIR="$GITHUB_DIR/agents"
+
+        # Create .github directory if it doesn't exist
+        if [ ! -d "$GITHUB_DIR" ]; then
+            mkdir -p "$GITHUB_DIR"
+            echo -e "  ${GREEN}✓${NC} Created .github directory"
+        fi
+
+        create_symlink \
+            "$ORCHESTRATOR_ROOT/shared/copilot-agents" \
+            "$COPILOT_AGENTS_DIR" \
+            "Copilot agents" \
+            "directory" || ((ERRORS++))
+    else
+        echo -e "${YELLOW}  Copilot Agents:${NC} ${CYAN}Skipped (disabled in config)${NC}"
+    fi
+
+    # 8. GITIGNORE: Add .claude/tsc-cache
     echo -e "${YELLOW}  Gitignore:${NC}"
     if [ -f "$SCRIPT_DIR/manage-gitignore.sh" ]; then
         bash "$SCRIPT_DIR/manage-gitignore.sh" "$REPO_PATH" 2>&1 | sed 's/^/  /'
@@ -397,6 +427,9 @@ if [ $SUCCESS_COUNT -eq $REPO_COUNT ]; then
     echo "  ✓ .claude/guidelines/global/ → orchestrator/shared/guidelines/global/"
     echo "  ✓ .claude/guidelines/{repo}/ → orchestrator/shared/guidelines/{repo}/"
     echo "  ✓ .claude/settings.json → orchestrator/shared/settings/{repo}/settings.json"
+    if [ "$COPILOT_AGENTS_ENABLED" = "true" ]; then
+        echo "  ✓ .github/agents/ → orchestrator/shared/copilot-agents/"
+    fi
     echo "  ✓ .gitignore updated with .claude/tsc-cache"
     echo ""
     echo "Next steps:"

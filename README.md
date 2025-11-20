@@ -110,7 +110,7 @@ YourOrganization/
 │       │   └── global/               # Global agents for all repos
 │       │   └── orchestrator/         # Orchestrator-only agents
 │       │   └── <repo-name>/          # (OPTIONAL) Repo-specific agents (directory for each repo)
-│       ├── chatmodes/                # Co-pilot agents
+│       ├── copilot-agents/           # GitHub Copilot custom agents (.agent.md files)
 │       ├── commands/                 # Wrappers around agents/skills
 │       ├── guidelines/               # Long-form documentation
 │       │   └── global/               # Global guidelines (for all repos)
@@ -125,20 +125,22 @@ YourOrganization/
 │      
 │
 ├── repo-a/
-│   └── .claude/
-│       ├── agents/ 
-│       │   └── global/               # symlink to orchestrator/shared/agents/global
-│       │   └── <repo-a>/             # symlink to orchestrator/shared/agents/<repo-a>
-│       ├── commands/                 # symlink to orchestrator/shared/commands
-│       ├── guidelines/              
-│       │   └── global/               # symlink to orchestrator/shared/guidelines/global
-│       │   └── <repo-a>/             # symlink to orchestrator/shared/guidelines/<repo-a>
-│       ├── hooks/                    # symlink to orchestrator/shared/hooks
-│       ├── skills/
-│             └── global/             # symlink to orchestrator/shared/skills/global
-│             └── <repo-a>/           # symlink to orchestrator/shared/skills/<repo-a>
-│       └── settings.json             # symlink to orchestrator/shared/settings/<repo-a>/settings.json
-│    └── CLAUDE.md ->                 # Repo Specific Entry Point; MUST exist
+│   ├── .claude/
+│   │   ├── agents/
+│   │   │   └── global/               # symlink to orchestrator/shared/agents/global
+│   │   │   └── <repo-a>/             # symlink to orchestrator/shared/agents/<repo-a>
+│   │   ├── commands/                 # symlink to orchestrator/shared/commands
+│   │   ├── guidelines/
+│   │   │   └── global/               # symlink to orchestrator/shared/guidelines/global
+│   │   │   └── <repo-a>/             # symlink to orchestrator/shared/guidelines/<repo-a>
+│   │   ├── hooks/                    # symlink to orchestrator/shared/hooks
+│   │   ├── skills/
+│   │         └── global/             # symlink to orchestrator/shared/skills/global
+│   │         └── <repo-a>/           # symlink to orchestrator/shared/skills/<repo-a>
+│   │   └── settings.json             # symlink to orchestrator/shared/settings/<repo-a>/settings.json
+│   ├── .github/                      # (optional - if copilotAgents enabled)
+│   │   └── agents/                   # symlink to orchestrator/shared/copilot-agents
+│   └── CLAUDE.md                     # Repo Specific Entry Point; MUST exist
 │...
 
 (you can have any number of repositories)
@@ -159,6 +161,9 @@ Agents that run ONLY from the orchestrator repository (NOT symlinked to applicat
 - `cross-repo-doc-sync` - Keeps orchestrator docs aligned with your evolving codebase
 - `setup-wizard` - Configures the orchestrator for your organization
 
+**Copilot Agents** (`shared/copilot-agents/`)
+GitHub Copilot custom agent configurations for specialized AI personas (code review, refactoring, documentation, etc.). Optionally symlinked to each repo's `.github/agents/` for VS Code/Copilot integration (enabled via setup wizard).
+
 **Hooks** (`shared/hooks/`)
 Event-driven scripts that auto-suggest skills and track file changes.
 
@@ -166,7 +171,7 @@ Event-driven scripts that auto-suggest skills and track file changes.
 Slash commands like `/dev-docs` for creating planning docs and `/setup-orchestrator` for initial configuration.
 
 **Global Skills** (`shared/skills/global/`)
-Meta-skill for creating new skills. Auto-triggers when working on the skill system. 
+Meta-skill for creating new skills. Auto-triggers when working on the skill system.
 
 **Global Guidelines** (`shared/guidelines/global/`)
 Documentation standards that all agents and skills follow. Language-agnostic best practices.
@@ -241,10 +246,10 @@ The wizard:
 ### AI Coding Tools
 - ✅ **Claude Code** (primary target)
 - ✅ **GitHub Copilot** (simplified compatibility):
-   - Uses basic agent markdown files in `shared/chatmodes/`
+   - Uses basic agent markdown files in `shared/copilot-agents/`
    - Less comprehensive than Claude Code agents but functional
    - Can be used alongside Claude Code infrastructure
-   - Agents work as simple chatmode references rather than full skill integration
+   - Custom agents work as chat references rather than full skill integration
    - **Cost-effective for routine tasks** - Leverage Copilot for simpler queries and code completion
    - **Smart token allocation** - Use Copilot for basic tasks, preserve Claude Code tokens for complex reasoning and architecture work
    - **Budget optimization** - Allocate easier development tasks to Copilot while reserving Claude's full capabilities for critical problem-solving

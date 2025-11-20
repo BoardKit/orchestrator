@@ -141,9 +141,14 @@ Ask user:
 2. Create API documentation guidelines? (yes/no)
    - If yes: REST, GraphQL, gRPC, etc.
 
+3. Include GitHub Copilot custom agents? (yes/no)
+   - If yes: Will create symlink to .github/agents/ in each repo
+   - If no: Skip copilot-agents symlink creation
+   - Note: GitHub Copilot agents are simplified versions for VS Code 1.106+
+
 Note: Cross-repo documentation sync is automatically enabled for all setups.
 
-Store: Feature flags in config
+Store: Feature flags in config (including copilotAgents: true/false)
 ```
 
 ---

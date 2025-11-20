@@ -227,6 +227,12 @@ Q: Generate detailed guidelines with examples?
 ```
 **Recommendation:** yes for first setup -- this will add the initial documentation files. Strictly verify the accuracy.
 
+```
+Q: Include GitHub Copilot custom agents?
+   (yes/no)
+```
+**Recommendation:** yes if you use GitHub Copilot in VS Code 1.106+ -- this will create symlinks to `.github/agents/` in each repo. If you only use Claude Code, select no.
+
 **Note:** Cross-repo documentation synchronization is automatically enabled for all setups.
 
 ### What the Wizard Generates
@@ -344,19 +350,22 @@ Now create symlinks in your repositories to use the shared resources:
 
 **Symlinks created in each repository:**
 ```
-your-repo/.claude/
-├── agents/
-│   ├── global/ → orchestrator/shared/agents/global/
-│   └── <repo-name>/ → orchestrator/shared/agents/<repo-name>/
-├── commands/ → orchestrator/shared/commands/
-├── guidelines/
-│   ├── global/ → orchestrator/shared/guidelines/global/
-│   └── <repo-name>/ → orchestrator/shared/guidelines/<repo-name>/
-├── hooks/ → orchestrator/shared/hooks/
-├── skills/
-│   ├── global/ → orchestrator/shared/skills/global/
-│   └── <repo-name>/ → orchestrator/shared/skills/<repo-name>/
-└── settings.json → orchestrator/shared/settings/<repo-name>/settings.json
+your-repo/
+├── .claude/
+│   ├── agents/
+│   │   ├── global/ → orchestrator/shared/agents/global/
+│   │   └── <repo-name>/ → orchestrator/shared/agents/<repo-name>/
+│   ├── commands/ → orchestrator/shared/commands/
+│   ├── guidelines/
+│   │   ├── global/ → orchestrator/shared/guidelines/global/
+│   │   └── <repo-name>/ → orchestrator/shared/guidelines/<repo-name>/
+│   ├── hooks/ → orchestrator/shared/hooks/
+│   ├── skills/
+│   │   ├── global/ → orchestrator/shared/skills/global/
+│   │   └── <repo-name>/ → orchestrator/shared/skills/<repo-name>/
+│   └── settings.json → orchestrator/shared/settings/<repo-name>/settings.json
+└── .github/                                        (if copilotAgents: true)
+    └── agents/ → orchestrator/shared/copilot-agents/
 ```
 
 **Output:**
@@ -370,6 +379,8 @@ Configuration: /path/to/orchestrator/SETUP_CONFIG.json
 Organization: YourOrg
 
 Repositories to process: 3
+
+GitHub Copilot agents: Enabled
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   Creating Symlinks
@@ -386,6 +397,7 @@ Repositories to process: 3
   ✓ Created skills/global symlink
   ✓ Created skills/app symlink
   ✓ Created settings.json symlink
+  ✓ Created .github/agents symlink
   ✓ Repository configured successfully
 
 [2/3] Repository: backend
@@ -399,6 +411,7 @@ Repositories to process: 3
   ✓ Created skills/global symlink
   ✓ Created skills/backend symlink
   ✓ Created settings.json symlink
+  ✓ Created .github/agents symlink
   ✓ Repository configured successfully
 
 [3/3] Repository: library
@@ -412,6 +425,7 @@ Repositories to process: 3
   ✓ Created skills/global symlink
   ✓ Created skills/library symlink
   ✓ Created settings.json symlink
+  ✓ Created .github/agents symlink
   ✓ Repository configured successfully
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -428,6 +442,16 @@ Next steps:
   2. Verify skill activation works
   3. Delete the setup/ directory: rm -rf setup/
 ```
+
+**Note:** If you disabled GitHub Copilot agents (`copilotAgents: false`), the output will show:
+```
+GitHub Copilot agents: Disabled
+
+...
+
+  Copilot Agents: Skipped (disabled in config)
+```
+And no `.github/agents/` symlinks will be created.
 
 ---
 
@@ -518,7 +542,19 @@ ls -la
 #   app/ -> ../../orchestrator/shared/skills/app/
 # settings.json -> ../../orchestrator/shared/settings/app/settings.json
 
+# Check GitHub Copilot agents symlink (if enabled)
+cd ..
+if [ -d .github/agents ]; then
+  echo "Copilot agents enabled"
+  ls -la .github
+  # You should see:
+  # agents/ -> ../../orchestrator/shared/copilot-agents/
+else
+  echo "Copilot agents not enabled (optional)"
+fi
+
 # Test symlink works
+cd .claude
 cat skills/app/skill.md
 # Should display the skill content for your app
 ```
@@ -707,6 +743,11 @@ ln -sf ../../../orchestrator/shared/skills/app skills/app
 
 # Create settings symlink
 ln -sf ../../orchestrator/shared/settings/app/settings.json settings.json
+
+# Create GitHub Copilot agents symlink
+cd ..
+mkdir -p .github
+ln -sf ../../orchestrator/shared/copilot-agents .github/agents
 ```
 
 **Windows:**
@@ -736,6 +777,11 @@ mklink /D skills\app ..\..\..\orchestrator\shared\skills\app
 
 # Create settings symlink
 mklink settings.json ..\..\orchestrator\shared\settings\app\settings.json
+
+# Create GitHub Copilot agents symlink
+cd ..
+mkdir .github
+mklink /D .github\agents ..\..\orchestrator\shared\copilot-agents
 ```
 
 ### Issue: Skills Not Triggering

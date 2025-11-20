@@ -102,8 +102,8 @@
     "databaseDocs": true,
     "_comment_databaseDocs": "Generate database documentation guidelines (DATABASE_SCHEMA, DATABASE_OPERATIONS, DATABASE_SECURITY)",
 
-    "chatModes": false,
-    "_comment_chatModes": "Generate chat mode files for each agent (optional, for Cursor/other IDEs)",
+    "copilotAgents": true,
+    "_comment_copilotAgents": "Include GitHub Copilot custom agents (symlinked to .github/agents/ in each repo)",
 
     "skillEnforcement": "suggest",
     "_comment_skillEnforcement": "Default skill enforcement: 'suggest' (show suggestion), 'warn' (show warning), 'block' (require usage)"

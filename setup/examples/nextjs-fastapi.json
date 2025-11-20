@@ -56,7 +56,7 @@
   "features": {
     "crossRepoDocSync": false,
     "databaseDocs": true,
-    "chatModes": false,
+    "copilotAgents": true,
     "skillEnforcement": "suggest"
   },
 

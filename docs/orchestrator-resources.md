@@ -9,7 +9,7 @@
 - [Root Files](#root-files)
 - [Shared Resources (Pre-Configured)](#shared-resources-pre-configured)
   - [Agents](#agents)
-  - [Chat Modes](#chat-modes)
+  - [Copilot Agents](#copilot-agents)
   - [Commands](#commands)
   - [Guidelines](#guidelines)
   - [Hooks](#hooks)
@@ -79,19 +79,20 @@ Only available when working in the orchestrator repository.
 
 ---
 
-### Chat Modes
+### Copilot Agents
 
-#### `shared/chatmodes/`
-GitHub Copilot-compatible versions of agents.
+#### `shared/copilot-agents/`
+GitHub Copilot custom agents for VS Code 1.106+. These are simplified versions of Claude Code agents that work with GitHub Copilot. They need to be chosen explicitly from the Copilot chat interface's agent dropdown menu. Optionally symlinked to `.github/agents/` in each repo (enabled via setup wizard).
 
 | File | Purpose |
 |------|---------|
-| `auto-error-resolver.chatmode.md` | Chat mode version of auto-error-resolver |
-| `code-refactor-master.chatmode.md` | Chat mode version of code-refactor-master |
-| `documentation-architect.chatmode.md` | Chat mode version of documentation-architect |
-| `plan-reviewer.chatmode.md` | Chat mode version of plan-reviewer |
-| `refactor-planner.chatmode.md` | Chat mode version of refactor-planner |
-| `web-research-specialist.chatmode.md` | Chat mode version of web-research-specialist |
+| `auto-error-resolver.agent.md` | Copilot agent for fixing TypeScript/build errors |
+| `code-architecture-reviewer.agent.md` | Copilot agent for code review and architecture analysis |
+| `code-refactor-master.agent.md` | Copilot agent for systematic refactoring execution |
+| `documentation-architect.agent.md` | Copilot agent for creating/updating documentation |
+| `plan-reviewer.agent.md` | Copilot agent for reviewing implementation plans |
+| `refactor-planner.agent.md` | Copilot agent for creating refactoring plans |
+| `web-research-specialist.agent.md` | Copilot agent for web research on technologies |
 
 ---
 
@@ -298,6 +299,7 @@ Example configurations for different tech stacks:
 | `.claude/skills/global/` | Symlink to `orchestrator/shared/skills/global/` |
 | `.claude/skills/<repo-name>/` | Symlink to `orchestrator/shared/skills/<repo-name>/` |
 | `.claude/settings.json` | Symlink to `orchestrator/shared/settings/<repo-name>/settings.json` |
+| `.github/agents/` | (Optional) Symlink to `orchestrator/shared/copilot-agents/` if enabled |
 
 ---
 
@@ -354,7 +356,7 @@ Structure for each task in `dev/active/<task-name>/`:
 - **Root files:** 8
 - **Global agents:** 7
 - **Orchestrator agents:** 2
-- **Chat modes:** 6
+- **Copilot agents:** 7
 - **Commands:** 3
 - **Global guidelines:** 1
 - **Hooks:** 6
@@ -362,7 +364,7 @@ Structure for each task in `dev/active/<task-name>/`:
 - **Setup system:** ~30 files across scripts, templates, examples
 - **Documentation:** 8
 
-**Total:** ~70 significant files
+**Total:** ~73 significant files
 
 ### After Setup (Example: 2 Repos)
 All of the above, plus:
@@ -371,10 +373,10 @@ All of the above, plus:
 - **Repo-specific guidelines:** 2 directories (1 per repo)
 - **Repo-specific settings:** 2 files (1 per repo)
 - **Repo CLAUDE.md files:** 2 (in application repos, not orchestrator)
-- **Symlinks in each repo:** ~8-10 per repo
+- **Symlinks in each repo:** ~8-10 per repo (9-11 if copilot agents enabled)
 
-**Total in orchestrator:** ~85 significant files
-**Total including application repos:** ~105+ files and symlinks
+**Total in orchestrator:** ~88 significant files
+**Total including application repos:** ~108+ files and symlinks
 
 ---
 
