@@ -831,7 +831,7 @@ Step 1: Organization Information
 What is your organization name?
 (e.g., "Acme Corp", "My Projects", "Personal Dev")
 
-User: BoardKit
+User: Acme Corp
 
 Agent:
 Great! How many application repositories do you want to manage?
@@ -853,7 +853,7 @@ Agent:
 What is the absolute path to frontend-app?
 (e.g., "/Users/you/projects/frontend-app")
 
-User: /Users/MV/projects/boardkit/app
+User: /Users/you/projects/acme/frontend-app
 
 Agent:
 ✅ Path exists and is a git repository
