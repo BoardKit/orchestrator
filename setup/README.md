@@ -66,7 +66,7 @@ orchestrator/
 │   │       ├── error-handling.md
 │   │       ├── testing-standards.md
 │   │       ├── cross-repo-patterns.md    # (if multiple repos)
-│   │       └── DATABASE_*.md             # (if database docs enabled)
+│   │       └── database-*.md             # (if database docs enabled)
 │   ├── agents/
 │   │   └── <repo-name>/                  # (optional repo-specific agents)
 │   └── settings/

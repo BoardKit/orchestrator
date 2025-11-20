@@ -239,9 +239,9 @@ For each change, determine what orchestrator documentation needs updating.
 - API integration patterns → Update repo-specific skill
 
 **Database Changes (if applicable):**
-- Schema/tables → Update `shared/guidelines/{repo-name}/DATABASE_SCHEMA.md` (if it exists)
-- Queries/performance → Update `shared/guidelines/{repo-name}/DATABASE_OPERATIONS.md` (if it exists)
-- Security policies → Update `shared/guidelines/{repo-name}/DATABASE_SECURITY.md` (if it exists)
+- Schema/tables → Update `shared/guidelines/{repo-name}/database-schema.md` (if it exists)
+- Queries/performance → Update `shared/guidelines/{repo-name}/database-operations.md` (if it exists)
+- Security policies → Update `shared/guidelines/{repo-name}/database-security.md` (if it exists)
 
 **Cross-Repository Changes:**
 - New integration patterns → Update `shared/guidelines/global/cross-repo-patterns.md` (if it exists)
@@ -278,8 +278,8 @@ When updating orchestrator documentation:
    **Actual splits implemented (2025-11-06):**
    - `API_PATTERNS.md` (909 lines) → `API_CLIENT.md` (280), `API_ENDPOINTS.md` (322), `API_ADVANCED.md` (360)
    - `FRONTEND_PATTERNS.md` (1265 lines) → `FRONTEND_BASICS.md` (216), `FRONTEND_UI.md` (206), `FRONTEND_STATE.md` (377), `FRONTEND_DATA.md` (558)
-   - `database-schema.md` (1371 lines) → `DATABASE_SCHEMA.md` (852*), `DATABASE_OPERATIONS.md` (376), `DATABASE_SECURITY.md` (221)
-   - *Note: DATABASE_SCHEMA is 852 lines (exception for cohesive table definitions)
+   - `database-schema.md` (1371 lines) → `database-schema.md` (852*), `database-operations.md` (376), `database-security.md` (221)
+   - *Note: database-schema.md is 852 lines (exception for cohesive table definitions)
 
    **When splitting documents:**
    - Each new file must have clear focused scope

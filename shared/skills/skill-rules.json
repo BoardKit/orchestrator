@@ -29,7 +29,7 @@
         ]
       }
     },
-    "global/orchestrator": {
+    "orchestrator/orchestrator": {
       "type": "domain",
       "enforcement": "suggest",
       "priority": "high",

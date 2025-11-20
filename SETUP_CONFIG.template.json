@@ -100,7 +100,7 @@
     "_comment_crossRepoDocSync": "Enable cross-repo documentation synchronization (requires cross-repo-doc-sync agent)",
 
     "databaseDocs": true,
-    "_comment_databaseDocs": "Generate database documentation guidelines (DATABASE_SCHEMA, DATABASE_OPERATIONS, DATABASE_SECURITY)",
+    "_comment_databaseDocs": "Generate database documentation guidelines (database-schema, database-operations, database-security)",
 
     "copilotAgents": false,
     "_comment_copilotAgents": "Include GitHub Copilot custom agents (symlinked to .github/agents/ in each repo) - set to true to enable",

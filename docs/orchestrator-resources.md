@@ -130,9 +130,9 @@ Typical files created:
 - `error-handling.md` - Tech stack-specific error patterns (e.g., FastAPI, React)
 - `testing-standards.md` - Framework-specific testing patterns (e.g., pytest, Jest)
 - `cross-repo-patterns.md` - Multi-repo workflows (if applicable)
-- `DATABASE_SCHEMA.md` - Database tables, columns, relationships (if enabled)
-- `DATABASE_OPERATIONS.md` - Query patterns, migrations, performance (if enabled)
-- `DATABASE_SECURITY.md` - RLS policies, security best practices (if enabled)
+- `database-schema.md` - Database tables, columns, relationships (if enabled)
+- `database-operations.md` - Query patterns, migrations, performance (if enabled)
+- `database-security.md` - RLS policies, security best practices (if enabled)
 
 ---
 
@@ -157,7 +157,7 @@ Event-driven scripts that auto-execute.
 #### Global Skills (`shared/skills/global/`)
 
 **skill-developer** (`shared/skills/global/skill-developer/`)
-Meta-skill for creating new skills.
+Meta-skill for creating new skills. Available to all repositories.
 
 | File | Purpose |
 |------|---------|
@@ -169,15 +169,17 @@ Meta-skill for creating new skills.
 | `trigger_types.md` | Trigger mechanisms (file patterns, keywords, intent) |
 | `troubleshooting.md` | Debug skill issues |
 
-**orchestrator** (`shared/skills/global/orchestrator/`)
-Orchestrator-specific development skill.
+#### Orchestrator Skills (`shared/skills/orchestrator/`)
+
+**orchestrator** (`shared/skills/orchestrator/orchestrator/`)
+Orchestrator-specific development skill. Only available when working in the orchestrator repository.
 
 | File | Purpose |
 |------|---------|
 | `skill.md` | Orchestrator development patterns and guidelines |
 | `README.md` | Skill overview |
 
-**Skill Configuration**
+#### Skill Configuration
 
 | File | Purpose |
 |------|---------|
@@ -367,7 +369,8 @@ Structure for each task in `dev/active/<task-name>/`:
 - **Global guidelines:** 1
 - **Orchestrator guidelines:** 1
 - **Hooks:** 6
-- **Global skills:** 2 skill directories (skill-developer, orchestrator)
+- **Global skills:** 1 skill directory (skill-developer)
+- **Orchestrator skills:** 1 skill directory (orchestrator)
 - **Setup system:** ~30 files across scripts, templates, examples
 - **Documentation:** 8
 

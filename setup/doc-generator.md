@@ -545,7 +545,7 @@ If `features.databaseDocs === true`:
 
 Create three files:
 
-#### DATABASE_SCHEMA.md
+#### database-schema.md
 ```markdown
 # Database Schema
 
@@ -579,7 +579,7 @@ CREATE TABLE users (
 {{/if}}
 ```
 
-#### DATABASE_OPERATIONS.md
+#### database-operations.md
 ```markdown
 # Database Operations
 
@@ -599,7 +599,7 @@ UPDATE users SET name = $1 WHERE id = $2;
 {{/if}}
 ```
 
-#### DATABASE_SECURITY.md
+#### database-security.md
 ```markdown
 # Database Security
 
@@ -612,7 +612,7 @@ Security best practices and RLS policies.
 {{/if}}
 ```
 
-**Write to:** `shared/guidelines/<repo-name>/DATABASE_*.md` (for each repository with databases)
+**Write to:** `shared/guidelines/<repo-name>/database-*.md` (for each repository with databases)
 
 ### Step 6: Validate Generated Files
 
@@ -672,9 +672,9 @@ Tech Stacks: React, FastAPI, PostgreSQL
    - Coverage standards
 
 {{#if databaseDocs}}
-✅ Generated: shared/guidelines/DATABASE_SCHEMA.md
-✅ Generated: shared/guidelines/DATABASE_OPERATIONS.md
-✅ Generated: shared/guidelines/DATABASE_SECURITY.md
+✅ Generated: shared/guidelines/database-schema.md
+✅ Generated: shared/guidelines/database-operations.md
+✅ Generated: shared/guidelines/database-security.md
 {{/if}}
 
 Guidelines ready! ✓

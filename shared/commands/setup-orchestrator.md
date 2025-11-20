@@ -7,7 +7,7 @@ description: Configure the orchestrator for your organization - first-time setup
 
 **Role:** Interactive orchestrator configuration specialist
 
-**Mission:** Guide users through first-time orchestrator setup, collecting organization details, discovering repositories, assigning agents per repo, creating symlinks, and generating all necessary documentation.
+**Mission:** Guide users through first-time orchestrator setup, collecting organization details, discovering repositories, creating symlinks, and generating all necessary documentation.
 
 ---
 
@@ -24,12 +24,11 @@ description: Configure the orchestrator for your organization - first-time setup
      - Absolute path on filesystem
      - Repository type (frontend, backend, fullstack, ML, etc.)
      - Primary tech stack
-     - Which agents it needs (from available generic agents + option to create custom)
 
 3. **Create Symlink Structure**
-   - Create directory-level symlinks for agents (global/, orchestrator/, {repo-name}/ subdirectories)
-   - Each repo gets symlinks to global agents + their repo-specific agents
+   - Create directory-level symlinks for agents (all repos get access to global/ agents)
    - Create directory symlinks for skills, guidelines, hooks, and commands
+   - Each repo gets symlinks to global resources + their repo-specific resources
 
 4. **Generate Repository-Specific Skills**
    - Create skills that auto-trigger for each repo's tech stack
@@ -107,36 +106,7 @@ Ask user:
    - Testing frameworks (Jest, pytest, etc.)
 ```
 
-**Step 4: Agent Assignment**
-
-For each repository:
-```
-Display available agents:
-- List all agents in shared/agents/
-- Mark each as [Generic] or allow creating [Custom]
-
-Ask user to select agents for this repo:
-1. Recommended generic agents (pre-selected):
-   - code-architecture-reviewer
-   - refactor-planner
-   - documentation-architect
-   - plan-reviewer
-
-2. Optional agents:
-   - code-refactor-master
-   - auto-error-resolver
-   - web-research-specialist
-
-Note: cross-repo-doc-sync is ONLY available when working in the orchestrator repository itself (not symlinked to application repos)
-
-3. Custom agent creation:
-   - "Create custom agent for this repo?" (yes/no)
-   - If yes: agent name, purpose, tech stack
-
-Store: List of agents for each repo
-```
-
-**Step 5: Feature Configuration**
+**Step 4: Feature Configuration**
 ```
 Ask user:
 1. Create database documentation? (yes/no)
@@ -160,7 +130,7 @@ Store: Feature flags in config (including copilotAgents: true/false)
 
 ### Phase 2: File Generation
 
-**Step 6: Create Repository-Specific Skills**
+**Step 5: Create Repository-Specific Skills**
 
 For each repository:
 ```
@@ -180,7 +150,7 @@ Include:
 - References to guidelines/[repo-name]/testing-standards.md
 ```
 
-**Step 7: Generate Guidelines**
+**Step 6: Generate Guidelines**
 
 For each repository:
 ```
@@ -236,28 +206,28 @@ Only if multiple repositories and this repo interacts with others:
 - Deployment coordination
 ```
 
-**shared/guidelines/[repo-name]/DATABASE_*.md (optional):**
+**shared/guidelines/[repo-name]/database-*.md (optional):**
 ```
 If user enabled database docs for this repo:
 
-DATABASE_SCHEMA.md:
+database-schema.md:
 - Table structures used by this repo
 - Column definitions
 - Relationships
 - Custom types
 
-DATABASE_OPERATIONS.md:
+database-operations.md:
 - Common query patterns for this repo
 - Performance optimization
 - Migration guidelines
 
-DATABASE_SECURITY.md:
+database-security.md:
 - RLS policies (if applicable)
 - Access control patterns
 - Security best practices
 ```
 
-**Step 8: Create Custom Agents (if requested)**
+**Step 7: Create Custom Agents (if requested)**
 
 For each custom agent requested:
 ```
@@ -284,7 +254,7 @@ Template structure:
 
 ### Phase 3: Symlink Creation
 
-**Step 9: Create .claude Directories in Repos**
+**Step 8: Create .claude Directories in Repos**
 
 For each repository:
 ```
@@ -298,7 +268,7 @@ Check: Does repo/.claude/ exist?
   - skills/
 ```
 
-**Step 10: Create Agent Symlinks**
+**Step 9: Create Agent Symlinks**
 
 For each repository:
 ```
@@ -318,7 +288,7 @@ frontend-repo/.claude/agents/
 These are DIRECTORY symlinks, not individual file symlinks.
 ```
 
-**Step 11: Create Skills Symlinks**
+**Step 10: Create Skills Symlinks**
 
 For each repository:
 ```
@@ -336,7 +306,7 @@ frontend-repo/.claude/skills/
 └── frontend/ -> ../../../orchestrator/shared/skills/frontend/
 ```
 
-**Step 12: Create Guidelines Symlinks**
+**Step 11: Create Guidelines Symlinks**
 
 For each repository:
 ```
@@ -354,7 +324,7 @@ frontend-repo/.claude/guidelines/
 └── frontend/ -> ../../../orchestrator/shared/guidelines/frontend/
 ```
 
-**Step 13: Create Hooks Symlinks**
+**Step 12: Create Hooks Symlinks**
 
 For each repository:
 ```
@@ -364,7 +334,7 @@ In repo/.claude/:
 - Verify symlink works
 ```
 
-**Step 14: Create Commands Symlinks**
+**Step 13: Create Commands Symlinks**
 
 For each repository:
 ```
@@ -373,7 +343,7 @@ In repo/.claude/:
 - Verify symlink works
 ```
 
-**Step 15: Create Repository Settings Files**
+**Step 14: Create Repository Settings Files**
 
 For each repository:
 ```
@@ -400,7 +370,7 @@ repo/.claude/settings.json -> ../../orchestrator/shared/settings/[repo-name]/set
 
 ### Phase 4: Documentation Updates
 
-**Step 16: Create Repository-Specific CLAUDE.md Files**
+**Step 15: Create Repository-Specific CLAUDE.md Files**
 
 For each repository:
 ```
@@ -456,7 +426,7 @@ Template:
 - Global guidelines: `.claude/guidelines/global/`
 ```
 
-**Step 17: Update Orchestrator CLAUDE.md**
+**Step 16: Update Orchestrator CLAUDE.md**
 
 **CRITICAL:** Transform CLAUDE.md from template into production-ready documentation with NO setup references.
 
@@ -511,7 +481,7 @@ Edit orchestrator/CLAUDE.md in-place with these changes:
     - All content should reference actual org/repo names
 ```
 
-**Step 18: Update README.md**
+**Step 17: Update README.md**
 
 ```
 Add organization-specific information:
@@ -521,7 +491,7 @@ Add organization-specific information:
 - Remove generic placeholders
 ```
 
-**Step 19: Create SETUP_CONFIG.json**
+**Step 18: Create SETUP_CONFIG.json**
 
 ```
 Create configuration file for future reference and updates:
@@ -623,7 +593,7 @@ Save to: orchestrator/SETUP_CONFIG.json
 
 ### Phase 5: Verification and Summary
 
-**Step 20: Verify Setup**
+**Step 19: Verify Setup**
 
 ```
 For each repository:
@@ -650,7 +620,7 @@ For each repository:
 Report any failures to user
 ```
 
-**Step 21: Generate Summary Report**
+**Step 20: Generate Summary Report**
 
 ```
 Display comprehensive summary:
@@ -797,18 +767,18 @@ For agents (repo-specific): ../../../orchestrator/shared/agents/[repo-name]/
 For skills/hooks/commands: ../../orchestrator/shared/[resource]/
 ```
 
-**Agent Selection Logic:**
+**Agent Access:**
 ```
-Generic agents (recommend for all repos):
+All repositories automatically get access to all global agents via symlinks:
 - code-architecture-reviewer
 - refactor-planner
-- documentation-architect
+- code-refactor-master
 - plan-reviewer
+- documentation-architect
+- auto-error-resolver
+- web-research-specialist
 
-Tech-specific agents (suggest based on tech stack):
-- Python backend → backend-python-developer (if exists or offer to create)
-- TypeScript frontend → frontend-typescript-specialist (if exists or offer to create)
-- ML → ml-python-specialist (if exists or offer to create)
+Note: cross-repo-doc-sync is ONLY available when working in the orchestrator repository (not symlinked to application repos)
 ```
 
 ---
@@ -846,8 +816,7 @@ Prerequisites:
 What we'll configure:
 • Organization details
 • Repository discovery and analysis
-• Agent assignment per repository
-• Symlink structure (individual agents, not directories)
+• Symlink structure (directory-based for agents, skills, guidelines, hooks, commands)
 • Repository-specific skills
 • Tech stack-specific guidelines
 • Documentation updates
@@ -907,23 +876,6 @@ What is the primary tech stack for frontend-app?
 User: TypeScript, React, Vite
 
 ... [continues through all repos] ...
-
-Agent:
-Agent Assignment for frontend-app:
-
-Available agents:
-✅ code-architecture-reviewer (recommended)
-✅ refactor-planner (recommended)
-✅ documentation-architect (recommended)
-✅ plan-reviewer (recommended)
-○ code-refactor-master (optional)
-○ auto-error-resolver (optional)
-○ web-research-specialist (optional)
-
-Which agents should frontend-app have access to?
-(Enter numbers separated by commas, or "all" for all agents)
-
-... [continues] ...
 
 Agent:
 📝 Creating repository-specific skills...

@@ -199,8 +199,11 @@ echo ""
 for i in $(seq 0 $((REPO_COUNT - 1))); do
     # Get repository info
     REPO_NAME=$(jq -r ".repositories[$i].name" "$CONFIG_FILE")
-    REPO_PATH=$(jq -r ".repositories[$i].path" "$CONFIG_FILE")
+    REPO_RELATIVE_PATH=$(jq -r ".repositories[$i].relativePath" "$CONFIG_FILE")
     CLAUDE_PATH=$(jq -r ".repositories[$i].claudePath // \".claude\"" "$CONFIG_FILE")
+
+    # Resolve relative path from orchestrator root
+    REPO_PATH="$ORCHESTRATOR_ROOT/$REPO_RELATIVE_PATH"
 
     echo -e "${CYAN}[$((i + 1))/$REPO_COUNT] $REPO_NAME${NC}"
     echo "  Path: $REPO_PATH"
@@ -216,7 +219,7 @@ for i in $(seq 0 $((REPO_COUNT - 1))); do
 
     # Create .claude directory structure
     CLAUDE_DIR="$REPO_PATH/$CLAUDE_PATH"
-    mkdir -p "$CLAUDE_DIR/"{agents,skills,tsc-cache}
+    mkdir -p "$CLAUDE_DIR/"{agents,skills,guidelines,tsc-cache}
 
     ERRORS=0
 

@@ -326,22 +326,22 @@ Guidelines are **NOT meant to be discovered organically**. They are explicitly r
 #### Database Documentation (Optional)
 **Split into 3 focused documents (or more depending on complexity):**
 
-**DATABASE_SCHEMA.md**
+**database-schema.md**
 - Complete table structures, columns, relationships
 - Custom database types (enums, etc.)
 - Database functions and storage buckets
-- **Location:** `shared/guidelines/**[your-repo-name]**/DATABASE_SCHEMA.md`
+- **Location:** `shared/guidelines/**[your-repo-name]**/database-schema.md`
 
-**DATABASE_OPERATIONS.md**
+**database-operations.md**
 - Common query patterns and examples
 - Migration considerations and performance optimization
 - Error handling patterns
-- **Location:** `shared/guidelines/**[your-repo-name]**/DATABASE_OPERATIONS.md`
+- **Location:** `shared/guidelines/**[your-repo-name]**/database-operations.md`
 
-**DATABASE_SECURITY.md**
+**database-security.md**
 - Row Level Security (RLS) policies for all tables (if applicable)
 - Security best practices and recommendations
-- **Location:** `shared/guidelines/**[your-repo-name]**/DATABASE_SECURITY.md`
+- **Location:** `shared/guidelines/**[your-repo-name]**/database-security.md`
 
 **Referenced by:** repo-guidelines skills, backend agents, API developers
 
@@ -538,8 +538,9 @@ See [README.md](./README.md) for complete architecture diagram.
     - Stored in `shared/agents/orchestrator/`
   - **Repo-specific agents** (optional, per repository): frontend-specialist, backend-specialist, etc.
     - Stored in `shared/agents/{repo-name}/` (will be generated during setup if needed)
-- **Skills** organized in global and repo-specific subdirectories
+- **Skills** organized in global, orchestrator, and repo-specific subdirectories
   - Global skills in `shared/skills/global/`
+  - Orchestrator skills in `shared/skills/orchestrator/` (orchestrator-only)
   - Repo skills in `shared/skills/{repo-name}/` (generated during setup)
 - **Guidelines** organized in global and repo-specific subdirectories
   - Global guidelines in `shared/guidelines/global/`
@@ -573,6 +574,7 @@ See [README.md](./README.md) for complete architecture diagram.
 - Orchestrator-only agents → Orchestrator `shared/agents/orchestrator/`
 - Repo-specific agents → Orchestrator `shared/agents/{repo-name}/`
 - Global skills → Orchestrator `shared/skills/global/`
+- Orchestrator skills → Orchestrator `shared/skills/orchestrator/`
 - Repo skills → Orchestrator `shared/skills/{repo-name}/`
 - Global guidelines → Orchestrator `shared/guidelines/global/`
 - Repo guidelines → Orchestrator `shared/guidelines/{repo-name}/`
@@ -762,9 +764,9 @@ cat orchestrator/shared/skills/skill-rules.json | jq .
 
 ### I need database schema information (Optional - if enabled)
 → **Read database documentation**
-- Schema/tables: `guidelines/**[your-repo-name]**/DATABASE_SCHEMA.md`
-- Queries/performance: `guidelines/**[your-repo-name]**/DATABASE_OPERATIONS.md`
-- RLS/security: `guidelines/**[your-repo-name]**/DATABASE_SECURITY.md`
+- Schema/tables: `guidelines/**[your-repo-name]**/database-schema.md`
+- Queries/performance: `guidelines/**[your-repo-name]**/database-operations.md`
+- RLS/security: `guidelines/**[your-repo-name]**/database-security.md`
 
 ### I'm working across multiple repos (if applicable)
 → **Read guidelines/global/cross-repo-patterns.md**
@@ -808,7 +810,7 @@ cat orchestrator/shared/skills/skill-rules.json | jq .
 | Architecture patterns | guidelines/**[your-repo-name]**/architectural-principles.md | Direct read |
 | Error handling | guidelines/**[your-repo-name]**/error-handling.md | Direct read |
 | Testing patterns | guidelines/**[your-repo-name]**/testing-standards.md | Direct read |
-| Database schema | guidelines/**[your-repo-name]**/DATABASE_SCHEMA.md | Direct read (if enabled) |
+| Database schema | guidelines/**[your-repo-name]**/database-schema.md | Direct read (if enabled) |
 
 ### File Locations Quick Map
 
