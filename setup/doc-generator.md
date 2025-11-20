@@ -1,6 +1,6 @@
 ---
 name: doc-generator
-description: Generates customized guidelines from templates based on organization configuration. Creates architectural-principles.md, error-handling.md, testing-standards.md, and optionally database docs. Invoked by setup-wizard during orchestrator configuration.
+description: Generates customized guidelines from templates based on organization configuration. Creates architectural-principles.md, error-handling.md, testing-standards.md, and optionally database docs. Invoked by /setup-orchestrator command during orchestrator configuration.
 model: sonnet
 color: orange
 ---

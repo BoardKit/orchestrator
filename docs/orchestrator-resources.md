@@ -72,7 +72,6 @@ Only available when working in the orchestrator repository.
 | Agent File | Purpose |
 |------------|---------|
 | `cross-repo-doc-sync.md` | Syncs orchestrator docs based on application repo changes |
-| `setup-wizard.md` | First-time orchestrator configuration wizard |
 
 #### Repo-Specific Agents (`shared/agents/<repo-name>/`)
 **Generated during setup** (optional) - one directory per repository if needed.
@@ -116,6 +115,12 @@ Slash commands available in all repositories.
 | Guideline File | Purpose |
 |----------------|---------|
 | `documentation-standards.md` | Language-agnostic documentation best practices, conciseness principles |
+
+#### Orchestrator Guidelines (`shared/guidelines/orchestrator/`)
+
+| Guideline File | Purpose |
+|----------------|---------|
+| `architectural-principles.md` | Orchestrator architecture, design principles, symlink model, setup workflow, testing strategy |
 
 #### Repo-Specific Guidelines (`shared/guidelines/<repo-name>/`)
 **Generated during setup** - one directory per repository.
@@ -214,10 +219,11 @@ Typical structure:
 | File | Purpose |
 |------|---------|
 | `README.md` | Setup system overview and architecture |
-| `setup-wizard.md` | Main setup wizard agent (orchestrates entire setup process) |
 | `doc-generator.md` | Agent for generating documentation files |
 | `repo-analyzer.md` | Agent for analyzing repository tech stacks |
 | `skill-generator.md` | Agent for generating repo-specific skills |
+
+**Note:** The main setup wizard logic is in `shared/commands/setup-orchestrator.md`, not in the setup directory.
 
 #### Scripts (`setup/scripts/`)
 
@@ -355,10 +361,11 @@ Structure for each task in `dev/active/<task-name>/`:
 ### Before Setup
 - **Root files:** 8
 - **Global agents:** 7
-- **Orchestrator agents:** 2
+- **Orchestrator agents:** 1 (cross-repo-doc-sync)
 - **Copilot agents:** 7
 - **Commands:** 3
 - **Global guidelines:** 1
+- **Orchestrator guidelines:** 1
 - **Hooks:** 6
 - **Global skills:** 2 skill directories (skill-developer, orchestrator)
 - **Setup system:** ~30 files across scripts, templates, examples

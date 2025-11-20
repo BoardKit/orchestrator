@@ -159,7 +159,6 @@ During setup, symlinks are created to connect each repository to the shared reso
 **Orchestrator Agents** (`shared/agents/orchestrator/`)
 Agents that run ONLY from the orchestrator repository (NOT symlinked to application repos):
 - `cross-repo-doc-sync` - Keeps orchestrator docs aligned with your evolving codebase
-- `setup-wizard` - Configures the orchestrator for your organization
 
 **Copilot Agents** (`shared/copilot-agents/`)
 GitHub Copilot custom agent configurations for specialized AI personas (code review, refactoring, documentation, etc.). Optionally symlinked to each repo's `.github/agents/` for VS Code/Copilot integration (enabled via setup wizard).

@@ -101,16 +101,6 @@ These agents are located in `shared/agents/orchestrator/` and are ONLY available
 
 **Important:** This agent must be invoked from within the orchestrator repository. It has access to read all configured repositories to sync documentation.
 
-### 9. setup-wizard
-
-**Location:** `orchestrator/setup-wizard.md` (orchestrator-only)
-
-**What it does:** Guides through first-time orchestrator configuration, collects org info, creates symlinks, generates documentation
-
-**Output:** SETUP_CONFIG.json, customized CLAUDE.md, repo-specific skills and guidelines
-
-**Important:** Run via `/setup-orchestrator` command from orchestrator repository
-
 ## Agent Invocation Patterns
 
 ### Single Agent

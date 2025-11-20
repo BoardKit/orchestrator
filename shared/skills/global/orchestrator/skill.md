@@ -30,8 +30,8 @@ Breaking changes require coordinated updates across all dependent repositories.
 ## Key Guidelines
 
 **Reference these when working on orchestrator:**
-- `guidelines/documentation-standards.md` - Keep docs concise and purposeful
-- `guidelines/architectural-principles.md` - Multi-repo architecture patterns
+- `guidelines/global/documentation-standards.md` - Keep docs concise and purposeful
+- `guidelines/orchestrator/architectural-principles.md` - Orchestrator architecture and design principles
 
 ## Testing Checklist
 

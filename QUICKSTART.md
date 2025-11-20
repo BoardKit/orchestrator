@@ -691,7 +691,7 @@ Agents are invoked automatically by Claude Code's Task tool, but you can request
 **Problem:** `/setup-orchestrator` command not recognized
 
 **Solution:**
-1. Ensure `setup/setup-wizard.md` exists
+1. Ensure `shared/commands/setup-orchestrator.md` exists
 2. Check it's properly formatted with frontmatter
 3. Restart Claude Code
 

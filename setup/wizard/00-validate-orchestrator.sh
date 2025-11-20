@@ -85,12 +85,6 @@ if [ -d "shared/agents/global" ]; then
     else
         check_fail "Orchestrator Agent: cross-repo-doc-sync.md missing"
     fi
-
-    if [ -f "shared/agents/orchestrator/setup-wizard.md" ]; then
-        check_pass "Orchestrator Agent: setup-wizard.md exists"
-    else
-        check_fail "Orchestrator Agent: setup-wizard.md missing"
-    fi
 else
     check_fail "shared/agents/global/ missing" "Run: mkdir -p shared/agents/global"
 fi

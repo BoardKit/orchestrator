@@ -306,6 +306,23 @@ Guidelines are **NOT meant to be discovered organically**. They are explicitly r
 
 **Location:** `shared/guidelines/global/documentation-standards.md`
 
+#### Orchestrator Guidelines
+
+**What it covers:**
+- Orchestrator architecture and design principles
+- Directory structure organization (agents/, skills/, guidelines/, etc.)
+- Symlink architecture and propagation model
+- Setup wizard workflow and template system
+- Modification principles and backward compatibility
+- Testing strategy for orchestrator changes
+- Common patterns for adding resources
+
+**Referenced by:** orchestrator-guidelines skill, setup agents
+
+**Status:** ✅ Active
+
+**Location:** `shared/guidelines/orchestrator/architectural-principles.md`
+
 #### Database Documentation (Optional)
 **Split into 3 focused documents (or more depending on complexity):**
 
@@ -517,7 +534,7 @@ See [README.md](./README.md) for complete architecture diagram.
 - **All agents** (both generic and repo-specific)
   - **Global agents** (available to all repos): code-architecture-reviewer, refactor-planner, etc.
     - Stored in `shared/agents/global/`
-  - **Orchestrator-only agents**: cross-repo-doc-sync, setup-wizard
+  - **Orchestrator-only agents**: cross-repo-doc-sync
     - Stored in `shared/agents/orchestrator/`
   - **Repo-specific agents** (optional, per repository): frontend-specialist, backend-specialist, etc.
     - Stored in `shared/agents/{repo-name}/` (will be generated during setup if needed)

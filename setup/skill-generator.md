@@ -1,6 +1,6 @@
 ---
 name: skill-generator
-description: Generates repository-specific skills based on tech stack analysis. Creates skill files, README, and skill-rules.json entries. Invoked by setup-wizard during orchestrator configuration.
+description: Generates repository-specific skills based on tech stack analysis. Creates skill files, README, and skill-rules.json entries. Invoked by /setup-orchestrator command during orchestrator configuration.
 model: sonnet
 color: green
 ---
@@ -372,7 +372,7 @@ Create JSON entry for this skill:
 }
 ```
 
-**Return this JSON** (don't write to file yet - setup-wizard will combine all entries)
+**Return this JSON** (don't write to file yet - /setup-orchestrator command will combine all entries)
 
 ### Step 5: Validate Generated Files
 
@@ -385,7 +385,7 @@ Check:
 
 ### Step 6: Return Confirmation
 
-Return structured response to setup-wizard:
+Return structured response to /setup-orchestrator command:
 
 ```json
 {

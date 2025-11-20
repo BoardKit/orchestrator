@@ -1,6 +1,6 @@
 ---
 name: repo-analyzer
-description: Analyzes a repository to detect tech stack, file patterns, and keywords automatically. Invoked by setup-wizard during orchestrator configuration.
+description: Analyzes a repository to detect tech stack, file patterns, and keywords automatically. Invoked by /setup-orchestrator command during orchestrator configuration.
 model: sonnet
 color: blue
 ---
@@ -381,7 +381,7 @@ Return your analysis in this exact JSON structure:
 
 ## Returning Results
 
-After completing analysis, return the JSON structure to the calling agent (setup-wizard) with:
+After completing analysis, return the JSON structure to the calling command (/setup-orchestrator) with:
 
 ```
 Analysis complete for: {{repo_path}}

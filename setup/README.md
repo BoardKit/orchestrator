@@ -120,11 +120,12 @@ git commit -m "Configure orchestrator for [YourOrg]"
 
 ## What's Inside setup/?
 
-### Agents
-- `setup-wizard.md` - Main setup orchestrator agent
+### Helper Agents
 - `repo-analyzer.md` - Scans your repos for tech stack detection
 - `skill-generator.md` - Generates repository-specific skills
 - `doc-generator.md` - Generates customized guidelines
+
+**Note:** The main setup wizard logic is in `shared/commands/setup-orchestrator.md` (invoked via `/setup-orchestrator`)
 
 ### Templates
 - `templates/CLAUDE.template.md` - Template for orchestrator CLAUDE.md
