@@ -1,0 +1,6 @@
+{
+  "repoName": "{{REPO_NAME}}",
+  "repoType": "{{REPO_TYPE}}",
+  "techStack": "{{TECH_STACK}}",
+  "orchestratorPath": "{{ORCHESTRATOR_PATH}}"
+}

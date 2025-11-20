@@ -115,7 +115,7 @@ See [shared/guidelines/README.md](./shared/guidelines/README.md) for guidelines 
 ## Adding New Shared Resources
 
 **Agent:**
-1. Create `shared/agents/new-agent.md`
+1. Create `shared/agents/global/new-agent.md` (or `shared/agents/{repo-name}/` for repo-specific)
 2. Update `shared/agents/README.md`
 3. Update `CLAUDE.md` discovery map
 
@@ -125,8 +125,8 @@ See [shared/guidelines/README.md](./shared/guidelines/README.md) for guidelines 
 3. Update `CLAUDE.md` discovery map
 
 **Guideline:**
-1. Create `shared/guidelines/new-guideline.md`
-2. Update `shared/guidelines/README.md`
+1. Create `shared/guidelines/global/new-guideline.md` (or `shared/guidelines/{repo-name}/` for repo-specific)
+2. Update `shared/guidelines/README.md` (if exists)
 3. Update `CLAUDE.md` discovery map
 4. Reference from relevant agents/skills
 
