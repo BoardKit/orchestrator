@@ -283,10 +283,12 @@ This orchestrator is designed to be customized and extended for your organizatio
 
 ## 🧠 Credits & Inspiration
 
-**Created by:** [mvoutov](https://github.com/mvoutov)  
-**Built while working on [BoardKit](https://github.com/boardkit)** — an AI-powered whiteboard.
+**Created by:** [mvoutov](https://github.com/mvoutov)
 
-This project grew out of the need to manage shared AI resources across BoardKit’s multi-repo architecture.
+**Built while working on [BoardKit](https://github.com/boardkit) and [Tutor Kit](https://tutorkit.ai)** — an AI-powered whiteboard and a virtual tutor platform / interview prep intelligence platform.
+> <a href="https://tutorkit.ai"><img src="https://tutorkit.ai/logo.png" alt="Tutor Kit" width="50"></a> **[Tutor Kit](https://tutorkit.ai)** (tutorkit.ai) empowers learners to reach their full potential through intelligent, adaptive preparation — combining personalized tutoring with AI-driven interview coaching that learns who you are, identifies what you lack, and guides you to where you need to be.
+
+This project grew out of the need to manage shared AI resources across the projects' multi-repo architecture.
 
 Inspired by the Reddit post [**“Claude Code is a Beast – Tips from 6 Months of Hardcore Use”**](https://www.reddit.com/r/ClaudeAI/comments/1oivjvm/claude_code_is_a_beast_tips_from_6_months_of/),  
 I expanded the idea into a full **orchestrator system** for syncing documentation and AI resources across repositories.  
