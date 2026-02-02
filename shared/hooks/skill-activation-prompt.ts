@@ -20,6 +20,7 @@ interface SkillRule {
     enforcement: 'block' | 'suggest' | 'warn';
     priority: 'critical' | 'high' | 'medium' | 'low';
     scope?: string; // "all" | "orchestrator" | specific repo name
+    alwaysActive?: boolean; // If true, skill activates whenever scope matches (no keyword/pattern check)
     promptTriggers?: PromptTriggers;
 }
 
@@ -114,6 +115,12 @@ async function main() {
             // Filter by scope first
             if (!skillMatchesScope(config, currentRepo)) {
                 continue; // Skip skills not meant for this repo
+            }
+
+            // If alwaysActive is true, activate without checking keywords/patterns
+            if (config.alwaysActive) {
+                matchedSkills.push({ name: skillName, matchType: 'keyword', config });
+                continue;
             }
 
             const triggers = config.promptTriggers;
