@@ -61,7 +61,7 @@ Before providing design guidance, check `CLAUDE.md` or project configuration for
 ### Design System Architecture
 
 **Three-Tier Token System:**
-```
+```text
 Primitive Tokens (raw values)
   → color.blue.500: #3B82F6
   → spacing.4: 16px

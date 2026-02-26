@@ -205,7 +205,7 @@ INVALID: Pattern "**/{repo-name}/**/{old-name}/**" matches 0 files
 mkdir -p dev/audits
 ```
 
-**Save report to:** `dev/audits/audit-YYYY-MM-DD.md`
+**Save report to:** `dev/audits/audit-YYYY-MM-DD-HHMMSS.md`
 
 **Report Template:**
 

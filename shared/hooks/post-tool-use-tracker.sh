@@ -254,8 +254,20 @@ add_skill_to_session() {
         else
             # Fallback: simple append check without jq
             if ! grep -q "\"$skill\"" "$session_file" 2>/dev/null; then
-                # Recreate file with new skill (basic JSON)
-                echo "{\"repo\":\"$repo\",\"active_skills\":[\"$skill\"],\"last_updated\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"}" > "$session_file"
+                # Read existing skills from file, append new one, rewrite
+                local existing_skills=""
+                if [[ -f "$session_file" ]]; then
+                    # Extract skills array content: strip brackets, quotes, whitespace
+                    existing_skills=$(grep -o '"active_skills":\[[^]]*\]' "$session_file" 2>/dev/null | sed 's/"active_skills":\[//;s/\]//;s/"//g;s/ //g')
+                fi
+                # Build new skills list
+                local new_skills=""
+                if [[ -n "$existing_skills" ]]; then
+                    new_skills="\"$(echo "$existing_skills" | sed 's/,/","/g')\",\"$skill\""
+                else
+                    new_skills="\"$skill\""
+                fi
+                echo "{\"repo\":\"$repo\",\"active_skills\":[$new_skills],\"last_updated\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"}" > "$session_file"
             fi
         fi
     else

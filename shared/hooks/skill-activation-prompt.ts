@@ -184,7 +184,7 @@ async function main() {
             }
 
             // AUTO-ACTIVATE: If alwaysActivate is true and scope matches exactly
-            if (config.alwaysActivate && config.scope === currentRepo) {
+            if (config.alwaysActivate && config.scope === currentRepo && !addedSkills.has(skillName)) {
                 matchedSkills.push({ name: skillName, matchType: 'auto', config });
                 addedSkills.add(skillName);
                 continue;
@@ -280,11 +280,11 @@ async function main() {
         process.exit(0);
     } catch (err) {
         console.error('Error in skill-activation-prompt hook:', err);
-        process.exit(1);
+        process.exit(0);
     }
 }
 
 main().catch(err => {
     console.error('Uncaught error:', err);
-    process.exit(1);
+    process.exit(0);
 });

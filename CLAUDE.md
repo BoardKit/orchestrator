@@ -519,7 +519,7 @@ Task tool:
 Result: Code review with architectural feedback
 ```
 
-**Available Agents:** See "Agents" section above for all 8 agents
+**Available Agents:** See "Agents" section above for the full list
 
 ### Guidelines: Explicit Reference
 
