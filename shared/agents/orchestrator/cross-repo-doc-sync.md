@@ -574,3 +574,89 @@ cat doc-sync-logs/metrics/sync-dashboard.md
 5. **Be Comprehensive**: Check all potentially affected docs, not just obvious ones
 
 Your goal is to ensure that orchestrator documentation remains the single source of truth for your organization's patterns and practices, accurately reflecting the current state of your application repositories.
+
+---
+
+## Modular Skill System (v2.0)
+
+The orchestrator uses a **tiered skill architecture**. Understanding this is critical for proper sync.
+
+### Skill Types
+
+| Type | Loading | Purpose | Size Target |
+|------|---------|---------|-------------|
+| **Base** | Always | Tech stack, commands, conventions | ~30 lines |
+| **Domain** | File-pattern triggered | Feature-specific pointers | ~35 lines |
+| **Guidelines** | On-demand (read) | Comprehensive patterns | ~150-300 lines |
+
+### Skill Locations
+
+```text
+shared/skills/
+├── {repo-name}/
+│   ├── base/skill.md         # Always loads in {repo-name}
+│   ├── {feature-a}/skill.md  # Triggers on {feature-a}/** files
+│   ├── {feature-b}/skill.md  # Triggers on {feature-b}/** files
+│   └── {feature-c}/skill.md  # Triggers on {feature-c}/** files
+└── skill-rules.json          # Trigger configuration
+```
+
+### Guideline Locations
+
+```text
+shared/guidelines/
+├── {repo-name}/
+│   ├── features/
+│   │   ├── {feature-a}.md    # Comprehensive patterns for feature A
+│   │   ├── {feature-b}.md    # Comprehensive patterns for feature B
+│   │   └── {feature-c}.md    # Comprehensive patterns for feature C
+│   ├── error-handling.md
+│   ├── testing-standards.md
+│   └── architectural-principles.md
+└── global/
+    └── ...
+```
+
+### Sync Rules
+
+1. **Map changes to domains first**
+   - Identify which feature domain changed
+   - Find corresponding domain skill AND guideline
+
+2. **Update skills minimally**
+   - Skills are thin dispatchers (~35 lines)
+   - Only update: file lists, directory references, critical rules
+   - Patterns belong in guidelines, NOT skills
+
+3. **Update guidelines for patterns**
+   - Detailed implementations go in guidelines
+   - One guideline per feature domain
+   - Include code examples, data flows, error handling
+
+4. **Validate skill metadata**
+   - Each skill has `<!-- skill-meta -->` comment
+   - Check `covers_directories` matches actual structure
+   - Flag new directories not in metadata
+
+### Skill Metadata Validation
+
+Each domain skill includes metadata:
+
+```markdown
+<!-- skill-meta
+last_verified: YYYY-MM-DD
+type: domain
+covers_directories:
+  - src/components/{feature}/
+  - src/hooks/{feature}/
+  - src/types/{feature}/
+-->
+```
+
+**During sync:**
+1. Parse skill metadata
+2. Check if `covers_directories` still exist
+3. Check for NEW directories not in metadata
+4. Flag discrepancies in sync report:
+   - "NEW: src/hooks/{feature}/experimental/ not in skill metadata"
+   - "STALE: src/types/{feature}/ listed but doesn't exist"

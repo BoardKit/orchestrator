@@ -154,11 +154,13 @@ For in depth details on all the resources in the orchestrator, see: [docs/orches
 During setup, symlinks are created to connect each repository to the shared resources in the orchestrator.
 
 **Global Agents** (`shared/agents/global/`)
-7 specialized agents for code review, refactoring, planning, documentation, error fixing, and web research. Available to all repos via symlinks.
+9 specialized agents for code review, refactoring, planning, documentation, error fixing, web research, UX/UI design, and copywriting. Available to all repos via symlinks.
 
 **Orchestrator Agents** (`shared/agents/orchestrator/`)
 Agents that run ONLY from the orchestrator repository (NOT symlinked to application repos):
 - `cross-repo-doc-sync` - Keeps orchestrator docs aligned with your evolving codebase
+- `codebase-auditor` - Audits codebase for drift between documentation and implementation
+- `gtm-strategist` - Go-to-market strategy and positioning guidance
 
 **Copilot Agents** (`shared/copilot-agents/`)
 GitHub Copilot custom agent configurations for specialized AI personas (code review, refactoring, documentation, etc.). Optionally symlinked to each repo's `.github/agents/` for VS Code/Copilot integration (enabled via setup wizard).

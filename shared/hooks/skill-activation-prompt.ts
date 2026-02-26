@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { readFileSync, existsSync } from 'fs';
 import { join, basename } from 'path';
+import { createHash } from 'crypto';
 
 interface HookInput {
     session_id: string;
@@ -16,12 +17,13 @@ interface PromptTriggers {
 }
 
 interface SkillRule {
-    type: 'guardrail' | 'domain';
+    type: 'guardrail' | 'domain' | 'base';
     enforcement: 'block' | 'suggest' | 'warn';
     priority: 'critical' | 'high' | 'medium' | 'low';
     scope?: string; // "all" | "orchestrator" | specific repo name
-    alwaysActive?: boolean; // If true, skill activates whenever scope matches (no keyword/pattern check)
+    alwaysActivate?: boolean; // If true, always activate when scope matches repo
     promptTriggers?: PromptTriggers;
+    filePatterns?: string[];
 }
 
 interface SkillRules {
@@ -31,14 +33,45 @@ interface SkillRules {
 
 interface MatchedSkill {
     name: string;
-    matchType: 'keyword' | 'intent';
+    matchType: 'keyword' | 'intent' | 'auto' | 'session';
     config: SkillRule;
+    content?: string; // The actual skill markdown content
+}
+
+interface SessionState {
+    repo: string;
+    active_skills: string[];
+    last_updated: string;
 }
 
 interface RepoConfig {
     repoName: string;
     repoType: string;
     orchestratorPath?: string;
+}
+
+/**
+ * Read the skill.md content for a given skill name
+ * Skill names are like "backend/base" → looks for .claude/skills/backend/base/skill.md
+ */
+function readSkillContent(projectDir: string, skillName: string): string | null {
+    // Try multiple possible paths for the skill file
+    const possiblePaths = [
+        join(projectDir, '.claude', 'skills', skillName, 'skill.md'),
+        join(projectDir, '.claude', 'skills', `${skillName}.md`),
+    ];
+
+    for (const skillPath of possiblePaths) {
+        if (existsSync(skillPath)) {
+            try {
+                return readFileSync(skillPath, 'utf-8');
+            } catch {
+                // Continue to next path
+            }
+        }
+    }
+
+    return null;
 }
 
 /**
@@ -87,6 +120,26 @@ function skillMatchesScope(skillConfig: SkillRule, currentRepo: string): boolean
     return false; // Scope doesn't match
 }
 
+/**
+ * Get session-sticky skills from session state file
+ * Skills that were activated via file edits stay active for the session
+ */
+function getSessionActiveSkills(projectDir: string): string[] {
+    try {
+        const hash = createHash('md5').update(projectDir).digest('hex');
+        const sessionFile = `/tmp/claude-skills-${hash}.json`;
+
+        if (existsSync(sessionFile)) {
+            const content = readFileSync(sessionFile, 'utf-8');
+            const session: SessionState = JSON.parse(content);
+            return session.active_skills || [];
+        }
+    } catch (err) {
+        // Session file doesn't exist or is invalid - that's fine
+    }
+    return [];
+}
+
 async function main() {
     try {
         // Read input from stdin
@@ -110,6 +163,19 @@ async function main() {
 
         const matchedSkills: MatchedSkill[] = [];
 
+        // Track which skills have been added to avoid duplicates
+        const addedSkills = new Set<string>();
+
+        // SESSION-STICKY: Get skills from session state (persisted from file edits)
+        const sessionSkills = getSessionActiveSkills(projectDir);
+        for (const skillName of sessionSkills) {
+            const config = rules.skills[skillName];
+            if (config && !addedSkills.has(skillName)) {
+                matchedSkills.push({ name: skillName, matchType: 'session', config });
+                addedSkills.add(skillName);
+            }
+        }
+
         // Check each skill for matches
         for (const [skillName, config] of Object.entries(rules.skills)) {
             // Filter by scope first
@@ -117,14 +183,20 @@ async function main() {
                 continue; // Skip skills not meant for this repo
             }
 
-            // If alwaysActive is true, activate without checking keywords/patterns
-            if (config.alwaysActive) {
-                matchedSkills.push({ name: skillName, matchType: 'keyword', config });
+            // AUTO-ACTIVATE: If alwaysActivate is true and scope matches exactly
+            if (config.alwaysActivate && config.scope === currentRepo) {
+                matchedSkills.push({ name: skillName, matchType: 'auto', config });
+                addedSkills.add(skillName);
                 continue;
             }
 
             const triggers = config.promptTriggers;
             if (!triggers) {
+                continue;
+            }
+
+            // Skip if already added via auto-activate
+            if (addedSkills.has(skillName)) {
                 continue;
             }
 
@@ -135,6 +207,7 @@ async function main() {
                 );
                 if (keywordMatch) {
                     matchedSkills.push({ name: skillName, matchType: 'keyword', config });
+                    addedSkills.add(skillName);
                     continue;
                 }
             }
@@ -147,50 +220,60 @@ async function main() {
                 });
                 if (intentMatch) {
                     matchedSkills.push({ name: skillName, matchType: 'intent', config });
+                    addedSkills.add(skillName);
                 }
             }
         }
 
+        // Load skill content for matched skills
+        for (const skill of matchedSkills) {
+            const content = readSkillContent(projectDir, skill.name);
+            if (content) {
+                skill.content = content;
+            }
+        }
+
+        // Filter to only skills with content (base/high priority always, others only if content found)
+        const skillsWithContent = matchedSkills.filter(s => s.content);
+        const skillsWithoutContent = matchedSkills.filter(s => !s.content);
+
         // Generate output if matches found
         if (matchedSkills.length > 0) {
-            let output = '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n';
-            output += '🎯 SKILL ACTIVATION CHECK\n';
-            output += `📍 Repository: ${currentRepo}\n`;
-            output += '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n';
+            let output = '';
 
-            // Group by priority
-            const critical = matchedSkills.filter(s => s.config.priority === 'critical');
-            const high = matchedSkills.filter(s => s.config.priority === 'high');
-            const medium = matchedSkills.filter(s => s.config.priority === 'medium');
-            const low = matchedSkills.filter(s => s.config.priority === 'low');
+            // Inject skill content for high priority skills (base + critical + high)
+            const highPrioritySkills = skillsWithContent.filter(
+                s => s.config.type === 'base' || s.config.priority === 'critical' || s.config.priority === 'high'
+            );
 
-            if (critical.length > 0) {
-                output += '⚠️  CRITICAL SKILLS (REQUIRED):\n';
-                critical.forEach(s => output += `  → ${s.name}\n`);
-                output += '\n';
+            if (highPrioritySkills.length > 0) {
+                output += '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n';
+                output += `📍 ACTIVE SKILLS (${currentRepo})\n`;
+                output += '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n';
+
+                for (const skill of highPrioritySkills) {
+                    output += `<!-- skill: ${skill.name} -->\n`;
+                    output += skill.content + '\n';
+                    output += `<!-- /skill: ${skill.name} -->\n\n`;
+                }
             }
 
-            if (high.length > 0) {
-                output += '📚 RECOMMENDED SKILLS:\n';
-                high.forEach(s => output += `  → ${s.name}\n`);
-                output += '\n';
+            // List medium/low priority skills as available (not auto-loaded)
+            const optionalSkills = skillsWithContent.filter(
+                s => s.config.priority === 'medium' || s.config.priority === 'low'
+            );
+
+            if (optionalSkills.length > 0 || skillsWithoutContent.length > 0) {
+                output += '📌 Available skills (ask to activate): ';
+                const availableNames = [
+                    ...optionalSkills.map(s => s.name),
+                    ...skillsWithoutContent.map(s => s.name)
+                ];
+                output += availableNames.join(', ') + '\n';
             }
 
-            if (medium.length > 0) {
-                output += '💡 SUGGESTED SKILLS:\n';
-                medium.forEach(s => output += `  → ${s.name}\n`);
-                output += '\n';
-            }
-
-            if (low.length > 0) {
-                output += '📌 OPTIONAL SKILLS:\n';
-                low.forEach(s => output += `  → ${s.name}\n`);
-                output += '\n';
-            }
-
-            output += 'ACTION: Use Skill tool BEFORE responding\n';
-            output += '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n';
-
+            // Only output to stderr (terminal) - console.log goes to Claude's context
+            process.stderr.write(`[Skills] Activated: ${highPrioritySkills.map(s => s.name).join(', ') || 'none'}\n`);
             console.log(output);
         }
 

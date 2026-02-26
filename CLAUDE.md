@@ -186,6 +186,38 @@ Task tool with:
 
 **Location:** `shared/agents/global/web-research-specialist.md`
 
+#### ux-ui-designer
+**When to use:** Need UX/UI design guidance for interfaces, components, or accessibility
+
+**How to invoke:**
+- Task tool with subagent_type: "ux-ui-designer"
+- Prompt: "Design specifications for a dashboard analytics component"
+
+**What it does:**
+- Component specifications with states, props, accessibility
+- Design system recommendations (three-tier token system)
+- WCAG 2.2 accessibility audits
+- User flow analysis and interaction design
+- AI interface patterns
+
+**Location:** `shared/agents/global/ux-ui-designer.md`
+
+#### ghost-writer
+**When to use:** Need compelling, human-sounding content for user-facing materials
+
+**How to invoke:**
+- Task tool with subagent_type: "ghost-writer"
+- Prompt: "Write landing page copy for our new feature"
+
+**What it does:**
+- Landing page copy and marketing content
+- User documentation that's warm and clear
+- Social media posts with authentic voice
+- Email sequences that build connection
+- Avoids AI-sounding patterns and cliches
+
+**Location:** `shared/agents/global/ghost-writer.md`
+
 #### cross-repo-doc-sync (Orchestrator-Only)
 **When to use:** Synchronize orchestrator documentation with changes in **[your repositories]**
 
@@ -225,6 +257,38 @@ Task tool with:
 **Location:** `shared/agents/orchestrator/cross-repo-doc-sync.md`
 
 **Note:** Cross-repo doc sync is always enabled and available in the orchestrator repository.
+
+#### gtm-strategist (Orchestrator-Only)
+**When to use:** Need go-to-market strategy, sales planning, brand building, or growth tactics
+
+**How to invoke:**
+- Task tool with subagent_type: "gtm-strategist"
+- Prompt: "Create a daily action plan for generating first revenue"
+
+**What it does:**
+- Phased GTM plans with channels, messaging, milestones
+- Daily high-impact action plans ranked by revenue potential
+- Beachhead customer identification and pricing strategy
+- Brand and content strategy across platforms
+- Launch playbooks (Product Hunt, social, communities)
+
+**Location:** `shared/agents/orchestrator/gtm-strategist.md`
+
+#### codebase-auditor (Orchestrator-Only)
+**When to use:** Audit codebase against orchestrator documentation to find gaps, drift, and inconsistencies
+
+**How to invoke:**
+- Task tool with subagent_type: "codebase-auditor"
+- Prompt: "Run full codebase audit"
+
+**What it does:**
+- Systematically crawls codebase and compares against documentation
+- Identifies stale references, missing docs, pattern mismatches
+- Validates skill file patterns against actual code
+- Generates audit reports with prioritized fix recommendations
+- Supports full audit, targeted audit, and quick check modes
+
+**Location:** `shared/agents/orchestrator/codebase-auditor.md`
 
 ### Guidelines (Explicit Reference)
 
@@ -410,11 +474,17 @@ Hooks execute automatically on specific events. You don't need to invoke them.
 
 ### Skills: Auto-Triggering
 
+**Skill System v2.0:**
+- **Skill Types:** `base` (always-on foundational context), `domain` (repo/feature-specific patterns), `meta` (skill system itself)
+- **Session-Sticky:** Skills activated via file edits persist for the entire Claude Code session (stored in `/tmp/claude-skills-{hash}.json`)
+- **`alwaysActivate`:** Skills with this flag activate on every prompt without needing file pattern matches
+- **Content Injection:** High-priority skills inject their content inline for immediate context
+
 **Trigger Mechanism:**
 1. You edit a file in one of your repositories
 2. Hook (post-tool-use-tracker) detects the file path
 3. skill-rules.json is checked for matching patterns/keywords
-4. If match found, skill activates on next user prompt
+4. If match found, skill activates on next user prompt (and stays active for the session)
 5. Skill provides inline guidance + references to guidelines
 
 **Example Flow:**
@@ -733,6 +803,26 @@ cat orchestrator/shared/skills/skill-rules.json | jq .
 - Task tool with subagent_type: "web-research-specialist"
 - Provide prompt: "Research [topic]"
 
+### I need UX/UI design guidance
+→ **Invoke ux-ui-designer agent**
+- Task tool with subagent_type: "ux-ui-designer"
+- Provide prompt: "Design specs for [component/feature]"
+
+### I need marketing copy or user-facing content
+→ **Invoke ghost-writer agent**
+- Task tool with subagent_type: "ghost-writer"
+- Provide prompt: "Write [landing page copy / user docs / social posts] for [feature]"
+
+### I need go-to-market strategy or sales planning
+→ **Invoke gtm-strategist agent (from orchestrator repo only)**
+- Task tool with subagent_type: "gtm-strategist"
+- Provide prompt: "Create [GTM plan / daily action plan / pricing strategy]"
+
+### I need to audit documentation accuracy
+→ **Invoke codebase-auditor agent (from orchestrator repo only)**
+- Task tool with subagent_type: "codebase-auditor"
+- Provide prompt: "Run full codebase audit" or "Quick check skill coverage"
+
 ### I need to sync orchestrator docs after changes
 → **Invoke cross-repo-doc-sync agent (from orchestrator repo only)**
 - Must be working in the orchestrator repository
@@ -806,6 +896,10 @@ cat orchestrator/shared/skills/skill-rules.json | jq .
 | Fix errors | auto-error-resolver agent | Task tool invocation |
 | Create docs | documentation-architect agent | Task tool invocation |
 | Sync cross-repo docs | cross-repo-doc-sync agent | Task tool invocation (orchestrator-only) |
+| UX/UI design guidance | ux-ui-designer agent | Task tool invocation |
+| Marketing/user-facing copy | ghost-writer agent | Task tool invocation |
+| GTM strategy | gtm-strategist agent | Task tool invocation (orchestrator-only) |
+| Codebase audit | codebase-auditor agent | Task tool invocation (orchestrator-only) |
 | Plan complex task | /dev-docs command | `/dev-docs task-name` |
 | Architecture patterns | guidelines/**[your-repo-name]**/architectural-principles.md | Direct read |
 | Error handling | guidelines/**[your-repo-name]**/error-handling.md | Direct read |

@@ -1,9 +1,14 @@
 #!/bin/bash
-set -e
+# Note: Removed set -e to prevent hook failures from blocking edits
 
 # Post-tool-use hook that tracks edited files and their repos
 # This runs after Edit, MultiEdit, or Write tools complete successfully
 
+
+# Exit early if CLAUDE_PROJECT_DIR is not set
+if [[ -z "$CLAUDE_PROJECT_DIR" ]]; then
+    exit 0
+fi
 
 # Read tool information from stdin
 tool_info=$(cat)
@@ -186,6 +191,84 @@ fi
 if [[ -f "$cache_dir/commands.txt.tmp" ]]; then
     sort -u "$cache_dir/commands.txt.tmp" > "$cache_dir/commands.txt"
     rm -f "$cache_dir/commands.txt.tmp"
+fi
+
+# ============================================
+# SESSION-STICKY SKILLS TRACKING
+# ============================================
+# Detect which domain skill should be activated based on file path
+# and persist it in session state for sticky behavior
+
+detect_skill_domain() {
+    local file="$1"
+    local detected_skills=""
+
+    # -----------------------------------------------
+    # Add your domain-specific patterns here.
+    # Examples (uncomment and customize):
+    #
+    # Frontend domain patterns:
+    # if [[ "$file" =~ /courses/ ]] || [[ "$file" =~ useCourse ]]; then
+    #     detected_skills="frontend/courses"
+    # elif [[ "$file" =~ /dashboard/ ]] || [[ "$file" =~ useDashboard ]]; then
+    #     detected_skills="frontend/dashboard"
+    # fi
+    #
+    # Backend domain patterns:
+    # if [[ "$file" =~ /payments/ ]] || [[ "$file" =~ payment.*\.py ]]; then
+    #     detected_skills="backend/payments"
+    # elif [[ "$file" =~ /auth/ ]] || [[ "$file" =~ auth.*\.py ]]; then
+    #     detected_skills="backend/auth"
+    # fi
+    # -----------------------------------------------
+
+    echo "$detected_skills"
+}
+
+# Create session file path based on project directory hash
+get_session_file() {
+    local project_dir="$1"
+    local hash=$(echo -n "$project_dir" | md5 2>/dev/null || echo -n "$project_dir" | md5sum | cut -d' ' -f1)
+    echo "/tmp/claude-skills-${hash}.json"
+}
+
+# Add skill to session state
+add_skill_to_session() {
+    local skill="$1"
+    local session_file="$2"
+    local repo="$3"
+
+    if [[ -z "$skill" ]]; then
+        return
+    fi
+
+    # Create or update session file
+    if [[ -f "$session_file" ]]; then
+        # Check if jq is available
+        if command -v jq &> /dev/null; then
+            # Add skill to array, keeping unique values
+            jq --arg skill "$skill" --arg time "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+                '.active_skills = ((.active_skills + [$skill]) | unique) | .last_updated = $time' \
+                "$session_file" > "${session_file}.tmp" 2>/dev/null && \
+                mv "${session_file}.tmp" "$session_file"
+        else
+            # Fallback: simple append check without jq
+            if ! grep -q "\"$skill\"" "$session_file" 2>/dev/null; then
+                # Recreate file with new skill (basic JSON)
+                echo "{\"repo\":\"$repo\",\"active_skills\":[\"$skill\"],\"last_updated\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"}" > "$session_file"
+            fi
+        fi
+    else
+        # Create new session file
+        echo "{\"repo\":\"$repo\",\"active_skills\":[\"$skill\"],\"last_updated\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"}" > "$session_file"
+    fi
+}
+
+# Track skill domain for session-sticky behavior
+skill_domain=$(detect_skill_domain "$file_path")
+if [[ -n "$skill_domain" ]]; then
+    session_file=$(get_session_file "$CLAUDE_PROJECT_DIR")
+    add_skill_to_session "$skill_domain" "$session_file" "$repo"
 fi
 
 # Exit cleanly

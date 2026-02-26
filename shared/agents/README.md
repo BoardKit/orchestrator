@@ -1,6 +1,6 @@
 # Orchestrator - Agent Capabilities Guide
 
-**Last Updated: 2025-11-18**
+**Last Updated: 2026-02-26**
 
 ---
 
@@ -33,6 +33,60 @@ This directory contains AI agents that can be invoked to perform specific tasks 
 - Each repo sees only relevant agents
 - Clean namespace without unrelated agents
 - Orchestrator-specific tools remain isolated
+
+## Agent Frontmatter Format
+
+Agent `.md` files require YAML frontmatter that Claude Code parses to register the agent. **Getting this wrong means the agent won't be discoverable.**
+
+### Required Fields
+
+| Field | Purpose |
+|-------|---------|
+| `name` | Agent identifier. **Must match filename** (without `.md`) |
+| `description` | When to use + examples. **Must be a single line** (see below) |
+
+### Optional Fields
+
+| Field | Purpose |
+|-------|---------|
+| `model` | Model to use: `opus`, `sonnet`, or `haiku` |
+| `color` | UI color hint: `green`, `cyan`, `purple`, `yellow`, etc. |
+
+### Critical: Single-Line Description with `\n` Escapes
+
+The `description` field — including all examples — **must be on a single line** using literal `\n` for newlines. Multi-line YAML content will break frontmatter parsing and the agent won't register.
+
+**Correct format:**
+```yaml
+---
+name: my-agent
+description: Short description of when to use this agent.\n\nExamples:\n- <example>\n  Context: Situation description.\n  user: "User message"\n  assistant: "Assistant response"\n  <commentary>\n  Why this agent fits.\n  </commentary>\n</example>
+model: opus
+color: green
+---
+```
+
+**Wrong format (agent won't work):**
+```yaml
+---
+name: my-agent
+description: Short description.
+
+<example>
+Context: Situation description.
+user: "User message"
+</example>
+model: opus
+---
+```
+
+The wrong format puts multi-line content as free-floating YAML that isn't part of any key, so the parser can't read the agent definition.
+
+### Copying from an Existing Agent
+
+The easiest way to get the format right: copy the frontmatter from `ghost-writer.md` or `cross-repo-doc-sync.md` and replace the content.
+
+---
 
 ## How to Invoke Agents
 
@@ -85,13 +139,41 @@ These agents are located in `shared/agents/global/` and are symlinked to all app
 
 **Output:** Research summary with findings, recommendations, code examples, sources
 
+### 8. ux-ui-designer
+
+**What it does:** Provides UX/UI design guidance for building software interfaces, including component specifications, design system recommendations, accessibility audits, user flow analysis, and visual design patterns
+
+**Output:** Design specifications, UX audit reports, component specs with states/props/accessibility, design token recommendations
+
+**Specializations:**
+- Design system architecture (three-tier token system)
+- WCAG 2.2 accessibility compliance
+- Modern visual patterns (depth, motion, glass morphism)
+- Data visualization and dashboard design
+- AI interface patterns
+
+### 9. ghost-writer
+
+**What it does:** Creates compelling, human-sounding content for user-facing materials including landing page copy, marketing content, user documentation, help articles, social media posts, and email sequences
+
+**Output:** Conversion-focused copy, user docs, social media content, email sequences, blog posts
+
+**Specializations:**
+- Landing pages and marketing copy that converts
+- User documentation that's warm and clear
+- Social media content with authentic voice
+- Email sequences that build connection
+- Avoiding AI-sounding patterns and clichés
+
+**Philosophy:** Produces content with genuine texture—varied sentence rhythm, specific details over abstractions, opinions with edges, and unexpected word choices that make readers pause and engage.
+
 ### Orchestrator Agents (Orchestrator Repository Only)
 
 These agents are located in `shared/agents/orchestrator/` and are ONLY available when working in the orchestrator repository. They are NOT symlinked to application repositories.
 
-### 8. cross-repo-doc-sync
+### 10. cross-repo-doc-sync
 
-**Location:** `orchestrator/cross-repo-doc-sync.md` (orchestrator-only)
+**Location:** `shared/agents/orchestrator/cross-repo-doc-sync.md` (orchestrator-only)
 
 **What it does:** Monitors changes across repos, updates orchestrator documentation, validates cross-references, provides sync reports
 
@@ -100,6 +182,39 @@ These agents are located in `shared/agents/orchestrator/` and are ONLY available
 **Uses:** Reads from `SETUP_CONFIG.json`, only writes to orchestrator, preserves symlinks
 
 **Important:** This agent must be invoked from within the orchestrator repository. It has access to read all configured repositories to sync documentation.
+
+### 11. gtm-strategist
+
+**Location:** `shared/agents/orchestrator/gtm-strategist.md` (orchestrator-only)
+
+**What it does:** Provides go-to-market strategy, sales planning, brand-building playbooks, daily action plans, pricing strategy, and growth tactics for turning a built product into a profitable company
+
+**Output:** Phased GTM plans, daily action lists, sales scripts, email templates, pricing recommendations, channel strategies
+
+**Specializations:**
+- Daily high-impact action plans ranked by revenue potential
+- Beachhead customer identification and sales pipeline building
+- Brand and content strategy across platforms
+- Pricing and positioning for early-stage products
+- Launch playbooks (Product Hunt, social, communities, partnerships)
+
+**Philosophy:** Revenue is oxygen. Every recommendation must pass one test: if the founder does this today, will they be measurably closer to a sustainable business tomorrow?
+
+### 12. codebase-auditor
+
+**Location:** `shared/agents/orchestrator/codebase-auditor.md` (orchestrator-only)
+
+**What it does:** Systematically crawls the codebase and compares against orchestrator documentation to identify gaps, drift, and inconsistencies
+
+**Output:** Audit reports with stale references, missing documentation, pattern mismatches, coverage gaps, and invalid skill patterns
+
+**Specializations:**
+- Four-phase workflow: Crawl → Parse → Compare → Report
+- Full audit, targeted audit, or quick check modes
+- Skill coverage matrix generation
+- Actionable fix recommendations with priority levels
+
+**Best Practice:** Run weekly to catch drift, before releases for accuracy, and after major refactors.
 
 ## Agent Invocation Patterns
 

@@ -816,6 +816,22 @@ Issue #123: Replace process() workaround with v2 API
 
 ---
 
+## Dev Docs Lifecycle
+
+**After a feature is merged:**
+1. **Delete** dev docs from `dev/active/[task-name]/` — they served their purpose
+2. **Optional archive**: Move to `dev/archive/[task-name]/` if you want historical reference
+3. **Never leave stale dev docs** in `dev/active/` — it confuses future agents
+
+**Why delete:** Dev docs are working documents, not permanent documentation. Once the code is merged, the code IS the documentation. Keeping old dev docs around creates confusion about what's current.
+
+**What to keep instead:**
+- Update `CLAUDE.md` if architecture changed
+- Update guidelines if patterns changed
+- Update README if public API changed
+
+---
+
 ## Referenced By
 
 - documentation-architect agent
