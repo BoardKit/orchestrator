@@ -1,5 +1,5 @@
 {
-  "version": "1.0",
+  "version": "2.0",
   "skills": {
     "global/skill-developer": {
       "type": "domain",
@@ -34,7 +34,7 @@
       "enforcement": "suggest",
       "priority": "high",
       "scope": "orchestrator",
-      "alwaysActive": true,
+      "alwaysActivate": true,
       "filePatterns": [
         "**/shared/agents/**/*.md",
         "**/shared/skills/**/*.md",

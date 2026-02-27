@@ -251,7 +251,7 @@ app-repo/
 ### Adding a Global Agent
 
 1. Create `shared/agents/global/new-agent.md`
-2. Add YAML frontmatter (name, description)
+2. Add YAML frontmatter — see `shared/agents/README.md` "Agent Frontmatter Format" for required fields. **Critical:** The `description` field (including examples) must be a single line using `\n` escapes.
 3. Document invocation pattern
 4. Add to `shared/agents/README.md`
 5. Update CLAUDE.md Resource Discovery Map

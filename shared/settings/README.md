@@ -1,14 +1,18 @@
 # Per-Repository Settings
 
-This directory contains settings.json files that are customized for each repository. Each repo gets its own settings file via symlink.
+This directory contains settings.json files that are customized for each repository. Each repo gets its own settings file in a subdirectory, connected via symlink.
 
 ## Structure
 
 ```
 settings/
 ├── template-settings.json          # Base template
-├── frontend-settings.json          # Generated for frontend repo
-├── backend-settings.json           # Generated for backend repo
+├── example-backend/
+│   └── settings.json               # Example backend settings
+├── example-frontend/
+│   └── settings.json               # Example frontend settings
+├── {repo-name}/
+│   └── settings.json               # Generated for each repo during setup
 └── README.md                       # This file
 ```
 
@@ -16,13 +20,13 @@ settings/
 
 During setup:
 1. `template-settings.json` is used as the base
-2. Setup wizard generates `{repo-name}-settings.json` for each repository
+2. Setup wizard generates `{repo-name}/settings.json` for each repository
 3. Each repo's `.claude/settings.json` symlinks to its specific settings file
 
 Example symlinking:
 ```bash
 # In frontend repo
-frontend/.claude/settings.json -> ../../orchestrator/shared/settings/frontend-settings.json
+frontend/.claude/settings.json -> ../../orchestrator/shared/settings/frontend/settings.json
 ```
 
 ## Customization Levels
@@ -106,16 +110,16 @@ The setup wizard (`setup/wizard/03-generate-resources.sh`):
 1. Reads `SETUP_CONFIG.json` for repository info
 2. Copies `template-settings.json` as base
 3. Customizes based on repo type (if configured)
-4. Saves to `shared/settings/{repo-name}-settings.json`
+4. Saves to `shared/settings/{repo-name}/settings.json`
 5. Creates symlink from repo to settings file
 
 ## Manual Customization
 
 To customize a repo's settings after setup:
 
-1. Edit `shared/settings/{repo-name}-settings.json`
+1. Edit `shared/settings/{repo-name}/settings.json`
 2. Changes apply immediately (symlink resolves to this file)
-3. Validate JSON: `jq . shared/settings/{repo-name}-settings.json`
+3. Validate JSON: `jq . shared/settings/{repo-name}/settings.json`
 4. Test in Claude Code
 
 ## Local Overrides
@@ -144,13 +148,10 @@ Before symlinking, settings files should be validated:
 
 ```bash
 # Check JSON syntax
-jq . shared/settings/frontend-settings.json
+jq . shared/settings/{repo-name}/settings.json
 
 # Check required fields
-jq '.permissions, .hooks' shared/settings/frontend-settings.json
-
-# If Claude Code supports validation
-claude --validate-settings shared/settings/frontend-settings.json
+jq '.permissions, .hooks' shared/settings/{repo-name}/settings.json
 ```
 
 ## Troubleshooting
@@ -158,13 +159,13 @@ claude --validate-settings shared/settings/frontend-settings.json
 **Settings not working:**
 - Check symlink: `ls -la repo/.claude/settings.json`
 - Verify target exists: `cat repo/.claude/settings.json`
-- Validate JSON: `jq . shared/settings/repo-settings.json`
+- Validate JSON: `jq . shared/settings/{repo-name}/settings.json`
 
 **Want repo-specific permissions:**
-- Edit `shared/settings/{repo}-settings.json`
+- Edit `shared/settings/{repo-name}/settings.json`
 - Modify `permissions.allow` array
 - Changes take effect immediately
 
 **Need to reset:**
-- Copy from template: `cp shared/settings/template-settings.json shared/settings/{repo}-settings.json`
+- Copy from template: `cp shared/settings/template-settings.json shared/settings/{repo-name}/settings.json`
 - Or re-run setup wizard
