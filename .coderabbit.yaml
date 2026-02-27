@@ -1,0 +1,142 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+
+language: "en-US"
+tone_instructions: "Be concise. Focus on actionable issues—broken paths, invalid JSON, shell bugs. Skip style nitpicks on markdown."
+early_access: false
+
+reviews:
+  profile: "chill"
+  request_changes_workflow: false
+  high_level_summary: true
+  review_status: true
+  collapse_walkthrough: false
+  poem: false
+  sequence_diagrams: true
+  estimate_code_review_effort: true
+  suggested_labels: true
+  auto_apply_labels: false
+  suggested_reviewers: false
+
+  auto_review:
+    enabled: true
+    auto_incremental_review: true
+    auto_pause_after_reviewed_commits: 5
+    ignore_title_keywords:
+      - "WIP"
+      - "DO NOT MERGE"
+      - "draft"
+    drafts: false
+
+  path_filters:
+    - "!**/node_modules/**"
+    - "!**/*.lock"
+    - "!**/package-lock.json"
+    - "!dev/active/**"
+    - "!doc-sync-logs/**"
+
+  path_instructions:
+    - path: "shared/agents/**/*.md"
+      instructions: |
+        Agent definition files for Claude Code. Check:
+        - YAML frontmatter has required fields: name, description, model
+        - Description is a SINGLE LINE with \n escapes (no actual newlines)
+        - Referenced file paths match the repo structure (shared/guidelines/*, etc.)
+        - No broken cross-references to guidelines or skills
+        - No product-specific content (this is a generic OSS orchestrator)
+
+    - path: "shared/copilot-agents/**/*.agent.md"
+      instructions: |
+        GitHub Copilot agent files. Check:
+        - YAML frontmatter has name and description fields
+        - Instructions are practical and implementation-ready
+        - No product-specific content
+
+    - path: "**/*.md"
+      instructions: |
+        Documentation/infrastructure repo. For markdown:
+        - CLI command examples should be syntactically correct
+        - File paths mentioned should match the repo structure
+        - Heading levels should not be skipped
+        - Code blocks should have a language tag
+
+    - path: "shared/hooks/**/*.sh"
+      instructions: |
+        Claude Code hook scripts that run automatically on every prompt or tool use.
+        Critical: these must NEVER crash or block the user.
+        - Should NOT use set -e (hooks must always exit 0)
+        - All variables must be properly quoted
+        - Must always exit 0 regardless of errors
+        - Check jq usage if parsing JSON
+        - Verify file path assumptions
+
+    - path: "shared/hooks/**/*.ts"
+      instructions: |
+        TypeScript hook code executed via tsx.
+        - No use of 'any' type
+        - Proper error handling with typed catch blocks
+        - Edge cases in file path handling
+        - Must handle missing files/dirs gracefully (hooks can't crash)
+
+    - path: "shared/skills/skill-rules.json"
+      instructions: |
+        Critical config controlling skill activation.
+        - JSON must be valid
+        - Glob patterns in file_patterns must be syntactically correct
+        - No duplicate skill names
+        - Version field should match skill system version
+
+    - path: "shared/settings/**/*.json"
+      instructions: |
+        Claude Code settings files.
+        - JSON must be valid
+        - Hook command paths must reference correct script locations
+        - Permission patterns must be valid Claude Code permission syntax
+
+    - path: "setup/**"
+      instructions: |
+        Setup wizard scripts. Check:
+        - Shell scripts are portable (POSIX where possible)
+        - File operations handle spaces in paths
+        - Symlink creation is correct for the documented structure
+
+  tools:
+    shellcheck:
+      enabled: true
+    markdownlint:
+      enabled: true
+    yamllint:
+      enabled: true
+    gitleaks:
+      enabled: true
+    trivy:
+      enabled: true
+    ruff:
+      enabled: false
+    pylint:
+      enabled: false
+    golangci-lint:
+      enabled: false
+
+  finishing_touches:
+    docstrings:
+      enabled: false
+    unit_tests:
+      enabled: false
+
+chat:
+  auto_reply: true
+
+knowledge_base:
+  opt_out: false
+  web_search:
+    enabled: true
+  code_guidelines:
+    enabled: true
+    filePatterns:
+      - "shared/guidelines/global/**/*.md"
+      - "shared/guidelines/orchestrator/**/*.md"
+      - "CLAUDE.md"
+  learnings:
+    scope: "local"
+  issues:
+    scope: "local"

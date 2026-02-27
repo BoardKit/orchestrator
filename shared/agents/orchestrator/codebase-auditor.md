@@ -22,6 +22,19 @@ pwd && ls -la shared/ SETUP_CONFIG.json 2>/dev/null | head -5
 
 ---
 
+## Guidelines
+
+Before running an audit, gather orchestrator context:
+
+1. **Check `CLAUDE.md`** for repository overview and resource discovery map
+2. **Read `SETUP_CONFIG.json`** for repository configuration and structure
+3. **Review `shared/guidelines/`** for documented patterns and conventions
+4. **Check `shared/skills/skill-rules.json`** for skill metadata and file patterns
+
+Reference specific guideline violations or pattern mismatches in audit findings.
+
+---
+
 ## Operating Modes
 
 ### Mode 1: FULL AUDIT (Default)
