@@ -6,6 +6,26 @@
 ![Claude Code](https://img.shields.io/badge/Claude%20Code-Supported-7F4DFF)
 ![GitHub Copilot](https://img.shields.io/badge/GitHub%20Copilot-Compatible-blue?logo=githubcopilot)
 
+> 
+> ## Now available as a standalone npm package: **[aspens](https://www.npmjs.com/package/aspens)**
+>
+> ```bash
+> npm install -g aspens
+> ```
+>
+> Generate AI-ready skills + CLAUDE.md for any repo. No cloning, no symlinks, no setup wizard.
+>
+> ```bash
+> aspens scan .                    # See your repo's tech stack and domains
+> aspens doc init .                # Generate skills + CLAUDE.md
+> aspens doc sync --install-hook   # Auto-update on every commit
+> aspens add agent all             # Add 9 AI agents
+> aspens customize agents          # Tailor agents to your project
+> ```
+>
+> **aspens** is the standalone CLI for individual repositories or multi-repo setups('hubs'). The **Orchestrator** (this repo) is the full framework for multi-repo organizations that want shared resources and cross-repo documentation synchronization and it you dont want to use the CLI. The package **aspens** would allow us to push updates to the users easier than the **orchestrator** repo, but the **orchestrator** repo allows for more flexible development, which you can take in any direction you want. 
+
+---
 
 **A self-configuring infrastructure for shared Claude Code resources across all projects in your organization.**
 
@@ -300,6 +320,32 @@ Its key feature — a **cross-repo documentation synchronization agent** — kee
 
 I hope this project is useful to you! If you find any issues or have suggestions for improvements, I'd love to hear your feedback.
 
+
+---
+
+## Also See: aspens CLI
+
+If you want AI-ready documentation without the full orchestrator setup, check out **[aspens](https://www.npmjs.com/package/aspens)** — a standalone CLI that generates and maintains skills for any repo.
+
+```bash
+npx aspens scan .                    # See your repo's tech stack
+npx aspens doc init .                # Generate skills + CLAUDE.md
+npx aspens doc sync --install-hook   # Auto-update on every commit
+npx aspens add agent all             # Add 9 AI agents
+npx aspens customize agents          # Tailor agents to your project
+```
+
+**Orchestrator vs aspens:**
+
+| | Orchestrator | aspens |
+|---|---|---|
+| **Best for** | Multi-repo orgs with shared resources | Individual repos, quick setup |
+| **Setup** | Clone + setup wizard (~30 min) | `npx aspens doc init` (~2 min) |
+| **Shared resources** | Symlinked across repos | Per-repo |
+| **Cross-repo sync** | Built-in agent | Not yet |
+| **Agents** | 9 global + orchestrator-only | 9 bundled, customizable |
+
+The orchestrator is where agents and skills are authored and tested. aspens packages them for easy distribution.
 
 ---
 
