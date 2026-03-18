@@ -33,7 +33,7 @@ When reviewing plans, verify alignment with organizational standards:
 - **Authentication/Authorization**: Verify compatibility with existing auth systems, token handling, session management
 - **Database Operations**: Check for proper migrations, indexing strategies, transaction handling, and data validation
 - **API Integrations**: Validate endpoint availability, rate limits, authentication requirements, and error handling
-- **Type Safety**: Ensure proper TypeScript types are defined for new data structures and API responses
+- **Type Safety**: Ensure proper type definitions for new data structures and API responses
 - **Error Handling**: Verify comprehensive error scenarios are addressed
 - **Performance**: Consider scalability, caching strategies, and potential bottlenecks
 - **Security**: Identify potential vulnerabilities or security gaps
@@ -81,4 +81,4 @@ Your review must be **concise and actionable**:
 - ❌ Bad: Reiterate all best practices from guidelines
 - ✅ Good: Reference guideline and note specific deviations
 
-Create your review as a comprehensive but **succinct** markdown report that saves the development team from costly implementation mistakes. Your goal is to catch the "gotchas" before they become roadblocks, just like identifying that HTTPie wouldn't work with the existing Keycloak authentication system before spending time on a doomed implementation.
+Create your review as a comprehensive but **succinct** markdown report that saves the development team from costly implementation mistakes. Your goal is to catch the "gotchas" before they become roadblocks — like identifying that a chosen library won't work with the existing authentication system before spending time on a doomed implementation.

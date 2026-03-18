@@ -20,18 +20,24 @@ SCRIPT_DIR="$(get_script_dir)"
 # Change to the script directory and run the TypeScript hook
 cd "$SCRIPT_DIR"
 
-# Capture stdin to a variable so we can pass it to tsx
+# Capture stdin (printf preserves payload shape, unlike echo which can mangle escapes)
 INPUT=$(cat)
 
-# Run the TypeScript hook and capture both stdout and stderr
-OUTPUT=$(echo "$INPUT" | NODE_NO_WARNINGS=1 npx tsx skill-activation-prompt.ts 2>&1)
+# Temp files for clean stdout/stderr separation
+STDOUT_FILE=$(mktemp)
+STDERR_FILE=$(mktemp)
+trap 'rm -f "$STDOUT_FILE" "$STDERR_FILE"' EXIT
+
+# Run the TypeScript hook with stdout and stderr captured separately
+printf '%s' "$INPUT" | NODE_NO_WARNINGS=1 npx tsx skill-activation-prompt.ts \
+    >"$STDOUT_FILE" 2>"$STDERR_FILE"
 EXIT_CODE=$?
 
-# If there was an error, log it but still output what we can
+# Parse stderr for skill activation info and relay to terminal
 if [ $EXIT_CODE -ne 0 ]; then
     echo "⚡ [Skills] Hook error (exit $EXIT_CODE)" >&2
 else
-    SKILL_LINE=$(echo "$OUTPUT" | grep -o '\[Skills\] Activated: [^"]*' | head -1)
+    SKILL_LINE=$(grep -o '\[Skills\] Activated: [^"]*' "$STDERR_FILE" | head -1)
     if [ -n "$SKILL_LINE" ]; then
         echo "⚡ $SKILL_LINE" >&2
     else
@@ -39,7 +45,7 @@ else
     fi
 fi
 
-# Output to stdout (filter out any error messages for clean output)
-echo "$OUTPUT" | grep -v "^Error\|^Uncaught\|ExperimentalWarning"
+# Output pristine stdout only (no grep filtering needed)
+cat "$STDOUT_FILE"
 
 exit 0
